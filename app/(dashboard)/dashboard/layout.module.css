@@ -1,0 +1,19 @@
+.dashboardContainer {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--color-bg-secondary);
+}
+
+.main {
+  flex: 1;
+  margin-left: 250px;
+  padding: var(--spacing-2xl);
+}
+
+@media (max-width: 768px) {
+  .main {
+    margin-left: 0;
+    padding: var(--spacing-lg);
+  }
+}
+

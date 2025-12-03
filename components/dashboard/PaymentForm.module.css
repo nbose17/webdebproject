@@ -1,0 +1,165 @@
+.paymentContainer {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--spacing-2xl);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.paymentMethods {
+  background-color: var(--color-white);
+  padding: var(--spacing-2xl);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  height: fit-content;
+}
+
+.sectionTitle {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-lg);
+  text-transform: uppercase;
+}
+
+.methodsList {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.methodCard {
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-align: center;
+  flex: 1;
+}
+
+.methodCard:hover {
+  border-color: var(--color-green);
+}
+
+.methodCard.selected {
+  border-color: var(--color-green);
+  background-color: var(--color-bg-secondary);
+}
+
+.methodName {
+  font-weight: var(--font-weight-semibold);
+}
+
+.planSelection {
+  margin-top: var(--spacing-xl);
+}
+
+.planOption {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.planOption input[type="radio"] {
+  width: 20px;
+  height: 20px;
+}
+
+.featuresList {
+  list-style: none;
+  padding-left: var(--spacing-lg);
+  margin-top: var(--spacing-md);
+}
+
+.featuresList li {
+  padding: var(--spacing-xs) 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.paymentForm {
+  background-color: var(--color-white);
+  padding: var(--spacing-2xl);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.formGroup {
+  margin-bottom: var(--spacing-lg);
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: var(--spacing-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.select {
+  width: 100%;
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  background-color: var(--color-white);
+  color: var(--color-text-primary);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.checkboxGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin: var(--spacing-lg) 0;
+}
+
+.checkboxGroup input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+}
+
+.total {
+  background-color: var(--color-bg-secondary);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-md);
+  margin: var(--spacing-xl) 0;
+  text-align: center;
+}
+
+.total p {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.note {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-normal);
+}
+
+.submitButton {
+  width: 100%;
+  margin-top: var(--spacing-lg);
+}
+
+@media (max-width: 1024px) {
+  .paymentContainer {
+    grid-template-columns: 1fr;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+}
+
