@@ -96,3 +96,4 @@ All data is currently stored in `lib/constants.ts` as mock data. In Phase 2, thi
 - Image uploads
 - Email notifications
 
+

@@ -1,14 +1,24 @@
 'use client';
 
-import { QRCode } from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 import { advertisementSubscription } from '@/lib/constants';
+import { useAuth } from '@/hooks/useAuth';
 import Button from '@/components/shared/Button';
 import styles from './QRCodeDisplay.module.css';
 
 export default function QRCodeDisplay() {
+  const { user } = useAuth();
+  // In a real app, this would come from the user's gym data
+  // For now, using gym ID '1' as default (first gym in mock data)
+  const gymId = '1';
+  const gymPageUrl = typeof window !== 'undefined' 
+    ? `${window.location.origin}/gym/${gymId}`
+    : `/gym/${gymId}`;
+
   const handleDownload = () => {
     // In a real app, this would download the QR code image
-    const svg = document.querySelector('svg');
+    const qrContainer = document.querySelector(`.${styles.qrCode}`);
+    const svg = qrContainer?.querySelector('svg');
     if (svg) {
       const svgData = new XMLSerializer().serializeToString(svg);
       const canvas = document.createElement('canvas');
@@ -20,7 +30,7 @@ export default function QRCodeDisplay() {
         ctx?.drawImage(img, 0, 0);
         const pngFile = canvas.toDataURL('image/png');
         const downloadLink = document.createElement('a');
-        downloadLink.download = 'qr-code.png';
+        downloadLink.download = 'gym-qr-code.png';
         downloadLink.href = pngFile;
         downloadLink.click();
       };
@@ -38,9 +48,10 @@ export default function QRCodeDisplay() {
           <strong>{advertisementSubscription.duration} days</strong> and can be renewed.
         </p>
       </div>
+
       <div className={styles.qrSection}>
         <div className={styles.qrCode}>
-          <QRCode value={advertisementSubscription.paymentLink} size={200} />
+          <QRCodeSVG value={gymPageUrl} size={200} />
         </div>
         <div className={styles.actions}>
           <Button variant="primary" onClick={handleDownload}>
@@ -50,12 +61,12 @@ export default function QRCodeDisplay() {
             Scan QR or go to the below link
             <br />
             <a
-              href={advertisementSubscription.paymentLink}
+              href={gymPageUrl}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.link}
             >
-              {advertisementSubscription.paymentLink}
+              {gymPageUrl}
             </a>
           </p>
         </div>

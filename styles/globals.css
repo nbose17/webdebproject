@@ -3,8 +3,12 @@
   --color-dark-gray: #2D2D2D;
   --color-light-gray: #F5F5F5;
   --color-white: #FFFFFF;
-  --color-green: #4CAF50;
-  --color-green-dark: #45a049;
+  --color-primary: #4CAF50;
+  --color-primary-dark: #45a049;
+  --color-primary-light: #e8f5e9;
+  --color-primary-lighter: #f0f9f0;
+  --color-green: var(--color-primary);
+  --color-green-dark: var(--color-primary-dark);
   --color-black: #000000;
   --color-text-primary: #2D2D2D;
   --color-text-secondary: #666666;
@@ -122,7 +126,7 @@ img {
 
 /* Focus styles for accessibility */
 *:focus-visible {
-  outline: 2px solid var(--color-green);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 

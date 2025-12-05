@@ -39,11 +39,11 @@
 }
 
 .methodCard:hover {
-  border-color: var(--color-green);
+  border-color: var(--color-primary);
 }
 
 .methodCard.selected {
-  border-color: var(--color-green);
+  border-color: var(--color-primary);
   background-color: var(--color-bg-secondary);
 }
 
@@ -162,4 +162,5 @@
     grid-template-columns: 1fr;
   }
 }
+
 

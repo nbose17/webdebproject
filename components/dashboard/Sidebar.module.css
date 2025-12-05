@@ -32,6 +32,9 @@
   transition: background-color var(--transition-base);
   font-size: var(--font-size-base);
   text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
 }
 
 .link:hover {
@@ -41,6 +44,11 @@
 .link.active {
   background-color: rgba(255, 255, 255, 0.2);
   font-weight: var(--font-weight-semibold);
+}
+
+.icon {
+  font-size: var(--font-size-lg);
+  flex-shrink: 0;
 }
 
 .logout {
@@ -54,6 +62,12 @@
   font-size: var(--font-size-base);
   text-align: left;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  background: none;
+  border: none;
+  width: 100%;
 }
 
 .logout:hover {
@@ -67,4 +81,5 @@
     height: auto;
   }
 }
+
 

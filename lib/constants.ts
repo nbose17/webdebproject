@@ -282,3 +282,4 @@ export const advertisementSubscription = {
   qrCode: 'https://fitnessclub.com',
 };
 
+

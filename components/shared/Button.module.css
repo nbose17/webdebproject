@@ -16,7 +16,7 @@
 }
 
 .button:focus {
-  outline: 2px solid var(--color-green);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
@@ -31,12 +31,12 @@
 }
 
 .secondary {
-  background-color: var(--color-green);
+  background-color: var(--color-primary);
   color: var(--color-white);
 }
 
 .secondary:hover:not(:disabled) {
-  background-color: var(--color-green-dark);
+  background-color: var(--color-primary-dark);
 }
 
 .outline {

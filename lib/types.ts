@@ -75,3 +75,4 @@ export interface AdvertisementSubscription {
   qrCode: string;
 }
 
+

@@ -32,7 +32,9 @@ export default function CMSPage() {
 
   return (
     <div>
-      <h1 className={styles.title}>CMS / Branding</h1>
+      <div className={styles.header}>
+        <h1 className={styles.title}>CMS / Branding</h1>
+      </div>
       <DataTable
         columns={columns}
         data={items}
@@ -50,4 +52,5 @@ export default function CMSPage() {
     </div>
   );
 }
+
 

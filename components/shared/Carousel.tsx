@@ -90,3 +90,4 @@ export default function Carousel({ children, itemsPerView = 3 }: CarouselProps) 
   );
 }
 
+
