@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Button from '@/components/shared/Button';
-import styles from './DataTable.module.css';
 
 interface Column {
   key: string;
@@ -24,33 +23,33 @@ export default function DataTable({
   onDelete,
 }: DataTableProps) {
   return (
-    <div className={styles.tableContainer}>
-      <table className={styles.table}>
+    <div className="data-table-container">
+      <table className="data-table">
         <thead>
-          <tr className={styles.headerRow}>
+          <tr className="data-table-header-row">
             {columns.map((column) => (
-              <th key={column.key} className={styles.headerCell}>
+              <th key={column.key} className="data-table-header-cell">
                 {column.label}
               </th>
             ))}
             {(onEdit || onDelete) && (
-              <th className={styles.headerCell}>Actions</th>
+              <th className="data-table-header-cell">Actions</th>
             )}
           </tr>
         </thead>
         <tbody>
           {data.map((row, index) => (
-            <tr key={row.id || index} className={styles.row}>
+            <tr key={row.id || index} className="data-table-row">
               {columns.map((column) => (
-                <td key={column.key} className={styles.cell}>
+                <td key={column.key} className="data-table-cell">
                   {column.render
                     ? column.render(row[column.key], row, index)
                     : row[column.key]}
                 </td>
               ))}
               {(onEdit || onDelete) && (
-                <td className={styles.cell}>
-                  <div className={styles.actions}>
+                <td className="data-table-cell">
+                  <div className="data-table-actions">
                     {onEdit && (
                       <Button
                         variant="outline"

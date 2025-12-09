@@ -2,31 +2,30 @@
 
 import { FaFacebook, FaInstagram } from 'react-icons/fa';
 import { FaXTwitter } from 'react-icons/fa6';
-import styles from './Footer.module.css';
 
 export default function Footer() {
   return (
-    <footer className={styles.footer}>
-      <div className={styles.footerContent}>
-        <div className={styles.branding}>FitConnect Ads</div>
-        <div className={styles.social}>
+    <footer className="public-footer">
+      <div className="public-footer-content">
+        <div className="public-footer-branding">FitConnect Ads</div>
+        <div className="public-footer-social">
           <a
             href="#"
-            className={styles.socialIcon}
+            className="public-footer-social-icon"
             aria-label="Facebook"
           >
             <FaFacebook />
           </a>
           <a
             href="#"
-            className={styles.socialIcon}
+            className="public-footer-social-icon"
             aria-label="Instagram"
           >
             <FaInstagram />
           </a>
           <a
             href="#"
-            className={styles.socialIcon}
+            className="public-footer-social-icon"
             aria-label="X (Twitter)"
           >
             <FaXTwitter />
@@ -36,5 +35,7 @@ export default function Footer() {
     </footer>
   );
 }
+
+
 
 

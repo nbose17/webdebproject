@@ -6,7 +6,6 @@ import { useAuth } from '@/hooks/useAuth';
 import Button from '@/components/shared/Button';
 import Input from '@/components/shared/Input';
 import Modal from '@/components/shared/Modal';
-import styles from './DangerZone.module.css';
 
 export default function DangerZone() {
   const { logout } = useAuth();
@@ -37,17 +36,17 @@ export default function DangerZone() {
   };
 
   return (
-    <div className={styles.container}>
-      <h2 className={styles.sectionTitle}>Danger Zone</h2>
-      <p className={styles.sectionDescription}>
+    <div className="settings-section">
+      <h2 className="dashboard-page-title" style={{ fontSize: 'var(--font-size-2xl)', marginBottom: 'var(--spacing-md)' }}>Danger Zone</h2>
+      <p className="dashboard-page-subtitle" style={{ marginBottom: 'var(--spacing-xl)' }}>
         Irreversible and destructive actions. Please proceed with caution.
       </p>
 
-      <div className={styles.dangerActions}>
-        <div className={styles.dangerItem}>
-          <div className={styles.dangerInfo}>
-            <h3 className={styles.dangerTitle}>Export Account Data</h3>
-            <p className={styles.dangerDescription}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--spacing-lg)', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-md)' }}>
+          <div>
+            <h3 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-semibold)', marginBottom: 'var(--spacing-sm)' }}>Export Account Data</h3>
+            <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
               Download all your account data, including gym information, plans, classes, and trainers.
             </p>
           </div>
@@ -56,17 +55,16 @@ export default function DangerZone() {
           </Button>
         </div>
 
-        <div className={styles.dangerItem}>
-          <div className={styles.dangerInfo}>
-            <h3 className={styles.dangerTitle}>Delete Account</h3>
-            <p className={styles.dangerDescription}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--spacing-lg)', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-md)' }}>
+          <div>
+            <h3 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-semibold)', marginBottom: 'var(--spacing-sm)' }}>Delete Account</h3>
+            <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
               Permanently delete your account and all associated data. This action cannot be undone.
             </p>
           </div>
           <Button
             variant="primary"
             onClick={() => setIsDeleteModalOpen(true)}
-            className={styles.deleteButton}
           >
             Delete Account
           </Button>
@@ -78,15 +76,15 @@ export default function DangerZone() {
         onClose={() => setIsDeleteModalOpen(false)}
         title="Delete Account"
       >
-        <div className={styles.deleteModal}>
-          <div className={styles.warningBox}>
-            <p className={styles.warningText}>
+        <div>
+          <div style={{ padding: 'var(--spacing-lg)', background: '#fee', borderRadius: 'var(--radius-md)', marginBottom: 'var(--spacing-lg)' }}>
+            <p style={{ color: '#c33', fontSize: 'var(--font-size-sm)' }}>
               <strong>Warning:</strong> This action cannot be undone. This will permanently delete
               your account and remove all of your data from our servers.
             </p>
           </div>
 
-          <p className={styles.confirmInstruction}>
+          <p style={{ marginBottom: 'var(--spacing-md)', fontSize: 'var(--font-size-sm)' }}>
             To confirm, please type <strong>DELETE</strong> in the box below:
           </p>
 
@@ -96,7 +94,7 @@ export default function DangerZone() {
             placeholder="Type DELETE to confirm"
           />
 
-          <div className={styles.modalActions}>
+          <div className="dashboard-form-actions">
             <Button
               variant="outline"
               onClick={() => {
@@ -110,7 +108,6 @@ export default function DangerZone() {
               variant="primary"
               onClick={handleDeleteAccount}
               disabled={confirmText !== 'DELETE' || isDeleting}
-              className={styles.confirmDeleteButton}
             >
               {isDeleting ? 'Deleting...' : 'Delete My Account'}
             </Button>
@@ -120,4 +117,7 @@ export default function DangerZone() {
     </div>
   );
 }
+
+
+
 

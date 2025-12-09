@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
+  FaHome,
   FaRocket, 
   FaCreditCard, 
   FaUserTie, 
@@ -13,15 +14,15 @@ import {
   FaSignOutAlt 
 } from 'react-icons/fa';
 import { useAuth } from '@/hooks/useAuth';
-import styles from './Sidebar.module.css';
 
 const navItems = [
-  { href: '/dashboard/publish', label: 'Publish Gym', icon: FaRocket },
+  { href: '/dashboard', label: 'Dashboard', icon: FaHome },
+  { href: '/dashboard/cms', label: 'CMS / Branding', icon: FaPalette },
   { href: '/dashboard/plans', label: 'Plans', icon: FaCreditCard },
   { href: '/dashboard/trainers', label: 'Trainers', icon: FaUserTie },
   { href: '/dashboard/classes', label: 'Classes', icon: FaCalendarAlt },
-  { href: '/dashboard/cms', label: 'CMS / Branding', icon: FaPalette },
   { href: '/dashboard/advertisement', label: 'Advertisement', icon: FaBullhorn },
+  { href: '/dashboard/publish', label: 'Publish Gym', icon: FaRocket },
   { href: '/dashboard/settings', label: 'Settings', icon: FaCog },
 ];
 
@@ -36,27 +37,30 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className={styles.sidebar}>
-      <div className={styles.branding}>FitConnect Ads</div>
-      <nav className={styles.nav}>
+    <aside className="dashboard-sidebar">
+      <div className="dashboard-sidebar-branding">FitConnect Ads</div>
+      <nav className="dashboard-sidebar-nav">
         {navItems.map((item) => {
           const IconComponent = item.icon;
+          const isActive = item.href === '/dashboard' 
+            ? pathname === '/dashboard'
+            : pathname === item.href || pathname.startsWith(item.href + '/');
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`${styles.link} ${
-                pathname === item.href ? styles.active : ''
+              className={`dashboard-sidebar-link ${
+                isActive ? 'active' : ''
               }`}
             >
-              <IconComponent className={styles.icon} />
+              <IconComponent className="dashboard-sidebar-icon" />
               <span>{item.label}</span>
             </Link>
           );
         })}
       </nav>
-      <button onClick={handleLogout} className={styles.logout}>
-        <FaSignOutAlt className={styles.icon} />
+      <button onClick={handleLogout} className="dashboard-sidebar-logout">
+        <FaSignOutAlt className="dashboard-sidebar-icon" />
         <span>Logout</span>
       </button>
     </aside>

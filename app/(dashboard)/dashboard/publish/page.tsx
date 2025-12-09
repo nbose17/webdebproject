@@ -9,7 +9,6 @@ import PublishPaymentSection from '@/components/dashboard/PublishPaymentSection'
 import Button from '@/components/shared/Button';
 import { mockCMSItems } from '@/lib/constants';
 import { Gym } from '@/lib/types';
-import styles from './page.module.css';
 
 export default function PublishPage() {
   const router = useRouter();
@@ -75,66 +74,68 @@ export default function PublishPage() {
   const isFormValid = listingInfo.name && listingInfo.location && listingInfo.image;
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Publish Your Gym</h1>
-        <p className={styles.subtitle}>
-          Review your content, complete payment, and publish your gym to the public listing
-        </p>
+    <div className="publish-container">
+      <div className="dashboard-page-header">
+        <div>
+          <h1 className="dashboard-page-title">Publish Your Gym</h1>
+          <p className="dashboard-page-subtitle">
+            Review your content, complete payment, and publish your gym to the public listing
+          </p>
+        </div>
       </div>
 
-      <div className={styles.progressIndicator}>
+      <div className="publish-progress-indicator">
         <div 
-          className={`${styles.step} ${currentStep === 1 ? styles.active : ''} ${isFormValid ? styles.completed : ''}`}
+          className={`publish-step ${currentStep === 1 ? 'active' : ''} ${isFormValid ? 'completed' : ''}`}
           onClick={() => setCurrentStep(1)}
         >
-          <span className={styles.stepNumber}>1</span>
-          <span className={styles.stepLabel}>Gym Information</span>
+          <span className="publish-step-number">1</span>
+          <span className="publish-step-label">Gym Information</span>
         </div>
-        <div className={styles.stepDivider} />
+        <div className="publish-step-divider" />
         <div 
-          className={`${styles.step} ${currentStep === 2 ? styles.active : ''} ${paymentCompleted ? styles.completed : ''} ${!isFormValid ? styles.disabled : ''}`}
+          className={`publish-step ${currentStep === 2 ? 'active' : ''} ${paymentCompleted ? 'completed' : ''} ${!isFormValid ? 'disabled' : ''}`}
           onClick={() => isFormValid && setCurrentStep(2)}
         >
-          <span className={styles.stepNumber}>2</span>
-          <span className={styles.stepLabel}>Payment</span>
+          <span className="publish-step-number">2</span>
+          <span className="publish-step-label">Payment</span>
         </div>
-        <div className={styles.stepDivider} />
+        <div className="publish-step-divider" />
         <div 
-          className={`${styles.step} ${currentStep === 3 ? styles.active : ''} ${paymentCompleted && isFormValid ? styles.completed : ''} ${!paymentCompleted || !isFormValid ? styles.disabled : ''}`}
+          className={`publish-step ${currentStep === 3 ? 'active' : ''} ${paymentCompleted && isFormValid ? 'completed' : ''} ${!paymentCompleted || !isFormValid ? 'disabled' : ''}`}
           onClick={() => paymentCompleted && isFormValid && setCurrentStep(3)}
         >
-          <span className={styles.stepNumber}>3</span>
-          <span className={styles.stepLabel}>Publish</span>
+          <span className="publish-step-number">3</span>
+          <span className="publish-step-label">Publish</span>
         </div>
       </div>
 
-      <div className={styles.contentFlow}>
+      <div className="publish-content-flow">
         {/* Section 1: Gym Information */}
         {currentStep === 1 && (
-          <section className={styles.section}>
-            <div className={styles.sectionHeader}>
-              <div className={styles.sectionNumber}>1</div>
+          <section className="publish-section">
+            <div className="publish-section-header">
+              <div className="publish-section-number">1</div>
               <div>
-                <h2 className={styles.sectionTitle}>Gym Information</h2>
-                <p className={styles.sectionDescription}>
+                <h2 className="publish-section-title">Gym Information</h2>
+                <p className="publish-section-description">
                   Review your CMS content and fill in listing information
                 </p>
               </div>
             </div>
 
-            <div className={styles.sectionContent}>
-              <div className={styles.subsection}>
-                <h3 className={styles.subsectionTitle}>CMS Content Review</h3>
+            <div className="publish-section-content">
+              <div className="publish-subsection">
+                <h3 className="publish-subsection-title">CMS Content Review</h3>
                 <CMSReview cmsData={cmsData} />
-                <p className={styles.editLink}>
+                <p className="publish-edit-link">
                   <a href="/dashboard/cms">Edit CMS Content →</a>
                 </p>
               </div>
 
-              <div className={styles.subsection}>
-                <h3 className={styles.subsectionTitle}>Listing Information</h3>
-                <p className={styles.sectionDescription}>
+              <div className="publish-subsection">
+                <h3 className="publish-subsection-title">Listing Information</h3>
+                <p className="publish-section-description">
                   Fill in the information that will appear on the gym listing page
                 </p>
                 <ListingInfoForm
@@ -144,7 +145,7 @@ export default function PublishPage() {
               </div>
             </div>
 
-            <div className={styles.sectionFooter}>
+            <div className="publish-section-footer">
               <Button
                 variant="primary"
                 size="lg"
@@ -159,26 +160,26 @@ export default function PublishPage() {
 
         {/* Section 2: Payment */}
         {currentStep === 2 && (
-          <section className={styles.section}>
-            <div className={styles.sectionHeader}>
-              <div className={styles.sectionNumber}>2</div>
+          <section className="publish-section">
+            <div className="publish-section-header">
+              <div className="publish-section-number">2</div>
               <div>
-                <h2 className={styles.sectionTitle}>Payment</h2>
-                <p className={styles.sectionDescription}>
+                <h2 className="publish-section-title">Payment</h2>
+                <p className="publish-section-description">
                   Select your subscription plan and complete payment
                 </p>
               </div>
             </div>
 
-            <div className={styles.sectionContent}>
+            <div className="publish-section-content">
               <PublishPaymentSection
                 onPaymentComplete={handlePaymentComplete}
                 paymentCompleted={paymentCompleted}
               />
             </div>
 
-            <div className={styles.sectionFooter}>
-              <div className={styles.navigationButtons}>
+            <div className="publish-section-footer">
+              <div className="publish-navigation-buttons">
                 <Button
                   variant="outline"
                   size="lg"
@@ -202,33 +203,33 @@ export default function PublishPage() {
 
         {/* Section 3: Preview & Publish */}
         {currentStep === 3 && (
-          <section className={styles.section}>
-            <div className={styles.sectionHeader}>
-              <div className={styles.sectionNumber}>3</div>
+          <section className="publish-section">
+            <div className="publish-section-header">
+              <div className="publish-section-number">3</div>
               <div>
-                <h2 className={styles.sectionTitle}>Preview & Publish</h2>
-                <p className={styles.sectionDescription}>
+                <h2 className="publish-section-title">Preview & Publish</h2>
+                <p className="publish-section-description">
                   Review your gym listing and publish to go live
                 </p>
               </div>
             </div>
 
-            <div className={styles.sectionContent}>
-              <div className={styles.subsection}>
-                <h3 className={styles.subsectionTitle}>Preview</h3>
+            <div className="publish-section-content">
+              <div className="publish-subsection">
+                <h3 className="publish-subsection-title">Preview</h3>
                 <PublishPreview
                   listingInfo={listingInfo}
                   cmsData={cmsData}
                 />
               </div>
 
-              <div className={styles.publishSection}>
-                <div className={styles.statusChecklist}>
-                  <div className={`${styles.statusItem} ${isFormValid ? styles.completed : ''}`}>
+              <div className="publish-publish-section">
+                <div className="publish-status-checklist">
+                  <div className={`publish-status-item ${isFormValid ? 'completed' : ''}`}>
                     <span>{isFormValid ? '✓' : '○'}</span>
                     <span>Listing information complete</span>
                   </div>
-                  <div className={`${styles.statusItem} ${paymentCompleted ? styles.completed : ''}`}>
+                  <div className={`publish-status-item ${paymentCompleted ? 'completed' : ''}`}>
                     <span>{paymentCompleted ? '✓' : '○'}</span>
                     <span>Payment completed</span>
                   </div>
@@ -239,14 +240,14 @@ export default function PublishPage() {
                   size="lg"
                   onClick={handlePublish}
                   disabled={!isFormValid || !paymentCompleted || isPublishing}
-                  className={styles.publishButton}
+                  className="publish-publish-button"
                 >
                   {isPublishing ? 'Publishing...' : 'Publish Gym'}
                 </Button>
               </div>
             </div>
 
-            <div className={styles.sectionFooter}>
+            <div className="publish-section-footer">
               <Button
                 variant="outline"
                 size="lg"

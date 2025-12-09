@@ -5,7 +5,6 @@ import { Class } from '@/lib/types';
 import Input from '@/components/shared/Input';
 import Button from '@/components/shared/Button';
 import Modal from '@/components/shared/Modal';
-import styles from './ClassForm.module.css';
 
 interface ClassFormProps {
   isOpen: boolean;
@@ -52,7 +51,7 @@ export default function ClassForm({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={classItem ? 'Edit Class' : 'Add Class'}>
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <form onSubmit={handleSubmit} className="dashboard-form">
         <Input
           label="Name"
           value={name}
@@ -83,7 +82,7 @@ export default function ClassForm({
           min="0"
           step="0.01"
         />
-        <div className={styles.actions}>
+        <div className="dashboard-form-actions">
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
           </Button>
@@ -95,5 +94,8 @@ export default function ClassForm({
     </Modal>
   );
 }
+
+
+
 
 

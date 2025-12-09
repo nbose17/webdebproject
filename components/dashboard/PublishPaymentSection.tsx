@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Input from '@/components/shared/Input';
 import Button from '@/components/shared/Button';
 import { advertisementSubscription } from '@/lib/constants';
-import styles from './PublishPaymentSection.module.css';
 
 interface PublishPaymentSectionProps {
   onPaymentComplete: () => void;
@@ -64,13 +63,13 @@ export default function PublishPaymentSection({
 
   if (paymentCompleted) {
     return (
-      <div className={styles.completedSection}>
-        <div className={styles.successIcon}>✓</div>
-        <h3 className={styles.successTitle}>Payment Completed</h3>
-        <p className={styles.successMessage}>
+      <div style={{ textAlign: 'center', padding: 'var(--spacing-4xl)', background: 'var(--color-primary-light)', borderRadius: 'var(--radius-lg)' }}>
+        <div style={{ fontSize: 'var(--font-size-5xl)', color: 'var(--color-primary)', marginBottom: 'var(--spacing-md)' }}>✓</div>
+        <h3 style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-md)' }}>Payment Completed</h3>
+        <p style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--spacing-sm)' }}>
           Your payment of ${totalAmount} has been processed successfully.
         </p>
-        <p className={styles.successNote}>
+        <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
           Your gym will be live for {selectedPlanData.duration} days after publishing.
         </p>
       </div>
@@ -78,78 +77,100 @@ export default function PublishPaymentSection({
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.planSelection}>
-        <h3 className={styles.sectionTitle}>Select Subscription Plan</h3>
-        <div className={styles.plansGrid}>
+    <div>
+      <div style={{ marginBottom: 'var(--spacing-2xl)' }}>
+        <h3 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-lg)', textTransform: 'uppercase' }}>Select Subscription Plan</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--spacing-lg)' }}>
           <div
-            className={`${styles.planCard} ${
-              selectedPlan === 'basic' ? styles.selected : ''
-            }`}
             onClick={() => setSelectedPlan('basic')}
+            style={{
+              padding: 'var(--spacing-xl)',
+              border: `2px solid ${selectedPlan === 'basic' ? 'var(--color-primary)' : 'var(--color-border)'}`,
+              borderRadius: 'var(--radius-lg)',
+              cursor: 'pointer',
+              background: selectedPlan === 'basic' ? 'var(--color-primary-light)' : 'var(--color-white)',
+              transition: 'all var(--transition-base)'
+            }}
           >
-            <div className={styles.planHeader}>
-              <h4 className={styles.planName}>Basic</h4>
-              <div className={styles.planPrice}>
-                <span className={styles.priceAmount}>${plans.basic.price}</span>
-                <span className={styles.pricePeriod}>/month</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
+              <h4 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-bold)' }}>Basic</h4>
+              <div>
+                <span style={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)' }}>${plans.basic.price}</span>
+                <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>/month</span>
               </div>
             </div>
-            <ul className={styles.planFeatures}>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: 'var(--font-size-sm)' }}>
               {plans.basic.features.map((feature, index) => (
-                <li key={index}>{feature}</li>
+                <li key={index} style={{ marginBottom: 'var(--spacing-xs)' }}>• {feature}</li>
               ))}
             </ul>
           </div>
 
           <div
-            className={`${styles.planCard} ${
-              selectedPlan === 'premium' ? styles.selected : ''
-            }`}
             onClick={() => setSelectedPlan('premium')}
+            style={{
+              padding: 'var(--spacing-xl)',
+              border: `2px solid ${selectedPlan === 'premium' ? 'var(--color-primary)' : 'var(--color-border)'}`,
+              borderRadius: 'var(--radius-lg)',
+              cursor: 'pointer',
+              background: selectedPlan === 'premium' ? 'var(--color-primary-light)' : 'var(--color-white)',
+              transition: 'all var(--transition-base)'
+            }}
           >
-            <div className={styles.planHeader}>
-              <h4 className={styles.planName}>Premium</h4>
-              <div className={styles.planPrice}>
-                <span className={styles.priceAmount}>${plans.premium.price}</span>
-                <span className={styles.pricePeriod}>/month</span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
+              <h4 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-bold)' }}>Premium</h4>
+              <div>
+                <span style={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)' }}>${plans.premium.price}</span>
+                <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>/month</span>
               </div>
             </div>
-            <ul className={styles.planFeatures}>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, fontSize: 'var(--font-size-sm)' }}>
               {plans.premium.features.map((feature, index) => (
-                <li key={index}>{feature}</li>
+                <li key={index} style={{ marginBottom: 'var(--spacing-xs)' }}>• {feature}</li>
               ))}
             </ul>
           </div>
         </div>
       </div>
 
-      <form onSubmit={handlePayment} className={styles.paymentForm}>
-        <h3 className={styles.sectionTitle}>Payment Method</h3>
+      <form onSubmit={handlePayment} className="dashboard-form">
+        <h3 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-lg)', textTransform: 'uppercase' }}>Payment Method</h3>
         
-        <div className={styles.paymentMethods}>
+        <div style={{ display: 'flex', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-lg)' }}>
           <button
             type="button"
-            className={`${styles.methodButton} ${
-              paymentMethod === 'paypal' ? styles.selected : ''
-            }`}
             onClick={() => setPaymentMethod('paypal')}
+            style={{
+              flex: 1,
+              padding: 'var(--spacing-md)',
+              border: `2px solid ${paymentMethod === 'paypal' ? 'var(--color-primary)' : 'var(--color-border)'}`,
+              borderRadius: 'var(--radius-md)',
+              background: paymentMethod === 'paypal' ? 'var(--color-primary-light)' : 'transparent',
+              cursor: 'pointer',
+              fontWeight: 'var(--font-weight-medium)'
+            }}
           >
             PayPal
           </button>
           <button
             type="button"
-            className={`${styles.methodButton} ${
-              paymentMethod === 'card' ? styles.selected : ''
-            }`}
             onClick={() => setPaymentMethod('card')}
+            style={{
+              flex: 1,
+              padding: 'var(--spacing-md)',
+              border: `2px solid ${paymentMethod === 'card' ? 'var(--color-primary)' : 'var(--color-border)'}`,
+              borderRadius: 'var(--radius-md)',
+              background: paymentMethod === 'card' ? 'var(--color-primary-light)' : 'transparent',
+              cursor: 'pointer',
+              fontWeight: 'var(--font-weight-medium)'
+            }}
           >
             Credit Card
           </button>
         </div>
 
         {paymentMethod === 'card' && (
-          <div className={styles.cardForm}>
+          <div>
             <Input
               label="Card Number"
               value={cardInfo.cardNumber}
@@ -159,7 +180,7 @@ export default function PublishPaymentSection({
               placeholder="1234 5678 9012 3456"
               required
             />
-            <div className={styles.cardRow}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--spacing-md)' }}>
               <Input
                 label="Expiration (MM/YY)"
                 value={cardInfo.expirationDate}
@@ -182,18 +203,18 @@ export default function PublishPaymentSection({
           </div>
         )}
 
-        <div className={styles.totalSection}>
-          <div className={styles.totalRow}>
+        <div style={{ padding: 'var(--spacing-lg)', background: 'var(--color-bg-secondary)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--spacing-lg)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--spacing-sm)' }}>
             <span>Plan:</span>
             <span>{selectedPlanData.name}</span>
           </div>
-          <div className={styles.totalRow}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--spacing-sm)' }}>
             <span>Duration:</span>
             <span>{selectedPlanData.duration} days</span>
           </div>
-          <div className={styles.totalRow}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 'var(--spacing-md)', borderTop: '1px solid var(--color-border)', fontWeight: 'var(--font-weight-bold)', fontSize: 'var(--font-size-lg)' }}>
             <span>Total Amount:</span>
-            <span className={styles.totalAmount}>${totalAmount}</span>
+            <span>${totalAmount}</span>
           </div>
         </div>
 
@@ -202,16 +223,19 @@ export default function PublishPaymentSection({
           variant="primary"
           size="lg"
           disabled={isProcessing}
-          className={styles.payButton}
+          style={{ width: '100%' }}
         >
           {isProcessing ? 'Processing...' : `Pay $${totalAmount}`}
         </Button>
 
-        <p className={styles.termsNote}>
+        <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)', textAlign: 'center', marginTop: 'var(--spacing-md)' }}>
           By proceeding, you agree to our Terms of Service. Payment is non-refundable.
         </p>
       </form>
     </div>
   );
 }
+
+
+
 

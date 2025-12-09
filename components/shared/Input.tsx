@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import styles from './Input.module.css';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -16,12 +15,12 @@ export default function Input({
   className = '',
   ...props
 }: InputProps) {
-  const inputClasses = `${styles.input} ${error ? styles.error : ''} ${className}`.trim();
+  const inputClasses = `input ${error ? 'error' : ''} ${className}`.trim();
 
   return (
-    <div className={styles.inputGroup}>
+    <div className="input-group">
       {label && (
-        <label htmlFor={props.id} className={styles.label}>
+        <label htmlFor={props.id} className="input-label">
           {label}
         </label>
       )}
@@ -34,7 +33,7 @@ export default function Input({
       ) : (
         <input className={inputClasses} {...props} />
       )}
-      {error && <span className={styles.errorMessage}>{error}</span>}
+      {error && <span className="input-error-message">{error}</span>}
     </div>
   );
 }

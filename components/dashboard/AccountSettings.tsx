@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { User } from '@/lib/types';
 import Input from '@/components/shared/Input';
-import styles from './AccountSettings.module.css';
 
 interface AccountSettingsProps {
   user: User | null;
@@ -33,15 +32,15 @@ export default function AccountSettings({ user }: AccountSettingsProps) {
   };
 
   return (
-    <div className={styles.container}>
-      <h2 className={styles.sectionTitle}>Account Information</h2>
-      <p className={styles.sectionDescription}>
+    <div>
+      <h2 className="dashboard-page-title" style={{ fontSize: 'var(--font-size-2xl)', marginBottom: 'var(--spacing-md)' }}>Account Information</h2>
+      <p className="dashboard-page-subtitle" style={{ marginBottom: 'var(--spacing-xl)' }}>
         Update your account information and password
       </p>
 
-      <div className={styles.form}>
-        <div className={styles.formSection}>
-          <h3 className={styles.subsectionTitle}>Personal Information</h3>
+      <div className="dashboard-form">
+        <div style={{ marginBottom: 'var(--spacing-xl)' }}>
+          <h3 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-semibold)', marginBottom: 'var(--spacing-md)' }}>Personal Information</h3>
           <Input
             label="Full Name"
             value={formData.name}
@@ -57,8 +56,8 @@ export default function AccountSettings({ user }: AccountSettingsProps) {
           />
         </div>
 
-        <div className={styles.formSection}>
-          <h3 className={styles.subsectionTitle}>Change Password</h3>
+        <div>
+          <h3 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-semibold)', marginBottom: 'var(--spacing-md)' }}>Change Password</h3>
           <Input
             label="Current Password"
             type="password"
@@ -83,7 +82,7 @@ export default function AccountSettings({ user }: AccountSettingsProps) {
           {formData.newPassword &&
             formData.confirmPassword &&
             formData.newPassword !== formData.confirmPassword && (
-              <p className={styles.errorMessage}>
+              <p className="input-error-message">
                 Passwords do not match
               </p>
             )}
@@ -92,4 +91,7 @@ export default function AccountSettings({ user }: AccountSettingsProps) {
     </div>
   );
 }
+
+
+
 

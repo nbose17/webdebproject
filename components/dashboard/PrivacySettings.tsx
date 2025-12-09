@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Input from '@/components/shared/Input';
-import styles from './PrivacySettings.module.css';
 
 export default function PrivacySettings() {
   const [privacy, setPrivacy] = useState({
@@ -19,17 +18,17 @@ export default function PrivacySettings() {
   };
 
   return (
-    <div className={styles.container}>
-      <h2 className={styles.sectionTitle}>Privacy Settings</h2>
-      <p className={styles.sectionDescription}>
+    <div>
+      <h2 className="dashboard-page-title" style={{ fontSize: 'var(--font-size-2xl)', marginBottom: 'var(--spacing-md)' }}>Privacy Settings</h2>
+      <p className="dashboard-page-subtitle" style={{ marginBottom: 'var(--spacing-xl)' }}>
         Control your privacy and data sharing preferences
       </p>
 
-      <div className={styles.form}>
-        <div className={styles.formSection}>
-          <h3 className={styles.subsectionTitle}>Profile Visibility</h3>
-          <div className={styles.radioGroup}>
-            <label className={styles.radioOption}>
+      <div className="dashboard-form">
+        <div style={{ marginBottom: 'var(--spacing-xl)' }}>
+          <h3 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-semibold)', marginBottom: 'var(--spacing-md)' }}>Profile Visibility</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--spacing-sm)', padding: 'var(--spacing-md)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}>
               <input
                 type="radio"
                 name="profileVisibility"
@@ -37,14 +36,14 @@ export default function PrivacySettings() {
                 checked={privacy.profileVisibility === 'public'}
                 onChange={(e) => handleChange('profileVisibility', e.target.value)}
               />
-              <div className={styles.radioContent}>
-                <span className={styles.radioLabel}>Public</span>
-                <span className={styles.radioDescription}>
+              <div>
+                <span style={{ display: 'block', fontWeight: 'var(--font-weight-semibold)', marginBottom: 'var(--spacing-xs)' }}>Public</span>
+                <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
                   Your profile is visible to everyone
                 </span>
               </div>
             </label>
-            <label className={styles.radioOption}>
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--spacing-sm)', padding: 'var(--spacing-md)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}>
               <input
                 type="radio"
                 name="profileVisibility"
@@ -52,9 +51,9 @@ export default function PrivacySettings() {
                 checked={privacy.profileVisibility === 'private'}
                 onChange={(e) => handleChange('profileVisibility', e.target.value)}
               />
-              <div className={styles.radioContent}>
-                <span className={styles.radioLabel}>Private</span>
-                <span className={styles.radioDescription}>
+              <div>
+                <span style={{ display: 'block', fontWeight: 'var(--font-weight-semibold)', marginBottom: 'var(--spacing-xs)' }}>Private</span>
+                <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
                   Only you can see your profile
                 </span>
               </div>
@@ -62,10 +61,10 @@ export default function PrivacySettings() {
           </div>
         </div>
 
-        <div className={styles.formSection}>
-          <h3 className={styles.subsectionTitle}>Contact Information</h3>
-          <div className={styles.checkboxGroup}>
-            <label className={styles.checkboxOption}>
+        <div style={{ marginBottom: 'var(--spacing-xl)' }}>
+          <h3 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-semibold)', marginBottom: 'var(--spacing-md)' }}>Contact Information</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={privacy.showEmail}
@@ -73,7 +72,7 @@ export default function PrivacySettings() {
               />
               <span>Show email address on public profile</span>
             </label>
-            <label className={styles.checkboxOption}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={privacy.showPhone}
@@ -81,7 +80,7 @@ export default function PrivacySettings() {
               />
               <span>Show phone number on public profile</span>
             </label>
-            <label className={styles.checkboxOption}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={privacy.allowDirectMessages}
@@ -92,10 +91,10 @@ export default function PrivacySettings() {
           </div>
         </div>
 
-        <div className={styles.formSection}>
-          <h3 className={styles.subsectionTitle}>Data & Analytics</h3>
-          <div className={styles.checkboxGroup}>
-            <label className={styles.checkboxOption}>
+        <div>
+          <h3 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-semibold)', marginBottom: 'var(--spacing-md)' }}>Data & Analytics</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={privacy.dataSharing}
@@ -103,7 +102,7 @@ export default function PrivacySettings() {
               />
               <span>Allow data sharing with partners</span>
             </label>
-            <label className={styles.checkboxOption}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={privacy.analyticsTracking}
@@ -117,4 +116,7 @@ export default function PrivacySettings() {
     </div>
   );
 }
+
+
+
 

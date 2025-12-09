@@ -7,8 +7,6 @@ import AdvertisementBanner from '@/components/public/AdvertisementBanner';
 import GymCard from '@/components/public/GymCard';
 import Button from '@/components/shared/Button';
 import { mockGyms } from '@/lib/constants';
-import '@/styles/public.css';
-import styles from './page.module.css';
 
 export default function PublicGymListingPage() {
   const [displayCount, setDisplayCount] = useState(12);
@@ -26,7 +24,7 @@ export default function PublicGymListingPage() {
         <div className="container">
           <AdvertisementBanner />
 
-          <section className={styles.section}>
+          <section className="public-section">
             <h2 className="section-heading">Newly Featured</h2>
             <div className="gym-grid">
               {featuredGyms.slice(0, 6).map((gym) => (
@@ -35,7 +33,7 @@ export default function PublicGymListingPage() {
             </div>
           </section>
 
-          <section className={styles.section}>
+          <section className="public-section">
             <h2 className="section-heading">All</h2>
             <div className="gym-grid">
               {allGyms.slice(0, displayCount).map((gym) => (

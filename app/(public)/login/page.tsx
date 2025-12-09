@@ -7,8 +7,6 @@ import Input from '@/components/shared/Input';
 import Button from '@/components/shared/Button';
 import Header from '@/components/public/Header';
 import Footer from '@/components/public/Footer';
-import '@/styles/public.css';
-import styles from './page.module.css';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -42,9 +40,9 @@ export default function LoginPage() {
       <Header />
       <main className="public-main">
         <div className="container">
-          <div className={styles.loginContainer}>
-            <h1 className={styles.title}>Login</h1>
-            <form onSubmit={handleSubmit} className={styles.form}>
+          <div className="login-container">
+            <h1 className="login-title">Login</h1>
+            <form onSubmit={handleSubmit} className="login-form">
               <Input
                 type="email"
                 label="Email"
@@ -61,13 +59,13 @@ export default function LoginPage() {
                 required
                 placeholder="Enter your password"
               />
-              {error && <div className={styles.error}>{error}</div>}
+              {error && <div className="login-error">{error}</div>}
               <Button
                 type="submit"
                 variant="primary"
                 size="lg"
                 disabled={loading}
-                className={styles.submitButton}
+                className="login-submit-button"
               >
                 {loading ? 'Logging in...' : 'Login'}
               </Button>

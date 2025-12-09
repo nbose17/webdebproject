@@ -5,7 +5,6 @@ import { CMSItem } from '@/lib/types';
 import { mockCMSItems } from '@/lib/constants';
 import DataTable from '@/components/dashboard/DataTable';
 import CMSForm from '@/components/dashboard/CMSForm';
-import styles from './page.module.css';
 
 export default function CMSPage() {
   const [items, setItems] = useState<CMSItem[]>(mockCMSItems);
@@ -32,8 +31,8 @@ export default function CMSPage() {
 
   return (
     <div>
-      <div className={styles.header}>
-        <h1 className={styles.title}>CMS / Branding</h1>
+      <div className="dashboard-page-header">
+        <h1 className="dashboard-page-title">CMS / Branding</h1>
       </div>
       <DataTable
         columns={columns}

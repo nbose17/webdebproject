@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import styles from './NotificationSettings.module.css';
 
 export default function NotificationSettings() {
   const [notifications, setNotifications] = useState({
@@ -57,29 +56,52 @@ export default function NotificationSettings() {
   ];
 
   return (
-    <div className={styles.container}>
-      <h2 className={styles.sectionTitle}>Notification Preferences</h2>
-      <p className={styles.sectionDescription}>
+    <div>
+      <h2 className="dashboard-page-title" style={{ fontSize: 'var(--font-size-2xl)', marginBottom: 'var(--spacing-md)' }}>Notification Preferences</h2>
+      <p className="dashboard-page-subtitle" style={{ marginBottom: 'var(--spacing-xl)' }}>
         Choose how you want to receive notifications
       </p>
 
-      <div className={styles.notificationsList}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
         {notificationOptions.map((option) => (
-          <div key={option.key} className={styles.notificationItem}>
-            <div className={styles.notificationInfo}>
-              <h3 className={styles.notificationLabel}>{option.label}</h3>
-              <p className={styles.notificationDescription}>
+          <div key={option.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: 'var(--spacing-lg)', background: 'var(--color-white)', borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-sm)' }}>
+            <div>
+              <h3 style={{ fontSize: 'var(--font-size-base)', fontWeight: 'var(--font-weight-semibold)', marginBottom: 'var(--spacing-xs)' }}>{option.label}</h3>
+              <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
                 {option.description}
               </p>
             </div>
-            <label className={styles.toggle}>
+            <label style={{ position: 'relative', display: 'inline-block', width: '50px', height: '24px' }}>
               <input
                 type="checkbox"
                 checked={notifications[option.key]}
                 onChange={() => handleToggle(option.key)}
-                className={styles.toggleInput}
+                style={{ opacity: 0, width: 0, height: 0 }}
               />
-              <span className={styles.toggleSlider} />
+              <span style={{
+                position: 'absolute',
+                cursor: 'pointer',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: notifications[option.key] ? 'var(--color-primary)' : '#ccc',
+                transition: 'var(--transition-base)',
+                borderRadius: '24px'
+              }}>
+                <span style={{
+                  position: 'absolute',
+                  content: '""',
+                  height: '18px',
+                  width: '18px',
+                  left: '3px',
+                  bottom: '3px',
+                  backgroundColor: 'white',
+                  transition: 'var(--transition-base)',
+                  borderRadius: '50%',
+                  transform: notifications[option.key] ? 'translateX(26px)' : 'translateX(0)'
+                }} />
+              </span>
             </label>
           </div>
         ))}
@@ -87,4 +109,7 @@ export default function NotificationSettings() {
     </div>
   );
 }
+
+
+
 

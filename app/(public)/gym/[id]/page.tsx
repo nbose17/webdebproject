@@ -10,8 +10,6 @@ import TrainerCard from '@/components/public/TrainerCard';
 import NewsletterSection from '@/components/public/NewsletterSection';
 import Carousel from '@/components/shared/Carousel';
 import { mockClasses, mockPlans, mockTrainers, mockCMSItems } from '@/lib/constants';
-import '@/styles/public.css';
-import styles from './page.module.css';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -27,21 +25,21 @@ export default function GymPage({ params }: PageProps) {
       <HeroSection />
       <main className="public-main">
         <div className="container">
-          <section className={styles.section}>
-            <h2 className={styles.heading}>Feature Heading</h2>
-            <p className={styles.subHeading}>
+          <section className="gym-detail-section">
+            <h2 className="gym-detail-heading">Feature Heading</h2>
+            <p className="gym-detail-sub-heading">
               Feature Content Feature Content Feature Content Feature Content Feature Content Feature Content
             </p>
             {featureBanner && (
-              <div className={styles.featureBanner}>
+              <div className="gym-detail-feature-banner">
                 <p>{featureBanner.content}</p>
               </div>
             )}
           </section>
 
-          <section className={styles.section}>
-            <h2 className={styles.heading}>Class List Heading</h2>
-            <p className={styles.subHeading}>
+          <section className="gym-detail-section">
+            <h2 className="gym-detail-heading">Class List Heading</h2>
+            <p className="gym-detail-sub-heading">
               Class List Sub Heading Class List Sub Heading Class List Sub Heading Class List Sub Heading
             </p>
             <Carousel itemsPerView={3}>
@@ -51,9 +49,9 @@ export default function GymPage({ params }: PageProps) {
             </Carousel>
           </section>
 
-          <section className={styles.section}>
-            <h2 className={styles.heading}>Plan List Heading</h2>
-            <p className={styles.subHeading}>
+          <section className="gym-detail-section">
+            <h2 className="gym-detail-heading">Plan List Heading</h2>
+            <p className="gym-detail-sub-heading">
               Plan List Sub Heading Plan List Sub Heading Plan List Sub Heading Plan List Sub Heading
             </p>
             <Carousel itemsPerView={3}>
@@ -63,9 +61,9 @@ export default function GymPage({ params }: PageProps) {
             </Carousel>
           </section>
 
-          <section className={styles.section}>
-            <h2 className={styles.heading}>Trainer List Heading</h2>
-            <p className={styles.subHeading}>
+          <section className="gym-detail-section">
+            <h2 className="gym-detail-heading">Trainer List Heading</h2>
+            <p className="gym-detail-sub-heading">
               Trainer List Sub Heading Trainer List Sub Heading Trainer List Sub Heading
             </p>
             <Carousel itemsPerView={3}>

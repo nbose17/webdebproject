@@ -9,7 +9,6 @@ import PrivacySettings from '@/components/dashboard/PrivacySettings';
 import SubscriptionSettings from '@/components/dashboard/SubscriptionSettings';
 import DangerZone from '@/components/dashboard/DangerZone';
 import Button from '@/components/shared/Button';
-import styles from './page.module.css';
 
 type SettingsTab = 'account' | 'notifications' | 'privacy' | 'subscription' | 'danger';
 
@@ -36,34 +35,36 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Settings</h1>
-        <p className={styles.subtitle}>Manage your account settings and preferences</p>
+    <div className="settings-container">
+      <div className="dashboard-page-header">
+        <div>
+          <h1 className="dashboard-page-title">Settings</h1>
+          <p className="dashboard-page-subtitle">Manage your account settings and preferences</p>
+        </div>
       </div>
 
-      <div className={styles.tabsContainer}>
-        <nav className={styles.tabs}>
+      <div className="settings-tabs-container">
+        <nav className="settings-tabs">
           {tabs.map((tab) => {
             const IconComponent = tab.icon;
             return (
               <button
                 key={tab.id}
-                className={`${styles.tab} ${
-                  activeTab === tab.id ? styles.active : ''
+                className={`settings-tab ${
+                  activeTab === tab.id ? 'active' : ''
                 }`}
                 onClick={() => setActiveTab(tab.id)}
               >
-                <IconComponent className={styles.tabIcon} />
-                <span className={styles.tabLabel}>{tab.label}</span>
+                <IconComponent className="settings-tab-icon" />
+                <span className="settings-tab-label">{tab.label}</span>
               </button>
             );
           })}
         </nav>
       </div>
 
-      <div className={styles.content}>
-        <div className={styles.section}>
+      <div className="settings-content">
+        <div className="settings-section">
           {activeTab === 'account' && <AccountSettings user={user} />}
           {activeTab === 'notifications' && <NotificationSettings />}
           {activeTab === 'privacy' && <PrivacySettings />}
@@ -72,7 +73,7 @@ export default function SettingsPage() {
         </div>
 
         {activeTab !== 'danger' && (
-          <div className={styles.actions}>
+          <div className="settings-actions">
             <Button
               variant="primary"
               onClick={handleSave}

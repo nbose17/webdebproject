@@ -5,7 +5,6 @@ import { CMSItem } from '@/lib/types';
 import Input from '@/components/shared/Input';
 import Button from '@/components/shared/Button';
 import Modal from '@/components/shared/Modal';
-import styles from './CMSForm.module.css';
 
 interface CMSFormProps {
   isOpen: boolean;
@@ -40,7 +39,7 @@ export default function CMSForm({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={`Edit ${item?.name || 'CMS Item'}`}>
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <form onSubmit={handleSubmit} className="dashboard-form">
         <Input
           label="Content"
           value={content}
@@ -48,7 +47,7 @@ export default function CMSForm({
           required
           multiline={item?.type === 'text' || item?.type === 'banner'}
         />
-        <div className={styles.actions}>
+        <div className="dashboard-form-actions">
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
           </Button>
@@ -60,5 +59,8 @@ export default function CMSForm({
     </Modal>
   );
 }
+
+
+
 
 

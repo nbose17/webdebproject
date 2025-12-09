@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Input from '@/components/shared/Input';
 import Button from '@/components/shared/Button';
-import styles from './NewsletterSection.module.css';
 
 export default function NewsletterSection() {
   const [email, setEmail] = useState('');
@@ -16,17 +15,17 @@ export default function NewsletterSection() {
   };
 
   return (
-    <section className={styles.section}>
-      <div className={styles.container}>
-        <h2 className={styles.heading}>GET CONNECTED WITH US</h2>
-        <p className={styles.subHeading}>Join our community for motivation</p>
-        <form onSubmit={handleSubmit} className={styles.form}>
+    <section className="newsletter-section">
+      <div className="newsletter-container">
+        <h2 className="newsletter-heading">GET CONNECTED WITH US</h2>
+        <p className="newsletter-sub-heading">Join our community for motivation</p>
+        <form onSubmit={handleSubmit} className="newsletter-form">
           <Input
             type="email"
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className={styles.input}
+            className="newsletter-input"
           />
           <Button type="submit" variant="primary" size="lg">
             Join Now
@@ -36,5 +35,8 @@ export default function NewsletterSection() {
     </section>
   );
 }
+
+
+
 
 

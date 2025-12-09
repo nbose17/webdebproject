@@ -1,7 +1,6 @@
 'use client';
 
 import { CMSItem } from '@/lib/types';
-import styles from './CMSReview.module.css';
 
 interface CMSReviewProps {
   cmsData: CMSItem[];
@@ -17,20 +16,20 @@ export default function CMSReview({ cmsData }: CMSReviewProps) {
   );
 
   return (
-    <div className={styles.container}>
-      <div className={styles.summary}>
-        <p className={styles.summaryText}>
+    <div style={{ background: 'var(--color-bg-secondary)', padding: 'var(--spacing-lg)', borderRadius: 'var(--radius-md)', marginBottom: 'var(--spacing-lg)' }}>
+      <div style={{ marginBottom: 'var(--spacing-md)' }}>
+        <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
           Your CMS content is configured. Review the key information below:
         </p>
       </div>
       
-      <div className={styles.itemsList}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
         {importantItems.map((item) => (
-          <div key={item.id} className={styles.item}>
-            <div className={styles.itemLabel}>{item.name}</div>
-            <div className={styles.itemValue}>
+          <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', padding: 'var(--spacing-md)', background: 'var(--color-white)', borderRadius: 'var(--radius-md)' }}>
+            <div style={{ fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-text-primary)' }}>{item.name}</div>
+            <div style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)' }}>
               {item.type === 'image' ? (
-                <span className={styles.imagePath}>{item.content}</span>
+                <span>{item.content}</span>
               ) : (
                 <span>{item.content}</span>
               )}
@@ -39,11 +38,14 @@ export default function CMSReview({ cmsData }: CMSReviewProps) {
         ))}
       </div>
 
-      <div className={styles.completeIndicator}>
-        <span className={styles.checkmark}>✓</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)', marginTop: 'var(--spacing-lg)', padding: 'var(--spacing-md)', background: 'var(--color-primary-light)', borderRadius: 'var(--radius-md)', color: 'var(--color-primary)', fontWeight: 'var(--font-weight-semibold)' }}>
+        <span style={{ fontSize: 'var(--font-size-xl)' }}>✓</span>
         <span>CMS Content Ready</span>
       </div>
     </div>
   );
 }
+
+
+
 

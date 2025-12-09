@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { Gym } from '@/lib/types';
 import Input from '@/components/shared/Input';
-import styles from './ListingInfoForm.module.css';
 
 interface ListingInfoFormProps {
   data: Partial<Gym>;
@@ -44,7 +43,7 @@ export default function ListingInfoForm({ data, onChange }: ListingInfoFormProps
   };
 
   return (
-    <div className={styles.container}>
+    <div>
       <Input
         label="Gym Name *"
         value={formData.name}
@@ -61,33 +60,33 @@ export default function ListingInfoForm({ data, onChange }: ListingInfoFormProps
         required
       />
 
-      <div className={styles.imageUpload}>
-        <label className={styles.imageLabel}>Gym Image *</label>
-        <div className={styles.imageUploadArea}>
+      <div className="dashboard-form-image-upload-group">
+        <label className="input-label">Gym Image *</label>
+        <div className="dashboard-form-image-upload-container">
           {formData.image ? (
-            <div className={styles.imagePreview}>
-              <img src={formData.image} alt="Gym preview" />
+            <div className="dashboard-form-image-preview-container">
+              <img src={formData.image} alt="Gym preview" className="dashboard-form-image-preview" />
               <button
                 type="button"
                 onClick={() => handleChange('image', '')}
-                className={styles.removeImage}
+                className="dashboard-form-remove-image-button"
               >
-                Remove
+                ×
               </button>
             </div>
           ) : (
-            <div className={styles.uploadPlaceholder}>
+            <div className="dashboard-form-image-placeholder">
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className={styles.fileInput}
+                className="dashboard-form-file-input"
                 id="gym-image-upload"
               />
-              <label htmlFor="gym-image-upload" className={styles.uploadLabel}>
+              <label htmlFor="gym-image-upload" className="dashboard-form-file-input-label">
                 <span>+</span>
                 <span>Click to upload gym image</span>
-                <span className={styles.uploadHint}>Recommended: 300x200px</span>
+                <span style={{ display: 'block', fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)', marginTop: 'var(--spacing-xs)' }}>Recommended: 300x200px</span>
               </label>
             </div>
           )}
@@ -104,4 +103,7 @@ export default function ListingInfoForm({ data, onChange }: ListingInfoFormProps
     </div>
   );
 }
+
+
+
 

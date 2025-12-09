@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import styles from './Button.module.css';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
@@ -16,7 +15,7 @@ export default function Button({
   className = '',
   ...props
 }: ButtonProps) {
-  const buttonClasses = `${styles.button} ${styles[variant]} ${styles[size]} ${className}`.trim();
+  const buttonClasses = `btn btn-${variant} btn-${size} ${className}`.trim();
 
   return (
     <button className={buttonClasses} {...props}>
@@ -24,5 +23,7 @@ export default function Button({
     </button>
   );
 }
+
+
 
 

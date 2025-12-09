@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import styles from './Carousel.module.css';
 
 interface CarouselProps {
   children: React.ReactNode[];
@@ -33,10 +32,10 @@ export default function Carousel({ children, itemsPerView = 3 }: CarouselProps) 
   const translateX = -(currentIndex * (100 / itemsPerView));
 
   return (
-    <div className={styles.carousel}>
-      <div className={styles.carouselContainer} ref={containerRef}>
+    <div className="carousel">
+      <div className="carousel-container" ref={containerRef}>
         <div
-          className={styles.carouselTrack}
+          className="carousel-track"
           style={{
             transform: `translateX(${translateX}%)`,
             transition: 'transform 0.3s ease-in-out',
@@ -45,7 +44,7 @@ export default function Carousel({ children, itemsPerView = 3 }: CarouselProps) 
           {children.map((child, index) => (
             <div
               key={index}
-              className={styles.carouselItem}
+              className="carousel-item"
               style={{ width: `${100 / itemsPerView}%` }}
             >
               {child}
@@ -56,7 +55,7 @@ export default function Carousel({ children, itemsPerView = 3 }: CarouselProps) 
 
       {currentIndex > 0 && (
         <button
-          className={`${styles.carouselButton} ${styles.prevButton}`}
+          className="carousel-button carousel-button-prev"
           onClick={goToPrev}
           aria-label="Previous"
         >
@@ -66,7 +65,7 @@ export default function Carousel({ children, itemsPerView = 3 }: CarouselProps) 
 
       {currentIndex < maxIndex && (
         <button
-          className={`${styles.carouselButton} ${styles.nextButton}`}
+          className="carousel-button carousel-button-next"
           onClick={goToNext}
           aria-label="Next"
         >
@@ -74,12 +73,12 @@ export default function Carousel({ children, itemsPerView = 3 }: CarouselProps) 
         </button>
       )}
 
-      <div className={styles.pagination}>
+      <div className="carousel-pagination">
         {Array.from({ length: maxIndex + 1 }).map((_, index) => (
           <button
             key={index}
-            className={`${styles.paginationDot} ${
-              index === currentIndex ? styles.active : ''
+            className={`carousel-pagination-dot ${
+              index === currentIndex ? 'active' : ''
             }`}
             onClick={() => goToSlide(index)}
             aria-label={`Go to slide ${index + 1}`}
@@ -89,5 +88,7 @@ export default function Carousel({ children, itemsPerView = 3 }: CarouselProps) 
     </div>
   );
 }
+
+
 
 

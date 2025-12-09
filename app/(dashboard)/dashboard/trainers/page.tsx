@@ -7,7 +7,6 @@ import { generateId } from '@/lib/utils';
 import DataTable from '@/components/dashboard/DataTable';
 import TrainerForm from '@/components/dashboard/TrainerForm';
 import Button from '@/components/shared/Button';
-import styles from './page.module.css';
 
 export default function TrainersPage() {
   const [trainers, setTrainers] = useState<Trainer[]>(mockTrainers);
@@ -16,6 +15,21 @@ export default function TrainersPage() {
 
   const columns = [
     { key: 'id', label: 'No', render: (_: any, row: any, index: number) => index + 1 },
+    { 
+      key: 'image', 
+      label: 'Image', 
+      render: (value: string) => (
+        value ? (
+          <img 
+            src={value} 
+            alt="Trainer" 
+            style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
+          />
+        ) : (
+          <span style={{ color: 'var(--color-text-secondary)' }}>No image</span>
+        )
+      )
+    },
     { key: 'name', label: 'Name' },
     { key: 'experience', label: 'Experience' },
   ];
@@ -52,8 +66,8 @@ export default function TrainersPage() {
 
   return (
     <div>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Trainers</h1>
+      <div className="dashboard-page-header">
+        <h1 className="dashboard-page-title">Trainers</h1>
         <Button variant="primary" onClick={handleAdd}>
           Add Trainer
         </Button>
@@ -76,5 +90,7 @@ export default function TrainersPage() {
     </div>
   );
 }
+
+
 
 

@@ -4,7 +4,6 @@ import { QRCodeSVG } from 'qrcode.react';
 import { advertisementSubscription } from '@/lib/constants';
 import { useAuth } from '@/hooks/useAuth';
 import Button from '@/components/shared/Button';
-import styles from './QRCodeDisplay.module.css';
 
 export default function QRCodeDisplay() {
   const { user } = useAuth();
@@ -17,7 +16,7 @@ export default function QRCodeDisplay() {
 
   const handleDownload = () => {
     // In a real app, this would download the QR code image
-    const qrContainer = document.querySelector(`.${styles.qrCode}`);
+    const qrContainer = document.querySelector('.qr-code-container');
     const svg = qrContainer?.querySelector('svg');
     if (svg) {
       const svgData = new XMLSerializer().serializeToString(svg);
@@ -39,32 +38,32 @@ export default function QRCodeDisplay() {
   };
 
   return (
-    <div className={styles.container}>
-      <div className={styles.info}>
-        <h3 className={styles.title}>Pay subscription and Publish</h3>
-        <p className={styles.description}>
+    <div style={{ display: 'flex', gap: 'var(--spacing-2xl)', flexWrap: 'wrap' }}>
+      <div style={{ flex: '1', minWidth: '300px' }}>
+        <h3 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-md)' }}>Pay subscription and Publish</h3>
+        <p style={{ fontSize: 'var(--font-size-base)', color: 'var(--color-text-secondary)', lineHeight: 'var(--line-height-relaxed)' }}>
           Standard rate of <strong>${advertisementSubscription.rate}/month</strong> for
           publishing advertisement. It will be live for{' '}
           <strong>{advertisementSubscription.duration} days</strong> and can be renewed.
         </p>
       </div>
 
-      <div className={styles.qrSection}>
-        <div className={styles.qrCode}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--spacing-lg)', background: 'var(--color-white)', padding: 'var(--spacing-xl)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)' }}>
+        <div className="qr-code-container">
           <QRCodeSVG value={gymPageUrl} size={200} />
         </div>
-        <div className={styles.actions}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--spacing-md)' }}>
           <Button variant="primary" onClick={handleDownload}>
             Download QR
           </Button>
-          <p className={styles.linkText}>
+          <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', textAlign: 'center' }}>
             Scan QR or go to the below link
             <br />
             <a
               href={gymPageUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className={styles.link}
+              style={{ color: 'var(--color-primary)', textDecoration: 'none' }}
             >
               {gymPageUrl}
             </a>

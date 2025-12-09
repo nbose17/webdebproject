@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { advertisementSubscription } from '@/lib/constants';
 import Button from '@/components/shared/Button';
-import styles from './SubscriptionSettings.module.css';
 
 export default function SubscriptionSettings() {
   const [subscription] = useState({
@@ -40,58 +39,64 @@ export default function SubscriptionSettings() {
   );
 
   return (
-    <div className={styles.container}>
-      <h2 className={styles.sectionTitle}>Subscription Management</h2>
-      <p className={styles.sectionDescription}>
+    <div>
+      <h2 className="dashboard-page-title" style={{ fontSize: 'var(--font-size-2xl)', marginBottom: 'var(--spacing-md)' }}>Subscription Management</h2>
+      <p className="dashboard-page-subtitle" style={{ marginBottom: 'var(--spacing-xl)' }}>
         Manage your subscription and billing information
       </p>
 
-      <div className={styles.subscriptionCard}>
-        <div className={styles.subscriptionHeader}>
+      <div style={{ background: 'var(--color-white)', padding: 'var(--spacing-xl)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)', marginBottom: 'var(--spacing-xl)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--spacing-lg)', paddingBottom: 'var(--spacing-lg)', borderBottom: '1px solid var(--color-border)' }}>
           <div>
-            <h3 className={styles.planName}>{subscription.plan} Plan</h3>
+            <h3 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-sm)' }}>{subscription.plan} Plan</h3>
             <span
-              className={`${styles.status} ${
-                subscription.status === 'Active' ? styles.active : ''
-              }`}
+              style={{
+                display: 'inline-block',
+                padding: 'var(--spacing-xs) var(--spacing-md)',
+                borderRadius: 'var(--radius-md)',
+                fontSize: 'var(--font-size-sm)',
+                fontWeight: 'var(--font-weight-semibold)',
+                background: subscription.status === 'Active' ? 'var(--color-primary-light)' : 'var(--color-bg-secondary)',
+                color: subscription.status === 'Active' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
+              }}
             >
               {subscription.status}
             </span>
           </div>
-          <div className={styles.planPrice}>
-            <span className={styles.priceAmount}>${subscription.amount}</span>
-            <span className={styles.pricePeriod}>/month</span>
+          <div>
+            <span style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 'var(--font-weight-bold)' }}>${subscription.amount}</span>
+            <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>/month</span>
           </div>
         </div>
 
-        <div className={styles.subscriptionDetails}>
-          <div className={styles.detailRow}>
-            <span className={styles.detailLabel}>Start Date:</span>
-            <span className={styles.detailValue}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-lg)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--color-text-secondary)' }}>Start Date:</span>
+            <span style={{ fontWeight: 'var(--font-weight-medium)' }}>
               {formatDate(subscription.startDate)}
             </span>
           </div>
-          <div className={styles.detailRow}>
-            <span className={styles.detailLabel}>End Date:</span>
-            <span className={styles.detailValue}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--color-text-secondary)' }}>End Date:</span>
+            <span style={{ fontWeight: 'var(--font-weight-medium)' }}>
               {formatDate(subscription.endDate)}
             </span>
           </div>
-          <div className={styles.detailRow}>
-            <span className={styles.detailLabel}>Days Remaining:</span>
-            <span className={styles.detailValue}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--color-text-secondary)' }}>Days Remaining:</span>
+            <span style={{ fontWeight: 'var(--font-weight-medium)' }}>
               {daysRemaining > 0 ? `${daysRemaining} days` : 'Expired'}
             </span>
           </div>
-          <div className={styles.detailRow}>
-            <span className={styles.detailLabel}>Auto-Renewal:</span>
-            <span className={styles.detailValue}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--color-text-secondary)' }}>Auto-Renewal:</span>
+            <span style={{ fontWeight: 'var(--font-weight-medium)' }}>
               {subscription.autoRenew ? 'Enabled' : 'Disabled'}
             </span>
           </div>
         </div>
 
-        <div className={styles.subscriptionActions}>
+        <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
           <Button variant="primary" onClick={handleRenew}>
             Renew Subscription
           </Button>
@@ -103,24 +108,35 @@ export default function SubscriptionSettings() {
         </div>
       </div>
 
-      <div className={styles.billingSection}>
-        <h3 className={styles.subsectionTitle}>Billing History</h3>
-        <div className={styles.billingTable}>
-          <div className={styles.billingHeader}>
-            <span>Date</span>
-            <span>Amount</span>
-            <span>Status</span>
-            <span>Invoice</span>
-          </div>
-          <div className={styles.billingRow}>
-            <span>{formatDate(subscription.startDate)}</span>
-            <span>${subscription.amount}</span>
-            <span className={styles.paid}>Paid</span>
-            <button className={styles.downloadLink}>Download</button>
-          </div>
+      <div style={{ background: 'var(--color-white)', padding: 'var(--spacing-xl)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)' }}>
+        <h3 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-semibold)', marginBottom: 'var(--spacing-lg)' }}>Billing History</h3>
+        <div className="data-table-container">
+          <table className="data-table">
+            <thead>
+              <tr className="data-table-header-row">
+                <th className="data-table-header-cell">Date</th>
+                <th className="data-table-header-cell">Amount</th>
+                <th className="data-table-header-cell">Status</th>
+                <th className="data-table-header-cell">Invoice</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="data-table-row">
+                <td className="data-table-cell">{formatDate(subscription.startDate)}</td>
+                <td className="data-table-cell">${subscription.amount}</td>
+                <td className="data-table-cell" style={{ color: 'var(--color-primary)', fontWeight: 'var(--font-weight-semibold)' }}>Paid</td>
+                <td className="data-table-cell">
+                  <button style={{ background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', textDecoration: 'underline' }}>Download</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
   );
 }
+
+
+
 

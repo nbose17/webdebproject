@@ -2,7 +2,6 @@
 
 import { Plan } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
-import styles from './PlanCard.module.css';
 
 interface PlanCardProps {
   plan: Plan;
@@ -10,13 +9,15 @@ interface PlanCardProps {
 
 export default function PlanCard({ plan }: PlanCardProps) {
   return (
-    <div className={styles.card}>
-      <h3 className={styles.title}>{plan.name}</h3>
-      <p className={styles.description}>
+    <div className="plan-card">
+      <h3 className="plan-card-title">{plan.name}</h3>
+      <p className="plan-card-description">
         Cardio training description Cardio training description Cardio training description
       </p>
     </div>
   );
 }
+
+
 
 

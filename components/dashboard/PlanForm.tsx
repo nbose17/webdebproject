@@ -5,7 +5,6 @@ import { Plan } from '@/lib/types';
 import Input from '@/components/shared/Input';
 import Button from '@/components/shared/Button';
 import Modal from '@/components/shared/Modal';
-import styles from './PlanForm.module.css';
 
 interface PlanFormProps {
   isOpen: boolean;
@@ -48,7 +47,7 @@ export default function PlanForm({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={plan ? 'Edit Plan' : 'Add Plan'}>
-      <form onSubmit={handleSubmit} className={styles.form}>
+      <form onSubmit={handleSubmit} className="dashboard-form">
         <Input
           label="Name"
           value={name}
@@ -71,7 +70,7 @@ export default function PlanForm({
           min="0"
           step="0.01"
         />
-        <div className={styles.actions}>
+        <div className="dashboard-form-actions">
           <Button type="button" variant="outline" onClick={onClose}>
             Cancel
           </Button>
@@ -83,5 +82,8 @@ export default function PlanForm({
     </Modal>
   );
 }
+
+
+
 
 

@@ -7,7 +7,6 @@ import { generateId, formatCurrency } from '@/lib/utils';
 import DataTable from '@/components/dashboard/DataTable';
 import ClassForm from '@/components/dashboard/ClassForm';
 import Button from '@/components/shared/Button';
-import styles from './page.module.css';
 
 export default function ClassesPage() {
   const [classes, setClasses] = useState<Class[]>(mockClasses);
@@ -58,8 +57,8 @@ export default function ClassesPage() {
 
   return (
     <div>
-      <div className={styles.header}>
-        <h1 className={styles.title}>Classes</h1>
+      <div className="dashboard-page-header">
+        <h1 className="dashboard-page-title">Classes</h1>
         <Button variant="primary" onClick={handleAdd}>
           Add Class
         </Button>
@@ -82,5 +81,7 @@ export default function ClassesPage() {
     </div>
   );
 }
+
+
 
 
