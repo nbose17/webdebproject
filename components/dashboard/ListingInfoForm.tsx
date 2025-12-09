@@ -43,7 +43,7 @@ export default function ListingInfoForm({ data, onChange }: ListingInfoFormProps
   };
 
   return (
-    <div>
+    <div style={{ background: 'var(--color-white)', padding: 'var(--spacing-xl)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)' }}>
       <Input
         label="Gym Name *"
         value={formData.name}

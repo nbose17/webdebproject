@@ -5,6 +5,7 @@ import { CMSItem } from '@/lib/types';
 import { mockCMSItems } from '@/lib/constants';
 import DataTable from '@/components/dashboard/DataTable';
 import CMSForm from '@/components/dashboard/CMSForm';
+import { FaPalette } from 'react-icons/fa';
 
 export default function CMSPage() {
   const [items, setItems] = useState<CMSItem[]>(mockCMSItems);
@@ -32,7 +33,12 @@ export default function CMSPage() {
   return (
     <div>
       <div className="dashboard-page-header">
-        <h1 className="dashboard-page-title">CMS / Branding</h1>
+        <h1 className="dashboard-page-title">
+          <span className="dashboard-page-title-icon">
+            <FaPalette />
+          </span>
+          CMS / Branding
+        </h1>
       </div>
       <DataTable
         columns={columns}

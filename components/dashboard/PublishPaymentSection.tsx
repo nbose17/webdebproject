@@ -63,7 +63,7 @@ export default function PublishPaymentSection({
 
   if (paymentCompleted) {
     return (
-      <div style={{ textAlign: 'center', padding: 'var(--spacing-4xl)', background: 'var(--color-primary-light)', borderRadius: 'var(--radius-lg)' }}>
+      <div style={{ textAlign: 'center', padding: 'var(--spacing-4xl)', background: 'var(--color-primary-light)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)' }}>
         <div style={{ fontSize: 'var(--font-size-5xl)', color: 'var(--color-primary)', marginBottom: 'var(--spacing-md)' }}>✓</div>
         <h3 style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-md)' }}>Payment Completed</h3>
         <p style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--spacing-sm)' }}>
@@ -77,7 +77,7 @@ export default function PublishPaymentSection({
   }
 
   return (
-    <div>
+    <div style={{ background: 'var(--color-white)', padding: 'var(--spacing-xl)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)' }}>
       <div style={{ marginBottom: 'var(--spacing-2xl)' }}>
         <h3 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-lg)', textTransform: 'uppercase' }}>Select Subscription Plan</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--spacing-lg)' }}>
@@ -89,7 +89,8 @@ export default function PublishPaymentSection({
               borderRadius: 'var(--radius-lg)',
               cursor: 'pointer',
               background: selectedPlan === 'basic' ? 'var(--color-primary-light)' : 'var(--color-white)',
-              transition: 'all var(--transition-base)'
+              transition: 'all var(--transition-base)',
+              boxShadow: 'var(--shadow-sm)'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>
@@ -114,7 +115,8 @@ export default function PublishPaymentSection({
               borderRadius: 'var(--radius-lg)',
               cursor: 'pointer',
               background: selectedPlan === 'premium' ? 'var(--color-primary-light)' : 'var(--color-white)',
-              transition: 'all var(--transition-base)'
+              transition: 'all var(--transition-base)',
+              boxShadow: 'var(--shadow-sm)'
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-md)' }}>

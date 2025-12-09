@@ -7,6 +7,7 @@ import { generateId, formatCurrency } from '@/lib/utils';
 import DataTable from '@/components/dashboard/DataTable';
 import ClassForm from '@/components/dashboard/ClassForm';
 import Button from '@/components/shared/Button';
+import { FaCalendarAlt } from 'react-icons/fa';
 
 export default function ClassesPage() {
   const [classes, setClasses] = useState<Class[]>(mockClasses);
@@ -58,7 +59,12 @@ export default function ClassesPage() {
   return (
     <div>
       <div className="dashboard-page-header">
-        <h1 className="dashboard-page-title">Classes</h1>
+        <h1 className="dashboard-page-title">
+          <span className="dashboard-page-title-icon">
+            <FaCalendarAlt />
+          </span>
+          Classes
+        </h1>
         <Button variant="primary" onClick={handleAdd}>
           Add Class
         </Button>

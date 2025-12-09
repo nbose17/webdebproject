@@ -16,7 +16,7 @@ export default function PublishPreview({ listingInfo, cmsData }: PublishPreviewP
   const heroSub = cmsData.find((item) => item.name === 'Hero Section Sub');
 
   return (
-    <div>
+    <div style={{ background: 'var(--color-white)', padding: 'var(--spacing-xl)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)' }}>
       <div style={{ display: 'flex', gap: 'var(--spacing-sm)', marginBottom: 'var(--spacing-lg)', borderBottom: '2px solid var(--color-border)' }}>
         <button
           onClick={() => setActiveTab('listing')}

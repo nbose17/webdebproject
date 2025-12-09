@@ -7,6 +7,7 @@ import { generateId, formatCurrency } from '@/lib/utils';
 import DataTable from '@/components/dashboard/DataTable';
 import PlanForm from '@/components/dashboard/PlanForm';
 import Button from '@/components/shared/Button';
+import { FaCreditCard } from 'react-icons/fa';
 
 export default function PlansPage() {
   const [plans, setPlans] = useState<Plan[]>(mockPlans);
@@ -57,7 +58,12 @@ export default function PlansPage() {
   return (
     <div>
       <div className="dashboard-page-header">
-        <h1 className="dashboard-page-title">Plans (Monthly / Yearly)</h1>
+        <h1 className="dashboard-page-title">
+          <span className="dashboard-page-title-icon">
+            <FaCreditCard />
+          </span>
+          Plans (Monthly / Yearly)
+        </h1>
         <Button variant="primary" onClick={handleAdd}>
           Add Plan
         </Button>

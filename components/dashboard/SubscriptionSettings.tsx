@@ -45,70 +45,71 @@ export default function SubscriptionSettings() {
         Manage your subscription and billing information
       </p>
 
-      <div style={{ background: 'var(--color-white)', padding: 'var(--spacing-xl)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)', marginBottom: 'var(--spacing-xl)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--spacing-lg)', paddingBottom: 'var(--spacing-lg)', borderBottom: '1px solid var(--color-border)' }}>
-          <div>
-            <h3 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-sm)' }}>{subscription.plan} Plan</h3>
-            <span
-              style={{
-                display: 'inline-block',
-                padding: 'var(--spacing-xs) var(--spacing-md)',
-                borderRadius: 'var(--radius-md)',
-                fontSize: 'var(--font-size-sm)',
-                fontWeight: 'var(--font-weight-semibold)',
-                background: subscription.status === 'Active' ? 'var(--color-primary-light)' : 'var(--color-bg-secondary)',
-                color: subscription.status === 'Active' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
-              }}
-            >
-              {subscription.status}
-            </span>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2xl)' }}>
+        <div style={{ background: 'var(--color-white)', padding: 'var(--spacing-xl)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--spacing-lg)', paddingBottom: 'var(--spacing-lg)', borderBottom: '1px solid var(--color-border)' }}>
+            <div>
+              <h3 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-sm)' }}>{subscription.plan} Plan</h3>
+              <span
+                style={{
+                  display: 'inline-block',
+                  padding: 'var(--spacing-xs) var(--spacing-md)',
+                  borderRadius: 'var(--radius-md)',
+                  fontSize: 'var(--font-size-sm)',
+                  fontWeight: 'var(--font-weight-semibold)',
+                  background: subscription.status === 'Active' ? 'var(--color-primary-light)' : 'var(--color-bg-secondary)',
+                  color: subscription.status === 'Active' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
+                }}
+              >
+                {subscription.status}
+              </span>
+            </div>
+            <div>
+              <span style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 'var(--font-weight-bold)' }}>${subscription.amount}</span>
+              <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>/month</span>
+            </div>
           </div>
-          <div>
-            <span style={{ fontSize: 'var(--font-size-2xl)', fontWeight: 'var(--font-weight-bold)' }}>${subscription.amount}</span>
-            <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>/month</span>
-          </div>
-        </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-lg)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: 'var(--color-text-secondary)' }}>Start Date:</span>
-            <span style={{ fontWeight: 'var(--font-weight-medium)' }}>
-              {formatDate(subscription.startDate)}
-            </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-lg)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--color-text-secondary)' }}>Start Date:</span>
+              <span style={{ fontWeight: 'var(--font-weight-medium)' }}>
+                {formatDate(subscription.startDate)}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--color-text-secondary)' }}>End Date:</span>
+              <span style={{ fontWeight: 'var(--font-weight-medium)' }}>
+                {formatDate(subscription.endDate)}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--color-text-secondary)' }}>Days Remaining:</span>
+              <span style={{ fontWeight: 'var(--font-weight-medium)' }}>
+                {daysRemaining > 0 ? `${daysRemaining} days` : 'Expired'}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: 'var(--color-text-secondary)' }}>Auto-Renewal:</span>
+              <span style={{ fontWeight: 'var(--font-weight-medium)' }}>
+                {subscription.autoRenew ? 'Enabled' : 'Disabled'}
+              </span>
+            </div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: 'var(--color-text-secondary)' }}>End Date:</span>
-            <span style={{ fontWeight: 'var(--font-weight-medium)' }}>
-              {formatDate(subscription.endDate)}
-            </span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: 'var(--color-text-secondary)' }}>Days Remaining:</span>
-            <span style={{ fontWeight: 'var(--font-weight-medium)' }}>
-              {daysRemaining > 0 ? `${daysRemaining} days` : 'Expired'}
-            </span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <span style={{ color: 'var(--color-text-secondary)' }}>Auto-Renewal:</span>
-            <span style={{ fontWeight: 'var(--font-weight-medium)' }}>
-              {subscription.autoRenew ? 'Enabled' : 'Disabled'}
-            </span>
-          </div>
-        </div>
 
-        <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
-          <Button variant="primary" onClick={handleRenew}>
-            Renew Subscription
-          </Button>
-          {subscription.autoRenew && (
-            <Button variant="outline" onClick={handleCancel}>
-              Cancel Auto-Renewal
+          <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
+            <Button variant="primary" onClick={handleRenew}>
+              Renew Subscription
             </Button>
-          )}
+            {subscription.autoRenew && (
+              <Button variant="outline" onClick={handleCancel}>
+                Cancel Auto-Renewal
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
 
-      <div style={{ background: 'var(--color-white)', padding: 'var(--spacing-xl)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)' }}>
+        <div style={{ background: 'var(--color-white)', padding: 'var(--spacing-xl)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)' }}>
         <h3 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'var(--font-weight-semibold)', marginBottom: 'var(--spacing-lg)' }}>Billing History</h3>
         <div className="data-table-container">
           <table className="data-table">
@@ -131,6 +132,7 @@ export default function SubscriptionSettings() {
               </tr>
             </tbody>
           </table>
+        </div>
         </div>
       </div>
     </div>

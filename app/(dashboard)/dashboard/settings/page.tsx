@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { FaUser, FaBell, FaLock, FaCreditCard, FaExclamationTriangle } from 'react-icons/fa';
+import { FaUser, FaBell, FaLock, FaCreditCard, FaExclamationTriangle, FaCog } from 'react-icons/fa';
 import AccountSettings from '@/components/dashboard/AccountSettings';
 import NotificationSettings from '@/components/dashboard/NotificationSettings';
 import PrivacySettings from '@/components/dashboard/PrivacySettings';
@@ -35,10 +35,15 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="settings-container">
+    <div>
       <div className="dashboard-page-header">
         <div>
-          <h1 className="dashboard-page-title">Settings</h1>
+          <h1 className="dashboard-page-title">
+            <span className="dashboard-page-title-icon">
+              <FaCog />
+            </span>
+            Settings
+          </h1>
           <p className="dashboard-page-subtitle">Manage your account settings and preferences</p>
         </div>
       </div>

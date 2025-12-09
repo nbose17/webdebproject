@@ -9,6 +9,7 @@ import PublishPaymentSection from '@/components/dashboard/PublishPaymentSection'
 import Button from '@/components/shared/Button';
 import { mockCMSItems } from '@/lib/constants';
 import { Gym } from '@/lib/types';
+import { FaRocket } from 'react-icons/fa';
 
 export default function PublishPage() {
   const router = useRouter();
@@ -74,10 +75,15 @@ export default function PublishPage() {
   const isFormValid = listingInfo.name && listingInfo.location && listingInfo.image;
 
   return (
-    <div className="publish-container">
+    <div>
       <div className="dashboard-page-header">
         <div>
-          <h1 className="dashboard-page-title">Publish Your Gym</h1>
+          <h1 className="dashboard-page-title">
+            <span className="dashboard-page-title-icon">
+              <FaRocket />
+            </span>
+            Publish Your Gym
+          </h1>
           <p className="dashboard-page-subtitle">
             Review your content, complete payment, and publish your gym to the public listing
           </p>

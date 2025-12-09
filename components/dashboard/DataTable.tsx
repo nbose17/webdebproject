@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Button from '@/components/shared/Button';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 
 interface Column {
   key: string;
@@ -55,8 +56,10 @@ export default function DataTable({
                         variant="outline"
                         size="sm"
                         onClick={() => onEdit(row)}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'var(--spacing-sm)' }}
+                        title="Edit"
                       >
-                        Edit
+                        <FaEdit />
                       </Button>
                     )}
                     {onDelete && (
@@ -64,8 +67,10 @@ export default function DataTable({
                         variant="outline"
                         size="sm"
                         onClick={() => onDelete(row)}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'var(--spacing-sm)' }}
+                        title="Delete"
                       >
-                        Delete
+                        <FaTrash />
                       </Button>
                     )}
                   </div>
