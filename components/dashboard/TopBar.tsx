@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import { FaUser, FaCog, FaSignOutAlt, FaChevronDown } from 'react-icons/fa';
 
@@ -10,6 +11,7 @@ export default function TopBar() {
   const popoverRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
+  const locale = useLocale();
   const { user, logout } = useAuth();
 
   useEffect(() => {
@@ -35,12 +37,12 @@ export default function TopBar() {
 
   const handleLogout = () => {
     logout();
-    router.push('/login');
+    router.push(`/${locale}/login`);
     setIsPopoverOpen(false);
   };
 
   const handleProfileSettings = () => {
-    router.push('/dashboard/settings');
+    router.push(`/${locale}/dashboard/settings`);
     setIsPopoverOpen(false);
   };
 
@@ -101,3 +103,4 @@ export default function TopBar() {
     </div>
   );
 }
+

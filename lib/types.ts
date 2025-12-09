@@ -75,6 +75,30 @@ export interface AdvertisementSubscription {
   qrCode: string;
 }
 
+export interface Branch {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  email: string;
+  manager?: string;
+  status: 'active' | 'inactive';
+}
+
+export interface Client {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  membershipType: string;
+  joinDate: string;
+  status: 'active' | 'inactive';
+  image?: string;
+  subscriptionEndDate?: string;
+  contractStartDate?: string;
+  contractEndDate?: string;
+}
+
 
 
 

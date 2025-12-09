@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLocale } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import Button from '@/components/shared/Button';
 import Input from '@/components/shared/Input';
@@ -10,6 +11,7 @@ import Modal from '@/components/shared/Modal';
 export default function DangerZone() {
   const { logout } = useAuth();
   const router = useRouter();
+  const locale = useLocale();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [confirmText, setConfirmText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
@@ -26,7 +28,7 @@ export default function DangerZone() {
       setIsDeleting(false);
       setIsDeleteModalOpen(false);
       logout();
-      router.push('/');
+      router.push(`/${locale}`);
       alert('Your account has been deleted');
     }, 2000);
   };

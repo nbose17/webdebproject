@@ -1,6 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
+import { Table } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 import Button from '@/components/shared/Button';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 
@@ -23,64 +25,88 @@ export default function DataTable({
   onEdit,
   onDelete,
 }: DataTableProps) {
-  return (
-    <div className="data-table-container">
-      <table className="data-table">
-        <thead>
-          <tr className="data-table-header-row">
-            {columns.map((column) => (
-              <th key={column.key} className="data-table-header-cell">
-                {column.label}
-              </th>
-            ))}
-            {(onEdit || onDelete) && (
-              <th className="data-table-header-cell">Actions</th>
+  // Convert custom column format to Ant Design column format
+  const antdColumns: ColumnsType<any> = useMemo(() => {
+    const convertedColumns: ColumnsType<any> = columns.map((col) => ({
+      title: col.label,
+      dataIndex: col.key,
+      key: col.key,
+      render: (value: any, record: any, index: number) => {
+        if (col.render) {
+          return col.render(value, record, index);
+        }
+        return value;
+      },
+    }));
+
+    // Add Actions column if edit or delete handlers are provided
+    if (onEdit || onDelete) {
+      convertedColumns.push({
+        title: 'Actions',
+        key: 'actions',
+        width: 120,
+        render: (_: any, record: any) => (
+          <div style={{ display: 'flex', gap: 'var(--spacing-xs)', justifyContent: 'center' }}>
+            {onEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEdit(record)}
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  padding: 'var(--spacing-sm)',
+                  minWidth: 'auto'
+                }}
+                title="Edit"
+              >
+                <FaEdit />
+              </Button>
             )}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row, index) => (
-            <tr key={row.id || index} className="data-table-row">
-              {columns.map((column) => (
-                <td key={column.key} className="data-table-cell">
-                  {column.render
-                    ? column.render(row[column.key], row, index)
-                    : row[column.key]}
-                </td>
-              ))}
-              {(onEdit || onDelete) && (
-                <td className="data-table-cell">
-                  <div className="data-table-actions">
-                    {onEdit && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onEdit(row)}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'var(--spacing-sm)' }}
-                        title="Edit"
-                      >
-                        <FaEdit />
-                      </Button>
-                    )}
-                    {onDelete && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onDelete(row)}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'var(--spacing-sm)' }}
-                        title="Delete"
-                      >
-                        <FaTrash />
-                      </Button>
-                    )}
-                  </div>
-                </td>
-              )}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            {onDelete && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onDelete(record)}
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  padding: 'var(--spacing-sm)',
+                  minWidth: 'auto'
+                }}
+                title="Delete"
+              >
+                <FaTrash />
+              </Button>
+            )}
+          </div>
+        ),
+      });
+    }
+
+    return convertedColumns;
+  }, [columns, onEdit, onDelete]);
+
+  return (
+    <div style={{ 
+      background: 'var(--color-white)', 
+      padding: 'var(--spacing-lg)', 
+      borderRadius: 'var(--radius-lg)', 
+      boxShadow: 'var(--shadow-md)' 
+    }}>
+      <Table
+        columns={antdColumns}
+        dataSource={data.map((item, index) => ({ ...item, key: item.id || index }))}
+        pagination={{
+          pageSize: 10,
+          showSizeChanger: true,
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+          pageSizeOptions: ['10', '20', '50', '100'],
+        }}
+        scroll={{ x: 'max-content' }}
+      />
     </div>
   );
 }
-

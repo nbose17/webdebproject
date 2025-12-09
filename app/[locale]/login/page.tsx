@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 import { useAuth } from '@/hooks/useAuth';
 import Input from '@/components/shared/Input';
 import Button from '@/components/shared/Button';
@@ -17,6 +18,15 @@ export default function LoginPage() {
   const [ssoLoading, setSsoLoading] = useState<string | null>(null);
   const { login } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const locale = useLocale();
+  const t = useTranslations('login');
+
+  const handleLanguageChange = (newLocale: string) => {
+    const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`);
+    router.push(newPathname);
+    router.refresh();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,12 +36,12 @@ export default function LoginPage() {
     try {
       const success = await login(email, password);
       if (success) {
-        router.push('/dashboard');
+        router.push(`/${locale}/dashboard`);
       } else {
-        setError('Invalid email or password');
+        setError(t('invalidCredentials'));
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      setError(t('error'));
     } finally {
       setLoading(false);
     }
@@ -46,10 +56,10 @@ export default function LoginPage() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       const success = await login('google@example.com', 'google');
       if (success) {
-        router.push('/dashboard');
+        router.push(`/${locale}/dashboard`);
       }
     } catch (err) {
-      setError('Google login failed. Please try again.');
+      setError(t('googleLoginFailed'));
     } finally {
       setSsoLoading(null);
     }
@@ -64,10 +74,10 @@ export default function LoginPage() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       const success = await login('facebook@example.com', 'facebook');
       if (success) {
-        router.push('/dashboard');
+        router.push(`/${locale}/dashboard`);
       }
     } catch (err) {
-      setError('Facebook login failed. Please try again.');
+      setError(t('facebookLoginFailed'));
     } finally {
       setSsoLoading(null);
     }
@@ -79,24 +89,37 @@ export default function LoginPage() {
       <main className="public-main">
         <div className="container">
           <div className="login-container">
-            <h1 className="login-title">Login</h1>
+            <div className="login-header">
+              <h1 className="login-title">{t('title')}</h1>
+              <div className="language-selector">
+                <label className="language-selector-label">{t('selectLanguage')}</label>
+                <select
+                  value={locale}
+                  onChange={(e) => handleLanguageChange(e.target.value)}
+                  className="language-selector-select"
+                >
+                  <option value="en">{t('english')}</option>
+                  <option value="ru">{t('russian')}</option>
+                </select>
+              </div>
+            </div>
             
             <form onSubmit={handleSubmit} className="login-form">
               <Input
                 type="email"
-                label="Email"
+                label={t('email')}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="Enter your email"
+                placeholder={t('emailPlaceholder')}
               />
               <Input
                 type="password"
-                label="Password"
+                label={t('password')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="Enter your password"
+                placeholder={t('passwordPlaceholder')}
               />
               {error && <div className="login-error">{error}</div>}
               <Button
@@ -106,13 +129,13 @@ export default function LoginPage() {
                 disabled={loading || ssoLoading !== null}
                 className="login-submit-button"
               >
-                {loading ? 'Logging in...' : 'Login'}
+                {loading ? t('loggingIn') : t('submit')}
               </Button>
             </form>
 
             <div className="login-divider">
               <span className="login-divider-line"></span>
-              <span className="login-divider-text">or</span>
+              <span className="login-divider-text">{t('or')}</span>
               <span className="login-divider-line"></span>
             </div>
 
@@ -124,7 +147,7 @@ export default function LoginPage() {
                 className="login-sso-button login-sso-google"
               >
                 <FaGoogle className="login-sso-icon" />
-                <span>{ssoLoading === 'google' ? 'Signing in...' : 'Continue with Google'}</span>
+                <span>{ssoLoading === 'google' ? t('signingIn') : t('continueWithGoogle')}</span>
               </button>
               <button
                 type="button"
@@ -133,7 +156,7 @@ export default function LoginPage() {
                 className="login-sso-button login-sso-facebook"
               >
                 <FaFacebook className="login-sso-icon" />
-                <span>{ssoLoading === 'facebook' ? 'Signing in...' : 'Continue with Facebook'}</span>
+                <span>{ssoLoading === 'facebook' ? t('signingIn') : t('continueWithFacebook')}</span>
               </button>
             </div>
           </div>

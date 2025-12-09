@@ -1,0 +1,66 @@
+{
+  "common": {
+    "login": "Войти",
+    "logout": "Выйти",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "update": "Обновить",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "create": "Создать",
+    "submit": "Отправить",
+    "search": "Поиск",
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "success": "Успех"
+  },
+  "header": {
+    "searchPlaceholder": "Поиск тренажерных залов, локаций...",
+    "listYourGym": "Разместить свой зал",
+    "login": "Войти"
+  },
+  "login": {
+    "title": "Войти",
+    "email": "Электронная почта",
+    "emailPlaceholder": "Введите вашу электронную почту",
+    "password": "Пароль",
+    "passwordPlaceholder": "Введите ваш пароль",
+    "submit": "Войти",
+    "loggingIn": "Вход в систему...",
+    "or": "или",
+    "continueWithGoogle": "Продолжить с Google",
+    "continueWithFacebook": "Продолжить с Facebook",
+    "signingIn": "Вход...",
+    "invalidCredentials": "Неверный email или пароль",
+    "error": "Произошла ошибка. Пожалуйста, попробуйте снова.",
+    "googleLoginFailed": "Вход через Google не удался. Пожалуйста, попробуйте снова.",
+    "facebookLoginFailed": "Вход через Facebook не удался. Пожалуйста, попробуйте снова.",
+    "selectLanguage": "Выберите язык",
+    "english": "Английский",
+    "russian": "Русский"
+  },
+  "home": {
+    "newlyFeatured": "Новые избранные",
+    "popularGymsAt": "Популярные тренажерные залы в",
+    "all": "Все",
+    "loadMore": "Загрузить еще"
+  },
+  "hero": {
+    "subHeading": "ОСТАВАЙТЕСЬ ЗДОРОВЫМИ, ОСТАВАЙТЕСЬ В ФОРМЕ",
+    "heading": "ПРИВЕДИТЕ СЕБЯ В ФОРМУ СЕЙЧАС",
+    "description": "Тренируйтесь в фитнес-зале и исследуйте все преимущества",
+    "seeAllClasses": "Посмотреть все занятия",
+    "viewPlans": "Посмотреть планы"
+  },
+  "footer": {
+    "branding": "FitConnect Ads"
+  },
+  "notFound": {
+    "title": "404",
+    "heading": "Страница не найдена",
+    "description": "Извините, мы не смогли найти страницу, которую вы ищете.",
+    "backToHome": "Вернуться на главную",
+    "backToHomeButton": "На главную"
+  }
+}
+

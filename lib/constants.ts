@@ -1,4 +1,4 @@
-import { Gym, Plan, Class, Trainer, CMSItem, PaymentMethod } from './types';
+import { Gym, Plan, Class, Trainer, CMSItem, PaymentMethod, Branch, Client } from './types';
 
 // Mock Gyms Data
 export const mockGyms: Gym[] = [
@@ -281,5 +281,90 @@ export const advertisementSubscription = {
   paymentLink: 'https://fitnessclub.com',
   qrCode: 'https://fitnessclub.com',
 };
+
+// Mock Branches Data
+export const mockBranches: Branch[] = [
+  {
+    id: '1',
+    name: 'Downtown Branch',
+    address: '123 Main Street, City Center',
+    phone: '+1 (555) 123-4567',
+    email: 'downtown@fitnessclub.com',
+    manager: 'John Smith',
+    status: 'active',
+  },
+  {
+    id: '2',
+    name: 'Westside Branch',
+    address: '456 Oak Avenue, West District',
+    phone: '+1 (555) 234-5678',
+    email: 'westside@fitnessclub.com',
+    manager: 'Sarah Johnson',
+    status: 'active',
+  },
+  {
+    id: '3',
+    name: 'Eastside Branch',
+    address: '789 Pine Road, East District',
+    phone: '+1 (555) 345-6789',
+    email: 'eastside@fitnessclub.com',
+    manager: 'Mike Davis',
+    status: 'inactive',
+  },
+];
+
+// Mock Clients Data
+export const mockClients: Client[] = [
+  {
+    id: '1',
+    name: 'Alice Johnson',
+    email: 'alice.johnson@email.com',
+    phone: '+1 (555) 111-2222',
+    membershipType: 'Premium',
+    joinDate: '2024-01-15',
+    status: 'active',
+    image: '/images/trainer-placeholder.jpg',
+    subscriptionEndDate: '2024-12-15',
+    contractStartDate: '2024-01-15',
+    contractEndDate: '2024-12-15',
+  },
+  {
+    id: '2',
+    name: 'Bob Williams',
+    email: 'bob.williams@email.com',
+    phone: '+1 (555) 222-3333',
+    membershipType: 'Basic',
+    joinDate: '2024-02-20',
+    status: 'active',
+    subscriptionEndDate: '2024-11-20',
+    contractStartDate: '2024-02-20',
+    contractEndDate: '2024-11-20',
+  },
+  {
+    id: '3',
+    name: 'Carol Brown',
+    email: 'carol.brown@email.com',
+    phone: '+1 (555) 333-4444',
+    membershipType: 'Premium',
+    joinDate: '2023-12-10',
+    status: 'active',
+    image: '/images/trainer-placeholder.jpg',
+    subscriptionEndDate: '2024-12-10',
+    contractStartDate: '2023-12-10',
+    contractEndDate: '2024-12-10',
+  },
+  {
+    id: '4',
+    name: 'David Miller',
+    email: 'david.miller@email.com',
+    phone: '+1 (555) 444-5555',
+    membershipType: 'Basic',
+    joinDate: '2024-03-05',
+    status: 'inactive',
+    subscriptionEndDate: '2024-12-05',
+    contractStartDate: '2024-03-05',
+    contractEndDate: '2024-12-05',
+  },
+];
 
 

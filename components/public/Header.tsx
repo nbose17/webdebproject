@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 import Button from '@/components/shared/Button';
 import { useAuth } from '@/hooks/useAuth';
 import { FaSearch, FaPlus } from 'react-icons/fa';
@@ -10,7 +11,10 @@ import { FaSearch, FaPlus } from 'react-icons/fa';
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
+  const pathname = usePathname();
+  const locale = useLocale();
   const { isAuthenticated } = useAuth();
+  const t = useTranslations('header');
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,9 +28,9 @@ export default function Header() {
 
   const handlePostAdvertisement = () => {
     if (isAuthenticated) {
-      router.push('/dashboard/publish');
+      router.push(`/${locale}/dashboard/publish`);
     } else {
-      router.push('/login');
+      router.push(`/${locale}/login`);
     }
   };
 
@@ -40,7 +44,7 @@ export default function Header() {
           <form onSubmit={handleSearch} className="public-header-search-form">
             <input
               type="text"
-              placeholder="Search gyms, locations..."
+              placeholder={t('searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="public-header-search-input"
@@ -51,8 +55,8 @@ export default function Header() {
           </form>
         </div>
         <div className="public-header-actions">
-          <Link href="/login" className="public-header-login-link">
-            Login
+          <Link href={`/${locale}/login`} className="public-header-login-link">
+            {t('login')}
           </Link>
           <Button 
             variant="primary" 
@@ -61,7 +65,7 @@ export default function Header() {
             className="public-header-post-button"
           >
             <FaPlus style={{ marginRight: '6px' }} />
-            List Your Gym
+            {t('listYourGym')}
           </Button>
         </div>
       </div>
