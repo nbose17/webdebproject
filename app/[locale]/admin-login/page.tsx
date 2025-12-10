@@ -34,17 +34,24 @@ function AdminLoginForm() {
     setLoading(true);
 
     try {
+      console.log('🔐 Starting admin login process...');
       const result = await loginAsAdmin(values.email, values.password);
+      
+      console.log('🔐 Login result:', result);
+      
       if (result.success) {
+        console.log('🔐 Login successful, redirecting to admin dashboard...');
         // Additional delay to ensure state is fully updated
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, 1200));
         // Use window.location for a hard redirect to ensure fresh state
         window.location.href = `/${locale}/admin`;
       } else {
+        console.log('🔐 Login failed:', result.message);
         setError(result.message || 'Invalid admin credentials. Please check your email and password.');
         setLoading(false);
       }
     } catch (err: any) {
+      console.error('🔐 Login error:', err);
       setError(err?.message || 'An error occurred. Please try again.');
       setLoading(false);
     }

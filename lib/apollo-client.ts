@@ -12,6 +12,13 @@ const authLink = setContext((_, { headers }) => {
   const userToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   const token = adminToken || userToken;
   
+  console.log('🔗 Apollo Client auth setup:', {
+    hasAdminToken: !!adminToken,
+    hasUserToken: !!userToken,
+    usingToken: token ? 'admin' : userToken ? 'user' : 'none',
+    tokenPreview: token ? token.substring(0, 20) + '...' : 'none'
+  });
+  
   return {
     headers: {
       ...headers,

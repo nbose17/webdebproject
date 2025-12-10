@@ -19,41 +19,75 @@ export default function AdminProtectedRoute({
   requiredPermission,
   fallbackPath = '/admin-login'
 }: AdminProtectedRouteProps) {
-  const { isAuthenticated, isAdmin, isLoading } = useAdminAuth();
+  const { isAuthenticated, isAdmin, isLoading, adminSession } = useAdminAuth();
   const { canAccess } = usePermissions();
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;
 
+  console.log('🛡️ AdminProtectedRoute check:', {
+    isLoading,
+    isAuthenticated,
+    isAdmin,
+    hasSession: !!adminSession,
+    sessionRole: adminSession?.user?.role,
+    currentPath: typeof window !== 'undefined' ? window.location.pathname : 'ssr'
+  });
+
   useEffect(() => {
-    // Wait for initial load to complete before checking authentication
-    if (isLoading) {
-      return; // Still loading, don't redirect yet
-    }
-
-    // Check if user is authenticated as admin
-    if (!isAuthenticated || !isAdmin) {
-      // Only redirect if we're not already on the login page
-      const currentPath = window.location.pathname;
-      if (!currentPath.includes('/admin-login')) {
-        router.push(`/${locale}${fallbackPath}`);
+    // Add a delay to ensure auth state is properly initialized
+    const timeoutId = setTimeout(() => {
+      // Wait for initial load to complete before checking authentication
+      if (isLoading) {
+        console.log('🛡️ Still loading, waiting...');
+        return; // Still loading, don't redirect yet
       }
-      return;
-    }
 
-    // Check specific permission if required
-    if (requiredPermission) {
-      const hasRequiredPermission = canAccess(
-        requiredPermission.resource,
-        requiredPermission.action
-      );
-      
-      if (!hasRequiredPermission) {
-        router.push(`/${locale}/admin/unauthorized`);
+      console.log('🛡️ Auth check complete:', {
+        isAuthenticated,
+        isAdmin,
+        hasSession: !!adminSession,
+        willRedirect: !isAuthenticated || !isAdmin
+      });
+
+      // Check if user is authenticated as admin
+      if (!isAuthenticated || !isAdmin) {
+        // Only redirect if we're not already on the login page
+        const currentPath = window.location.pathname;
+        console.log('🛡️ Not authenticated, current path:', currentPath);
+        
+        if (!currentPath.includes('/admin-login')) {
+          console.log('🛡️ Redirecting to admin login:', `/${locale}${fallbackPath}`);
+          router.push(`/${locale}${fallbackPath}`);
+        }
         return;
       }
-    }
-  }, [isAuthenticated, isAdmin, isLoading, requiredPermission, router, locale, canAccess, fallbackPath]);
+
+      console.log('🛡️ Admin authenticated, checking permissions...');
+
+      // Check specific permission if required
+      if (requiredPermission) {
+        const hasRequiredPermission = canAccess(
+          requiredPermission.resource,
+          requiredPermission.action
+        );
+        
+        console.log('🛡️ Permission check:', {
+          required: requiredPermission,
+          hasPermission: hasRequiredPermission
+        });
+        
+        if (!hasRequiredPermission) {
+          router.push(`/${locale}/admin/unauthorized`);
+          return;
+        }
+      }
+
+      console.log('🛡️ All checks passed, rendering children');
+    }, 100); // Small delay to let auth state settle
+
+    return () => clearTimeout(timeoutId);
+  }, [isAuthenticated, isAdmin, isLoading, requiredPermission, router, locale, canAccess, fallbackPath, adminSession]);
 
   // Show loading state while checking authentication
   if (isLoading) {

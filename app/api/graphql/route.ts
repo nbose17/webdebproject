@@ -29,6 +29,11 @@ const handler = startServerAndCreateNextHandler<NextRequest, ResolverContext>(
       const authHeader = req.headers.get('authorization');
       let user = null;
 
+      console.log('🔐 GraphQL Context:', {
+        hasAuthHeader: !!authHeader,
+        authHeaderPreview: authHeader ? authHeader.substring(0, 30) + '...' : 'none'
+      });
+
       if (authHeader && authHeader.startsWith('Bearer ')) {
         const token = authHeader.substring(7);
         try {
@@ -40,9 +45,19 @@ const handler = startServerAndCreateNextHandler<NextRequest, ResolverContext>(
             gymId: decoded.gymId || null,
             branchId: decoded.branchId || null,
           };
+          
+          console.log('🔐 Token decoded successfully:', {
+            userId: decoded.userId,
+            email: decoded.email,
+            role: decoded.role,
+            hasGymId: !!decoded.gymId
+          });
         } catch (error) {
+          console.log('🔐 Token verification failed:', error);
           // Invalid token, continue without user
         }
+      } else {
+        console.log('🔐 No valid authorization header found');
       }
 
       return {

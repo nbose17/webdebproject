@@ -36,7 +36,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     if (!token) {
       console.log('❌ No token found, logging out');
-      logout();
+      // Check if we're on admin pages - don't logout on admin routes
+      const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+      if (!currentPath.includes('/admin')) {
+        logout();
+      } else {
+        console.log('🔄 Skipping logout on admin route - no regular user token needed');
+      }
       setIsLoading(false);
       return;
     }
@@ -272,7 +278,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
-    localStorage.removeItem('adminToken');  // Also remove admin token if exists
+    // DON'T remove adminToken - let AdminAuthContext handle its own tokens
+    // localStorage.removeItem('adminToken');
     setIsLoading(false);
   };
 
