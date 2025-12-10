@@ -2102,6 +2102,367 @@ img {
   font-size: 14px;
 }
 
+/* ============================================
+   ADMIN PANEL STYLES
+   ============================================ */
+
+/* Admin Container */
+.admin-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f0f2f5;
+}
+
+.admin-content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 280px;
+}
+
+.admin-main {
+  flex: 1;
+  padding: 0;
+  background-color: #f0f2f5;
+}
+
+/* Admin Sidebar */
+.admin-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 280px;
+  height: 100vh;
+  background-color: #001529;
+  color: white;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.admin-sidebar-header {
+  padding: 24px 20px;
+  border-bottom: 1px solid #1f1f1f;
+}
+
+.admin-sidebar-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0 0 4px 0;
+  color: white;
+}
+
+.admin-sidebar-subtitle {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin: 0;
+}
+
+.admin-sidebar-nav {
+  padding: 16px 0;
+}
+
+.admin-sidebar-section {
+  margin-bottom: 24px;
+}
+
+.admin-sidebar-section-title {
+  font-size: 12px;
+  color: #8c8c8c;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin: 0 0 8px 20px;
+  letter-spacing: 0.5px;
+}
+
+.admin-sidebar-menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.admin-sidebar-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.admin-sidebar-link:hover {
+  color: white;
+  background-color: #112545;
+}
+
+.admin-sidebar-link.active {
+  color: white;
+  background-color: #1890ff;
+  border-left-color: #40a9ff;
+}
+
+.admin-sidebar-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.admin-sidebar-switch-button,
+.admin-sidebar-logout {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.admin-sidebar-switch-button:hover,
+.admin-sidebar-logout:hover {
+  color: white;
+  background-color: #112545;
+}
+
+/* Admin TopBar */
+.admin-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 64px;
+  padding: 0 24px;
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.admin-topbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.admin-topbar-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #262626;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.admin-topbar-shield {
+  margin-right: 8px;
+  color: #1890ff;
+}
+
+.admin-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.admin-topbar-notification {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: #8c8c8c;
+  transition: all 0.2s ease;
+}
+
+.admin-topbar-notification:hover {
+  background-color: #f5f5f5;
+  color: #262626;
+}
+
+.admin-topbar-notification-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background-color: #ff4d4f;
+  color: white;
+  font-size: 10px;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.admin-topbar-user-menu {
+  position: relative;
+}
+
+.admin-topbar-user-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.admin-topbar-user-button:hover {
+  background-color: #f5f5f5;
+}
+
+.admin-topbar-user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #1890ff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.admin-topbar-user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.admin-topbar-user-name {
+  font-weight: 500;
+  color: #262626;
+  font-size: 14px;
+}
+
+.admin-topbar-user-role {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.admin-topbar-chevron {
+  color: #8c8c8c;
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+
+.admin-topbar-popover {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 280px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #f0f0f0;
+  z-index: 1000;
+  margin-top: 8px;
+}
+
+.admin-topbar-popover-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.admin-topbar-popover-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #1890ff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  margin-right: 12px;
+}
+
+.admin-topbar-popover-info {
+  flex: 1;
+}
+
+.admin-topbar-popover-name {
+  font-weight: 500;
+  color: #262626;
+  margin-bottom: 2px;
+}
+
+.admin-topbar-popover-email {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.admin-topbar-popover-menu {
+  padding: 8px 0;
+}
+
+.admin-topbar-popover-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  color: #262626;
+}
+
+.admin-topbar-popover-item:hover {
+  background-color: #f5f5f5;
+}
+
+.admin-topbar-popover-item.logout {
+  color: #ff4d4f;
+}
+
+.admin-topbar-popover-item.logout:hover {
+  background-color: #fff2f0;
+}
+
+.admin-topbar-popover-icon {
+  margin-right: 12px;
+  width: 16px;
+}
+
+.admin-topbar-popover-divider {
+  margin: 8px 0;
+  border: none;
+  height: 1px;
+  background-color: #f0f0f0;
+}
+
+/* Responsive Admin Layout */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .admin-content-wrapper {
+    margin-left: 0;
+  }
+  
+  .admin-topbar-user-info {
+    display: none;
+  }
+}
+
 /* Gym Detail Page */
 .gym-detail-section {
   margin-bottom: var(--spacing-4xl);

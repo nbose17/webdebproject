@@ -30,13 +30,12 @@ export default function LoginPage() {
     router.refresh();
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (values: { email: string; password: string }) => {
     setError('');
     setLoading(true);
 
     try {
-      const success = await login(email, password);
+      const success = await login(values.email, values.password);
       if (success) {
         router.push(`/${locale}/dashboard`);
       } else {
@@ -98,7 +97,7 @@ export default function LoginPage() {
               onChange={handleLanguageChange}
               style={{ width: 120 }}
               size="small"
-              bordered={false}
+              variant="borderless"
               suffixIcon={null}
             >
               <Option value="en">{t('login.english')}</Option>
@@ -219,6 +218,16 @@ export default function LoginPage() {
                 {t('login.continueWithFacebook')}
               </Button>
             </Space>
+
+            <div style={{ textAlign: 'center', marginTop: '24px' }}>
+              <Button
+                type="link"
+                onClick={() => router.push(`/${locale}/admin-login`)}
+                style={{ padding: 0, fontSize: '14px' }}
+              >
+                Admin Login
+              </Button>
+            </div>
           </Card>
         </div>
       </main>

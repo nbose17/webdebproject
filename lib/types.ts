@@ -33,11 +33,54 @@ export interface Trainer {
   bio?: string;
 }
 
+// User Roles and Permissions System
+export enum UserRole {
+  FITCONNECT_ADMIN = 'fitconnect_admin',
+  GYM_OWNER = 'gym_owner',
+  GYM_MANAGER = 'gym_manager',
+  GYM_TRAINER = 'gym_trainer',
+  GYM_RECEPTIONIST = 'gym_receptionist'
+}
+
+export interface Permission {
+  resource: string;
+  actions: ('create' | 'read' | 'update' | 'delete')[];
+}
+
 export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'gym_owner' | 'admin';
+  role: UserRole;
+  permissions?: Permission[];
+  gymId?: string; // For gym-specific users
+}
+
+// Admin-specific interfaces
+export interface AdminGym extends Gym {
+  ownerId: string;
+  branches: Branch[];
+  subscriptionStatus: 'active' | 'suspended' | 'expired';
+  paymentStatus: 'current' | 'overdue';
+  createdAt: string;
+  lastActive?: string;
+}
+
+export interface GymUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  gymId: string;
+  branchId?: string;
+  isActive: boolean;
+  joinDate: string;
+}
+
+export interface AdminSession {
+  user: User;
+  permissions: Permission[];
+  isAdmin: boolean;
 }
 
 export interface CMSItem {
@@ -81,8 +124,12 @@ export interface Branch {
   address: string;
   phone: string;
   email: string;
+  managerId?: string;
   manager?: string;
   status: 'active' | 'inactive';
+  staff: GymUser[];
+  clients: Client[];
+  createdAt: string;
 }
 
 export interface Client {

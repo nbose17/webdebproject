@@ -1,14 +1,17 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User } from '@/lib/types';
+import { User, UserRole } from '@/lib/types';
 import { mockUser } from '@/lib/constants';
+import { isAdmin, canAccessAdminPanel } from '@/lib/roles';
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   isAuthenticated: boolean;
+  isAdmin: boolean;
+  canAccessAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -45,9 +48,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const isAuthenticated = !!user;
+  const userIsAdmin = user ? isAdmin(user.role) : false;
+  const canAccessAdmin = user ? canAccessAdminPanel(user.role) : false;
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      logout, 
+      isAuthenticated,
+      isAdmin: userIsAdmin,
+      canAccessAdmin 
+    }}>
       {children}
     </AuthContext.Provider>
   );
