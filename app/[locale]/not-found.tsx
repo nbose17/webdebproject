@@ -1,6 +1,7 @@
 'use client';
 
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/public/Header';
@@ -8,8 +9,9 @@ import Footer from '@/components/public/Footer';
 import Button from '@/components/shared/Button';
 
 export default function NotFound() {
-  const t = useTranslations('notFound');
-  const locale = useLocale();
+  const { t } = useTranslation(['common']);
+  const params = useParams();
+  const locale = params.locale as string;
   const router = useRouter();
 
   return (
@@ -19,19 +21,19 @@ export default function NotFound() {
         <div className="container">
           <div className="not-found-container">
             <div className="not-found-content">
-              <h1 className="not-found-code">{t('title')}</h1>
-              <h2 className="not-found-heading">{t('heading')}</h2>
-              <p className="not-found-description">{t('description')}</p>
+              <h1 className="not-found-code">{t('notFound.title')}</h1>
+              <h2 className="not-found-heading">{t('notFound.heading')}</h2>
+              <p className="not-found-description">{t('notFound.description')}</p>
               <div className="not-found-actions">
                 <Button
                   variant="primary"
                   size="lg"
                   onClick={() => router.push(`/${locale}`)}
                 >
-                  {t('backToHomeButton')}
+                  {t('notFound.backToHomeButton')}
                 </Button>
                 <Link href={`/${locale}`} className="not-found-link">
-                  {t('backToHome')}
+                  {t('notFound.backToHome')}
                 </Link>
               </div>
             </div>
@@ -42,4 +44,5 @@ export default function NotFound() {
     </div>
   );
 }
+
 

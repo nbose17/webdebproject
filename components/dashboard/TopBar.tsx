@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { FaUser, FaCog, FaSignOutAlt, FaChevronDown } from 'react-icons/fa';
 
@@ -11,7 +11,8 @@ export default function TopBar() {
   const popoverRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
-  const locale = useLocale();
+  const params = useParams();
+  const locale = params.locale as string;
   const { user, logout } = useAuth();
 
   useEffect(() => {

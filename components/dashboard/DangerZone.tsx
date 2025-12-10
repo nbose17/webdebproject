@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import Button from '@/components/shared/Button';
 import Input from '@/components/shared/Input';
@@ -11,7 +11,8 @@ import Modal from '@/components/shared/Modal';
 export default function DangerZone() {
   const { logout } = useAuth();
   const router = useRouter();
-  const locale = useLocale();
+  const params = useParams();
+  const locale = params.locale as string;
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [confirmText, setConfirmText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);

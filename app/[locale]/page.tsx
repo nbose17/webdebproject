@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslation } from 'react-i18next';
 import Header from '@/components/public/Header';
 import Footer from '@/components/public/Footer';
 import GymCard from '@/components/public/GymCard';
@@ -9,7 +9,7 @@ import Button from '@/components/shared/Button';
 import { mockGyms } from '@/lib/constants';
 
 export default function PublicGymListingPage() {
-  const t = useTranslations('home');
+  const { t } = useTranslation(['common']);
   const [displayCount, setDisplayCount] = useState(12);
   const [userLocation, setUserLocation] = useState<string>('Your Location');
   const featuredGyms = mockGyms.filter((gym) => gym.featured);
@@ -89,7 +89,7 @@ export default function PublicGymListingPage() {
       <main className="public-main">
         <div className="container">
           <section className="public-section">
-            <h2 className="section-heading">{t('newlyFeatured')}</h2>
+            <h2 className="section-heading">{t('home.newlyFeatured')}</h2>
             <div className="gym-grid">
               {featuredGyms.slice(0, 4).map((gym) => (
                 <GymCard key={gym.id} gym={gym} />
@@ -98,7 +98,7 @@ export default function PublicGymListingPage() {
           </section>
 
           <section className="public-section">
-            <h2 className="section-heading">{t('popularGymsAt')} {userLocation}</h2>
+            <h2 className="section-heading">{t('home.popularGymsAt')} {userLocation}</h2>
             <div className="gym-grid">
               {popularGymsAtLocation.slice(0, 4).map((gym) => (
                 <GymCard key={gym.id} gym={gym} />
@@ -107,7 +107,7 @@ export default function PublicGymListingPage() {
           </section>
 
           <section className="public-section">
-            <h2 className="section-heading">{t('all')}</h2>
+            <h2 className="section-heading">{t('home.all')}</h2>
             <div className="gym-grid">
               {allGyms.slice(0, displayCount).map((gym) => (
                 <GymCard key={gym.id} gym={gym} />
@@ -116,7 +116,7 @@ export default function PublicGymListingPage() {
             {displayCount < allGyms.length && (
               <div className="load-more-container">
                 <Button variant="primary" size="lg" onClick={handleLoadMore}>
-                  {t('loadMore')}
+                  {t('home.loadMore')}
                 </Button>
               </div>
             )}

@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function ProtectedRoute({
@@ -13,7 +13,8 @@ export default function ProtectedRoute({
   const { isAuthenticated } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const locale = useLocale();
+  const params = useParams();
+  const locale = params.locale as string;
 
   useEffect(() => {
     if (!isAuthenticated) {

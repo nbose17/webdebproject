@@ -2,7 +2,7 @@
 
 import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useParams } from 'next/navigation';
 import { Client } from '@/lib/types';
 import { mockClients } from '@/lib/constants';
 import Button from '@/components/shared/Button';
@@ -15,7 +15,8 @@ interface PageProps {
 export default function ClientDetailPage({ params }: PageProps) {
   const { id } = use(params);
   const router = useRouter();
-  const locale = useLocale();
+  const routeParams = useParams();
+  const locale = routeParams.locale as string;
   const [isSending, setIsSending] = useState(false);
   const [selectedChannel, setSelectedChannel] = useState<'email' | 'whatsapp' | 'telegram' | null>(null);
 

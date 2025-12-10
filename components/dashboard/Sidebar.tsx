@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useParams } from 'next/navigation';
 import { 
   FaHome,
   FaRocket, 
@@ -41,7 +41,8 @@ const manageBusinessItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const locale = useLocale();
+  const params = useParams();
+  const locale = params.locale as string;
   const { logout } = useAuth();
 
   const handleLogout = () => {

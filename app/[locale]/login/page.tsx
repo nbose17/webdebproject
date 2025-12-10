@@ -2,13 +2,15 @@
 
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
-import Input from '@/components/shared/Input';
-import Button from '@/components/shared/Button';
 import Header from '@/components/public/Header';
 import Footer from '@/components/public/Footer';
-import { FaGoogle, FaFacebook } from 'react-icons/fa';
+import { Form, Input, Button, Select, Card, Divider, Space, Typography } from 'antd';
+import { GoogleOutlined, FacebookFilled, GlobalOutlined } from '@ant-design/icons';
+
+const { Title, Text } = Typography;
+const { Option } = Select;
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -19,8 +21,8 @@ export default function LoginPage() {
   const { login } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const locale = useLocale();
-  const t = useTranslations('login');
+  const { t, i18n } = useTranslation(['common']);
+  const locale = i18n.language;
 
   const handleLanguageChange = (newLocale: string) => {
     const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`);
@@ -38,10 +40,10 @@ export default function LoginPage() {
       if (success) {
         router.push(`/${locale}/dashboard`);
       } else {
-        setError(t('invalidCredentials'));
+        setError(t('login.invalidCredentials'));
       }
     } catch (err) {
-      setError(t('error'));
+      setError(t('login.error'));
     } finally {
       setLoading(false);
     }
@@ -59,7 +61,7 @@ export default function LoginPage() {
         router.push(`/${locale}/dashboard`);
       }
     } catch (err) {
-      setError(t('googleLoginFailed'));
+      setError(t('login.googleLoginFailed'));
     } finally {
       setSsoLoading(null);
     }
@@ -77,7 +79,7 @@ export default function LoginPage() {
         router.push(`/${locale}/dashboard`);
       }
     } catch (err) {
-      setError(t('facebookLoginFailed'));
+      setError(t('login.facebookLoginFailed'));
     } finally {
       setSsoLoading(null);
     }
@@ -87,79 +89,137 @@ export default function LoginPage() {
     <div className="public-page">
       <Header />
       <main className="public-main">
-        <div className="container">
-          <div className="login-container">
-            <div className="login-header">
-              <h1 className="login-title">{t('title')}</h1>
-              <div className="language-selector">
-                <label className="language-selector-label">{t('selectLanguage')}</label>
-                <select
-                  value={locale}
-                  onChange={(e) => handleLanguageChange(e.target.value)}
-                  className="language-selector-select"
-                >
-                  <option value="en">{t('english')}</option>
-                  <option value="ru">{t('russian')}</option>
-                </select>
-              </div>
+        <div className="container" style={{ maxWidth: '400px', margin: '0 auto', padding: '20px' }}>
+          {/* Language Selector - Outside the card */}
+          <div className="language-selector-container">
+            <GlobalOutlined />
+            <Select
+              value={locale}
+              onChange={handleLanguageChange}
+              style={{ width: 120 }}
+              size="small"
+              bordered={false}
+              suffixIcon={null}
+            >
+              <Option value="en">{t('login.english')}</Option>
+              <Option value="ru">{t('login.russian')}</Option>
+            </Select>
+          </div>
+
+          {/* Login Card */}
+          <Card className="login-card">
+            <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+              <Title level={2} style={{ marginBottom: '8px', color: '#1f1f1f' }}>
+                {t('login.title')}
+              </Title>
             </div>
             
-            <form onSubmit={handleSubmit} className="login-form">
-              <Input
-                type="email"
-                label={t('email')}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder={t('emailPlaceholder')}
-              />
-              <Input
-                type="password"
-                label={t('password')}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder={t('passwordPlaceholder')}
-              />
-              {error && <div className="login-error">{error}</div>}
+            <Form onFinish={handleSubmit} layout="vertical" size="large">
+              <Form.Item
+                name="email"
+                label={t('login.email')}
+                rules={[
+                  { required: true, message: 'Please enter your email' },
+                  { type: 'email', message: 'Please enter a valid email' }
+                ]}
+              >
+                <Input
+                  placeholder={t('login.emailPlaceholder')}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  style={{ borderRadius: '8px' }}
+                />
+              </Form.Item>
+
+              <Form.Item
+                name="password"
+                label={t('login.password')}
+                rules={[{ required: true, message: 'Please enter your password' }]}
+              >
+                <Input.Password
+                  placeholder={t('login.passwordPlaceholder')}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  style={{ borderRadius: '8px' }}
+                />
+              </Form.Item>
+
+              {error && (
+                <div className="login-error-message">
+                  {error}
+                </div>
+              )}
+
+              <Form.Item>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={loading}
+                  disabled={ssoLoading !== null}
+                  block
+                  size="large"
+                  style={{ 
+                    borderRadius: '8px',
+                    height: '48px',
+                    fontSize: '16px',
+                    fontWeight: '500'
+                  }}
+                >
+                  {loading ? t('login.loggingIn') : t('login.submit')}
+                </Button>
+              </Form.Item>
+            </Form>
+
+            <Divider style={{ margin: '24px 0' }}>
+              <Text style={{ color: '#999', fontSize: '14px' }}>
+                {t('login.or')}
+              </Text>
+            </Divider>
+
+            <Space direction="vertical" style={{ width: '100%' }} size="middle">
               <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                disabled={loading || ssoLoading !== null}
-                className="login-submit-button"
-              >
-                {loading ? t('loggingIn') : t('submit')}
-              </Button>
-            </form>
-
-            <div className="login-divider">
-              <span className="login-divider-line"></span>
-              <span className="login-divider-text">{t('or')}</span>
-              <span className="login-divider-line"></span>
-            </div>
-
-            <div className="login-sso-buttons">
-              <button
-                type="button"
+                icon={<GoogleOutlined />}
                 onClick={handleGoogleLogin}
-                disabled={loading || ssoLoading !== null}
-                className="login-sso-button login-sso-google"
+                loading={ssoLoading === 'google'}
+                disabled={loading || (ssoLoading !== null && ssoLoading !== 'google')}
+                block
+                size="large"
+                style={{
+                  borderRadius: '8px',
+                  height: '48px',
+                  borderColor: '#db4437',
+                  color: '#db4437',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '14px'
+                }}
               >
-                <FaGoogle className="login-sso-icon" />
-                <span>{ssoLoading === 'google' ? t('signingIn') : t('continueWithGoogle')}</span>
-              </button>
-              <button
-                type="button"
+                {t('login.continueWithGoogle')}
+              </Button>
+
+              <Button
+                icon={<FacebookFilled />}
                 onClick={handleFacebookLogin}
-                disabled={loading || ssoLoading !== null}
-                className="login-sso-button login-sso-facebook"
+                loading={ssoLoading === 'facebook'}
+                disabled={loading || (ssoLoading !== null && ssoLoading !== 'facebook')}
+                block
+                size="large"
+                style={{
+                  borderRadius: '8px',
+                  height: '48px',
+                  borderColor: '#1877f2',
+                  color: '#1877f2',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '14px'
+                }}
               >
-                <FaFacebook className="login-sso-icon" />
-                <span>{ssoLoading === 'facebook' ? t('signingIn') : t('continueWithFacebook')}</span>
-              </button>
-            </div>
-          </div>
+                {t('login.continueWithFacebook')}
+              </Button>
+            </Space>
+          </Card>
         </div>
       </main>
       <Footer />

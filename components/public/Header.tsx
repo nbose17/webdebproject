@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslation } from 'react-i18next';
 import Button from '@/components/shared/Button';
 import { useAuth } from '@/hooks/useAuth';
 import { FaSearch, FaPlus } from 'react-icons/fa';
@@ -12,9 +12,9 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
   const pathname = usePathname();
-  const locale = useLocale();
   const { isAuthenticated } = useAuth();
-  const t = useTranslations('header');
+  const { t, i18n } = useTranslation(['common']);
+  const locale = i18n.language;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +44,7 @@ export default function Header() {
           <form onSubmit={handleSearch} className="public-header-search-form">
             <input
               type="text"
-              placeholder={t('searchPlaceholder')}
+              placeholder={t('header.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="public-header-search-input"
@@ -56,7 +56,7 @@ export default function Header() {
         </div>
         <div className="public-header-actions">
           <Link href={`/${locale}/login`} className="public-header-login-link">
-            {t('login')}
+            {t('header.login')}
           </Link>
           <Button 
             variant="primary" 
@@ -65,7 +65,7 @@ export default function Header() {
             className="public-header-post-button"
           >
             <FaPlus style={{ marginRight: '6px' }} />
-            {t('listYourGym')}
+            {t('header.listYourGym')}
           </Button>
         </div>
       </div>

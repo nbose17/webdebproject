@@ -2015,6 +2015,93 @@ img {
   }
 }
 
+/* Enhanced Login Page Styles (Ant Design) */
+.language-selector-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 24px;
+  gap: 8px;
+}
+
+.language-selector-container .anticon {
+  color: #666;
+  font-size: 16px;
+}
+
+.language-selector-container .ant-select .ant-select-selector {
+  border: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  font-weight: 500;
+  color: #333;
+}
+
+.language-selector-container .ant-select:hover .ant-select-selector,
+.language-selector-container .ant-select-focused .ant-select-selector {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Login Card Enhancements */
+.ant-card.login-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+}
+
+/* Form Enhancements */
+.ant-form-item-label > label {
+  font-weight: 500;
+  color: #333;
+}
+
+.ant-input, .ant-input-password .ant-input {
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  transition: all 0.2s ease;
+}
+
+.ant-input:focus, .ant-input:hover,
+.ant-input-password:focus .ant-input, .ant-input-password:hover .ant-input,
+.ant-input-focused, .ant-input-password-focused .ant-input {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+}
+
+.ant-btn-primary {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.ant-btn-primary:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+/* SSO Button Enhancements */
+.ant-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.login-error-message {
+  color: #ff4d4f;
+  text-align: center;
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: #fff2f0;
+  border-radius: 6px;
+  border: 1px solid #ffccc7;
+  font-size: 14px;
+}
+
 /* Gym Detail Page */
 .gym-detail-section {
   margin-bottom: var(--spacing-4xl);
