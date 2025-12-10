@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { CustomApolloProvider } from '@/components/providers/ApolloProvider';
 import TranslationsProvider from '@/components/TranslationsProvider';
 import initI18next from '../i18n';
 
@@ -29,15 +30,17 @@ export default async function LocaleLayout({
 
   // Nested layouts cannot have html/body - only root layout can
   return (
-    <AuthProvider>
-      <TranslationsProvider
-        locale={locale}
-        namespaces={['common']}
-        resources={resources}
-      >
-        {children}
-      </TranslationsProvider>
-    </AuthProvider>
+    <CustomApolloProvider>
+      <AuthProvider>
+        <TranslationsProvider
+          locale={locale}
+          namespaces={['common']}
+          resources={resources}
+        >
+          {children}
+        </TranslationsProvider>
+      </AuthProvider>
+    </CustomApolloProvider>
   );
 }
 

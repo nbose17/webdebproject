@@ -4,7 +4,17 @@ import { useState } from 'react';
 import Input from '@/components/shared/Input';
 import Button from '@/components/shared/Button';
 
-export default function NewsletterSection() {
+interface NewsletterSectionProps {
+  heading?: string;
+  subHeading?: string;
+  buttonText?: string;
+}
+
+export default function NewsletterSection({
+  heading = 'GET CONNECTED WITH US',
+  subHeading = 'Join our community for motivation',
+  buttonText = 'Join Now',
+}: NewsletterSectionProps) {
   const [email, setEmail] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -17,8 +27,8 @@ export default function NewsletterSection() {
   return (
     <section className="newsletter-section">
       <div className="newsletter-container">
-        <h2 className="newsletter-heading">GET CONNECTED WITH US</h2>
-        <p className="newsletter-sub-heading">Join our community for motivation</p>
+        <h2 className="newsletter-heading">{heading}</h2>
+        <p className="newsletter-sub-heading">{subHeading}</p>
         <form onSubmit={handleSubmit} className="newsletter-form">
           <Input
             type="email"
@@ -28,7 +38,7 @@ export default function NewsletterSection() {
             className="newsletter-input"
           />
           <Button type="submit" variant="primary" size="lg">
-            Join Now
+            {buttonText}
           </Button>
         </form>
       </div>

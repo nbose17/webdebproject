@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
-import { Card, Table, Tag, Button, Input, Space, Dropdown, Modal, Typography, Statistic, Row, Col } from 'antd';
+import { useQuery, useMutation } from '@apollo/client/react';
+import { Card, Table, Tag, Button, Input, Space, Dropdown, Modal, Typography, Statistic, Row, Col, message, Skeleton } from 'antd';
 import { 
   FaDumbbell, 
   FaEye, 
@@ -18,32 +19,79 @@ import {
   FaCrown,
   FaExclamationTriangle
 } from 'react-icons/fa';
-import { mockAdminGyms } from '@/lib/constants';
 import type { AdminGym } from '@/lib/types';
 import AdminProtectedRoute from '@/components/shared/AdminProtectedRoute';
+import { GET_GYMS, DELETE_GYM } from '@/graphql/queries/admin';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
 
 export default function GymsManagementPage() {
-  const [gyms, setGyms] = useState<AdminGym[]>(mockAdminGyms);
-  const [filteredGyms, setFilteredGyms] = useState<AdminGym[]>(mockAdminGyms);
-  const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;
+  
+  // Fetch gyms from GraphQL API
+  const { data, loading, error, refetch } = useQuery(GET_GYMS, {
+    fetchPolicy: 'cache-and-network',
+    onError: (err) => {
+      console.error('Error fetching gyms:', err);
+      message.error('Failed to load gyms. Please try again.');
+    },
+  });
+
+  const [deleteGymMutation] = useMutation(DELETE_GYM);
+
+  const [filteredGyms, setFilteredGyms] = useState<AdminGym[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
+  // Transform GraphQL data to match AdminGym interface
+  const [allGyms, setAllGyms] = useState<AdminGym[]>([]);
+
+  useEffect(() => {
+    if (data?.gyms) {
+      const transformedGyms: AdminGym[] = data.gyms.map((gym: any) => ({
+        id: gym.id,
+        name: gym.name,
+        location: gym.location,
+        image: gym.image,
+        featured: gym.featured,
+        description: gym.description,
+        ownerId: gym.ownerId,
+        subscriptionStatus: gym.subscriptionStatus.toLowerCase(),
+        paymentStatus: gym.paymentStatus.toLowerCase(),
+        createdAt: gym.createdAt,
+        lastActive: gym.lastActive,
+        branches: gym.branches || [],
+        users: gym.users || [],
+      }));
+      setAllGyms(transformedGyms);
+      // Apply current search filter if any
+      if (searchTerm.trim()) {
+        const filtered = transformedGyms.filter(gym =>
+          gym.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          gym.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (gym.ownerId?.toString() || '').toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        setFilteredGyms(filtered);
+      } else {
+        setFilteredGyms(transformedGyms);
+      }
+    }
+  }, [data, searchTerm]);
+
+  const gyms = filteredGyms;
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
     if (!value.trim()) {
-      setFilteredGyms(gyms);
+      setFilteredGyms(allGyms);
     } else {
-      const filtered = gyms.filter(gym =>
+      const filtered = allGyms.filter(gym =>
         gym.name.toLowerCase().includes(value.toLowerCase()) ||
         gym.location.toLowerCase().includes(value.toLowerCase()) ||
-        gym.ownerId.toLowerCase().includes(value.toLowerCase())
+        (gym.ownerId?.toString() || '').toLowerCase().includes(value.toLowerCase())
       );
       setFilteredGyms(filtered);
     }
@@ -57,21 +105,24 @@ export default function GymsManagementPage() {
     router.push(`/${locale}/admin/gyms/${gymId}/edit`);
   };
 
-  const handleDeleteGym = (gymId: string) => {
+  const handleDeleteGym = async (gymId: string) => {
     Modal.confirm({
       title: 'Delete Gym',
       content: 'Are you sure you want to delete this gym? This action cannot be undone.',
       okText: 'Yes, Delete',
       okType: 'danger',
       cancelText: 'Cancel',
-      onOk() {
-        const updatedGyms = gyms.filter(gym => gym.id !== gymId);
-        setGyms(updatedGyms);
-        setFilteredGyms(updatedGyms.filter(gym =>
-          !searchTerm || 
-          gym.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          gym.location.toLowerCase().includes(searchTerm.toLowerCase())
-        ));
+      async onOk() {
+        try {
+          await deleteGymMutation({
+            variables: { id: gymId },
+          });
+          message.success('Gym deleted successfully');
+          // Refetch gyms to update the list
+          await refetch();
+        } catch (err: any) {
+          message.error(err?.message || 'Failed to delete gym');
+        }
       },
     });
   };
@@ -128,7 +179,7 @@ export default function GymsManagementPage() {
       render: (branches: any[]) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <FaBuilding style={{ color: '#4CAF50' }} />
-          <span>{branches.length}</span>
+          <span>{branches?.length || 0}</span>
         </div>
       ),
     },
@@ -136,10 +187,11 @@ export default function GymsManagementPage() {
       title: 'Total Users',
       key: 'totalUsers',
       render: (record: AdminGym) => {
-        const totalUsers = record.branches.reduce((sum, branch) => sum + branch.staff.length, 0);
+        // Get user count from users array or calculate from branches
+        const totalUsers = record.users?.length || record.branches?.reduce((sum, branch: any) => sum + (branch.staff?.length || 0), 0) || 0;
         return (
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <FaUsers style={{ color: '#52c41a' }} />
+            <FaUsers style={{ color: '#4CAF50' }} />
             <span>{totalUsers}</span>
           </div>
         );
@@ -219,11 +271,26 @@ export default function GymsManagementPage() {
     onChange: setSelectedRowKeys,
   };
 
-  // Calculate statistics
-  const totalGyms = gyms.length;
-  const activeGyms = gyms.filter(g => g.subscriptionStatus === 'active').length;
-  const overduePayments = gyms.filter(g => g.paymentStatus === 'overdue').length;
-  const totalBranches = gyms.reduce((sum, gym) => sum + gym.branches.length, 0);
+  // Calculate statistics from all gyms (not just filtered)
+  const totalGyms = allGyms.length;
+  const activeGyms = allGyms.filter(g => g.subscriptionStatus === 'active').length;
+  const overduePayments = allGyms.filter(g => g.paymentStatus === 'overdue').length;
+  const totalBranches = allGyms.reduce((sum, gym) => sum + (gym.branches?.length || 0), 0);
+
+  // Show error state
+  if (error && !loading) {
+    return (
+      <AdminProtectedRoute requiredPermission={{ resource: 'gyms', action: 'read' }}>
+        <div>
+          <Card>
+            <div style={{ textAlign: 'center', padding: '40px' }}>
+              <Text type="danger">Failed to load gyms. Please try again.</Text>
+            </div>
+          </Card>
+        </div>
+      </AdminProtectedRoute>
+    );
+  }
 
   return (
     <AdminProtectedRoute requiredPermission={{ resource: 'gyms', action: 'read' }}>
@@ -244,40 +311,56 @@ export default function GymsManagementPage() {
         <Row gutter={[16, 16]} style={{ marginBottom: 'var(--spacing-2xl)' }}>
           <Col xs={24} sm={12} md={6}>
             <Card>
-              <Statistic
-                title="Total Gyms"
-                value={totalGyms}
-                prefix={<FaDumbbell style={{ color: '#4CAF50' }} />}
-              />
+              {loading ? (
+                <Skeleton active paragraph={{ rows: 1 }} />
+              ) : (
+                <Statistic
+                  title="Total Gyms"
+                  value={totalGyms}
+                  prefix={<FaDumbbell style={{ color: '#4CAF50' }} />}
+                />
+              )}
             </Card>
           </Col>
           <Col xs={24} sm={12} md={6}>
             <Card>
-              <Statistic
-                title="Active Gyms"
-                value={activeGyms}
-                prefix={<FaDumbbell style={{ color: '#52c41a' }} />}
-                suffix={`/ ${totalGyms}`}
-              />
+              {loading ? (
+                <Skeleton active paragraph={{ rows: 1 }} />
+              ) : (
+                <Statistic
+                  title="Active Gyms"
+                  value={activeGyms}
+                  prefix={<FaDumbbell style={{ color: '#52c41a' }} />}
+                  suffix={`/ ${totalGyms}`}
+                />
+              )}
             </Card>
           </Col>
           <Col xs={24} sm={12} md={6}>
             <Card>
-              <Statistic
-                title="Total Branches"
-                value={totalBranches}
-                prefix={<FaBuilding style={{ color: '#722ed1' }} />}
-              />
+              {loading ? (
+                <Skeleton active paragraph={{ rows: 1 }} />
+              ) : (
+                <Statistic
+                  title="Total Branches"
+                  value={totalBranches}
+                  prefix={<FaBuilding style={{ color: '#722ed1' }} />}
+                />
+              )}
             </Card>
           </Col>
           <Col xs={24} sm={12} md={6}>
             <Card>
-              <Statistic
-                title="Payment Issues"
-                value={overduePayments}
-                prefix={<FaExclamationTriangle style={{ color: '#ff4d4f' }} />}
-                valueStyle={{ color: overduePayments > 0 ? '#ff4d4f' : '#52c41a' }}
-              />
+              {loading ? (
+                <Skeleton active paragraph={{ rows: 1 }} />
+              ) : (
+                <Statistic
+                  title="Payment Issues"
+                  value={overduePayments}
+                  prefix={<FaExclamationTriangle style={{ color: '#ff4d4f' }} />}
+                  valueStyle={{ color: overduePayments > 0 ? '#ff4d4f' : '#52c41a' }}
+                />
+              )}
             </Card>
           </Col>
         </Row>
@@ -322,22 +405,25 @@ export default function GymsManagementPage() {
             </div>
           </div>
 
-          <Table
-            rowSelection={rowSelection}
-            columns={columns}
-            dataSource={filteredGyms}
-            rowKey="id"
-            loading={loading}
-            pagination={{
-              total: filteredGyms.length,
-              pageSize: 10,
-              showSizeChanger: true,
-              showQuickJumper: true,
-              showTotal: (total, range) => 
-                `${range[0]}-${range[1]} of ${total} gyms`,
-            }}
-            scroll={{ x: 1200 }}
-          />
+          {loading ? (
+            <Skeleton active paragraph={{ rows: 8 }} />
+          ) : (
+            <Table
+              rowSelection={rowSelection}
+              columns={columns}
+              dataSource={filteredGyms}
+              rowKey="id"
+              pagination={{
+                total: filteredGyms.length,
+                pageSize: 10,
+                showSizeChanger: true,
+                showQuickJumper: true,
+                showTotal: (total, range) => 
+                  `${range[0]}-${range[1]} of ${total} gyms`,
+              }}
+              scroll={{ x: 1200 }}
+            />
+          )}
         </Card>
       </div>
     </AdminProtectedRoute>

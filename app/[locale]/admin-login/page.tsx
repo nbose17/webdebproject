@@ -1,40 +1,51 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useParams } from 'next/navigation';
-import { Form, Input, Button, Card, Typography, Alert } from 'antd';
+import { useTranslation } from 'react-i18next';
+import { Form, Input, Button, Card, Typography, Alert, Select } from 'antd';
+import { GlobalOutlined } from '@ant-design/icons';
 import { FaShieldAlt, FaUser, FaLock } from 'react-icons/fa';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { AdminAuthProvider } from '@/contexts/AdminAuthContext';
 
 const { Title, Text } = Typography;
+const { Option } = Select;
 
 function AdminLoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { loginAsAdmin } = useAdminAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const params = useParams();
   const locale = params.locale as string;
+  const { t, i18n } = useTranslation(['common']);
+
+  const handleLanguageChange = (newLocale: string) => {
+    const newPathname = pathname.replace(`/${locale}`, `/${newLocale}`);
+    router.push(newPathname);
+    router.refresh();
+  };
 
   const handleSubmit = async (values: { email: string; password: string }) => {
     setError('');
     setLoading(true);
 
     try {
-      const success = await loginAsAdmin(values.email, values.password);
-      if (success) {
-        // Wait a moment to ensure localStorage is saved and state is updated
-        await new Promise(resolve => setTimeout(resolve, 100));
-        router.push(`/${locale}/admin`);
-        router.refresh();
+      const result = await loginAsAdmin(values.email, values.password);
+      if (result.success) {
+        // Additional delay to ensure state is fully updated
+        await new Promise(resolve => setTimeout(resolve, 300));
+        // Use window.location for a hard redirect to ensure fresh state
+        window.location.href = `/${locale}/admin`;
       } else {
-        setError('Invalid admin credentials. Please check your email and password.');
+        setError(result.message || 'Invalid admin credentials. Please check your email and password.');
         setLoading(false);
       }
-    } catch (err) {
-      setError('An error occurred. Please try again.');
+    } catch (err: any) {
+      setError(err?.message || 'An error occurred. Please try again.');
       setLoading(false);
     }
   };
@@ -46,8 +57,37 @@ function AdminLoginForm() {
       alignItems: 'center',
       justifyContent: 'center',
       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: '20px'
+      padding: '20px',
+      position: 'relative'
     }}>
+      {/* Language Selector - Top Right */}
+      <div style={{
+        position: 'absolute',
+        top: '24px',
+        right: '24px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
+        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        padding: '8px 12px',
+        borderRadius: '8px',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+        zIndex: 10
+      }}>
+        <GlobalOutlined style={{ color: '#667eea', fontSize: '16px' }} />
+        <Select
+          value={locale}
+          onChange={handleLanguageChange}
+          style={{ width: 100 }}
+          size="small"
+          variant="borderless"
+          suffixIcon={null}
+        >
+          <Option value="en">{t('login.english')}</Option>
+          <Option value="ru">{t('login.russian')}</Option>
+        </Select>
+      </div>
+
       <Card
         style={{
           width: '100%',
@@ -138,24 +178,6 @@ function AdminLoginForm() {
             </Button>
           </Form.Item>
         </Form>
-
-        <div style={{
-          marginTop: '24px',
-          padding: '16px',
-          backgroundColor: '#f5f5f5',
-          borderRadius: '8px',
-          fontSize: '13px'
-        }}>
-          <Text strong style={{ display: 'block', marginBottom: '8px' }}>
-            Test Credentials:
-          </Text>
-          <Text style={{ color: '#595959', display: 'block' }}>
-            Email: <code>admin@fitconnect.com</code>
-          </Text>
-          <Text style={{ color: '#595959', display: 'block' }}>
-            Password: <code>any password</code>
-          </Text>
-        </div>
 
         <div style={{ textAlign: 'center', marginTop: '24px' }}>
           <Button

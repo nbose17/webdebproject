@@ -1,22 +1,64 @@
 'use client';
 
 import { useState } from 'react';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { Trainer } from '@/lib/types';
-import { mockTrainers } from '@/lib/constants';
-import { generateId } from '@/lib/utils';
 import DataTable from '@/components/dashboard/DataTable';
 import TrainerCard from '@/components/dashboard/TrainerCard';
 import TrainerForm from '@/components/dashboard/TrainerForm';
 import Button from '@/components/shared/Button';
 import { FaTable, FaTh, FaUserTie } from 'react-icons/fa';
+import { Skeleton, Alert, message, Popconfirm } from 'antd';
+import { useAuth } from '@/hooks/useAuth';
+import { GET_TRAINERS, CREATE_TRAINER, UPDATE_TRAINER, DELETE_TRAINER } from '@/graphql/queries/admin';
 
 type ViewMode = 'table' | 'card';
 
 export default function TrainersPage() {
-  const [trainers, setTrainers] = useState<Trainer[]>(mockTrainers);
+  const { user } = useAuth();
+  const gymId = user?.gymId;
+  
+  const { data, loading, error, refetch } = useQuery(GET_TRAINERS, {
+    variables: { gymId },
+    skip: !gymId,
+    fetchPolicy: 'network-only',
+  });
+  
+  const [createTrainer] = useMutation(CREATE_TRAINER, {
+    onCompleted: () => {
+      message.success('Trainer created successfully!');
+      refetch();
+    },
+    onError: (error) => {
+      message.error(`Failed to create trainer: ${error.message}`);
+    },
+  });
+  
+  const [updateTrainer] = useMutation(UPDATE_TRAINER, {
+    onCompleted: () => {
+      message.success('Trainer updated successfully!');
+      refetch();
+    },
+    onError: (error) => {
+      message.error(`Failed to update trainer: ${error.message}`);
+    },
+  });
+  
+  const [deleteTrainer] = useMutation(DELETE_TRAINER, {
+    onCompleted: () => {
+      message.success('Trainer deleted successfully!');
+      refetch();
+    },
+    onError: (error) => {
+      message.error(`Failed to delete trainer: ${error.message}`);
+    },
+  });
+  
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTrainer, setEditingTrainer] = useState<Trainer | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
+  
+  const trainers = data?.trainers || [];
 
   const columns = [
     { key: 'id', label: 'No', render: (_: any, row: any, index?: number) => (index ?? 0) + 1 },
@@ -49,25 +91,81 @@ export default function TrainersPage() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = (trainer: Trainer) => {
-    if (confirm(`Are you sure you want to delete "${trainer.name}"?`)) {
-      setTrainers(trainers.filter((t) => t.id !== trainer.id));
-    }
+  const handleDelete = async (trainer: Trainer) => {
+    if (!gymId) return;
+    
+    await deleteTrainer({
+      variables: {
+        id: trainer.id,
+        gymId,
+      },
+    });
   };
 
-  const handleSubmit = (trainerData: Omit<Trainer, 'id'>) => {
+  const handleSubmit = async (trainerData: Omit<Trainer, 'id'>) => {
+    if (!gymId) return;
+    
     if (editingTrainer) {
-      setTrainers(
-        trainers.map((t) =>
-          t.id === editingTrainer.id ? { ...trainerData, id: editingTrainer.id } : t
-        )
-      );
+      await updateTrainer({
+        variables: {
+          id: editingTrainer.id,
+          gymId,
+          ...trainerData,
+        },
+      });
     } else {
-      setTrainers([...trainers, { ...trainerData, id: generateId() }]);
+      await createTrainer({
+        variables: {
+          gymId,
+          ...trainerData,
+        },
+      });
     }
     setIsFormOpen(false);
     setEditingTrainer(null);
   };
+  
+  if (!gymId) {
+    return (
+      <div>
+        <Alert
+          message="No Gym Associated"
+          description="You need to be associated with a gym to manage trainers."
+          type="warning"
+          showIcon
+        />
+      </div>
+    );
+  }
+  
+  if (loading) {
+    return (
+      <div>
+        <div className="dashboard-page-header">
+          <h1 className="dashboard-page-title">
+            <span className="dashboard-page-title-icon">
+              <FaUserTie />
+            </span>
+            Trainers
+          </h1>
+        </div>
+        <Skeleton active paragraph={{ rows: 8 }} />
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div>
+        <Alert
+          message="Error Loading Trainers"
+          description={error.message}
+          type="error"
+          showIcon
+        />
+      </div>
+    );
+  }
 
   return (
     <div>

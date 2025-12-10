@@ -63,12 +63,18 @@ export default function PublishPage() {
 
     setIsPublishing(true);
     
-    // Simulate publishing process
+    // In a real implementation, this would:
+    // 1. Update gym information via UPDATE_GYM mutation
+    // 2. Set featured: true and subscriptionStatus: 'active'
+    // 3. Create a subscription record
+    // 4. Redirect to the published gym page
+    
+    // For now, simulate publishing
     setTimeout(() => {
       alert('Gym published successfully!');
       setIsPublishing(false);
       // In real app, this would redirect to the published gym page
-      // router.push(`/gym/${listingInfo.id}`);
+      // router.push(`/${locale}/gym/${listingInfo.id}`);
     }, 1500);
   };
 

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, use } from 'react';
+import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { 
   Card, 
   Row, 
@@ -16,7 +17,10 @@ import {
   Statistic,
   Tabs,
   Alert,
-  Modal
+  Modal,
+  Skeleton,
+  message,
+  Image as AntImage
 } from 'antd';
 import { 
   FaArrowLeft,
@@ -30,16 +34,18 @@ import {
   FaCrown,
   FaCalendar,
   FaMoneyBill,
-  FaExclamationTriangle
+  FaExclamationTriangle,
+  FaUser,
+  FaEnvelope,
+  FaPhone
 } from 'react-icons/fa';
-import { mockAdminGyms, mockGymUsers } from '@/lib/constants';
-import type { AdminGym, Branch, GymUser } from '@/lib/types';
 import AdminProtectedRoute from '@/components/shared/AdminProtectedRoute';
+import { GET_GYM, DELETE_GYM } from '@/graphql/queries/admin';
 
 const { Title, Text } = Typography;
 
 interface PageProps {
-  params: Promise<{ gymId: string }>;
+  params: Promise<{ gymId: string; locale: string }>;
 }
 
 export default function GymDetailsPage({ params }: PageProps) {
@@ -48,30 +54,112 @@ export default function GymDetailsPage({ params }: PageProps) {
   const routeParams = useParams();
   const locale = routeParams.locale as string;
   
-  const gym = mockAdminGyms.find(g => g.id === gymId);
-  const [selectedGym, setSelectedGym] = useState<AdminGym | undefined>(gym);
+  // Fetch gym data from GraphQL
+  const { data, loading, error, refetch } = useQuery(GET_GYM, {
+    variables: { id: gymId },
+    fetchPolicy: 'cache-and-network',
+    onError: (err) => {
+      console.error('Error fetching gym:', err);
+      message.error('Failed to load gym details. Please try again.');
+    },
+  });
 
-  if (!selectedGym) {
+  const [deleteGymMutation] = useMutation(DELETE_GYM);
+
+  // Loading skeleton
+  if (loading) {
     return (
-      <div style={{ padding: '24px', textAlign: 'center' }}>
-        <Alert
-          message="Gym Not Found"
-          description="The requested gym could not be found."
-          type="error"
-          showIcon
-          action={
-            <Button onClick={() => router.push(`/${locale}/admin/gyms`)}>
-              Back to Gyms
-            </Button>
-          }
-        />
-      </div>
+      <AdminProtectedRoute requiredPermission={{ resource: 'gyms', action: 'read' }}>
+        <div>
+          <div className="dashboard-page-header">
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                <Skeleton.Button active size="default" style={{ width: 80 }} />
+                <Skeleton.Button active size="large" style={{ width: 250, height: 32 }} />
+              </div>
+              <Skeleton.Input active size="small" style={{ width: 200 }} />
+            </div>
+            <div>
+              <Space>
+                <Skeleton.Button active size="default" style={{ width: 100 }} />
+                <Skeleton.Button active size="default" style={{ width: 100 }} />
+              </Space>
+            </div>
+          </div>
+
+          <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
+            <Col xs={24} lg={16}>
+              <Card>
+                <div style={{ marginBottom: '16px', textAlign: 'center' }}>
+                  <Skeleton.Image active style={{ width: 200, height: 150 }} />
+                </div>
+                <Skeleton active paragraph={{ rows: 6 }} />
+              </Card>
+            </Col>
+            <Col xs={24} lg={8}>
+              <Row gutter={[16, 16]}>
+                <Col span={24}>
+                  <Card>
+                    <Skeleton active paragraph={{ rows: 1 }} />
+                  </Card>
+                </Col>
+                <Col span={24}>
+                  <Card>
+                    <Skeleton active paragraph={{ rows: 1 }} />
+                  </Card>
+                </Col>
+                <Col span={24}>
+                  <Card>
+                    <Skeleton active paragraph={{ rows: 1 }} />
+                  </Card>
+                </Col>
+              </Row>
+            </Col>
+          </Row>
+
+          {/* Tabs Skeleton */}
+          <Card style={{ marginTop: '24px' }}>
+            <Skeleton active paragraph={{ rows: 1 }} style={{ marginBottom: 16 }} />
+            <Skeleton active paragraph={{ rows: 5 }} />
+          </Card>
+        </div>
+      </AdminProtectedRoute>
     );
   }
 
-  const totalStaff = selectedGym.branches.reduce((sum, branch) => sum + branch.staff.length, 0);
-  const totalClients = selectedGym.branches.reduce((sum, branch) => sum + branch.clients.length, 0);
-  const activeBranches = selectedGym.branches.filter(branch => branch.status === 'active').length;
+  // Error state
+  if (error || !data?.gym) {
+    return (
+      <AdminProtectedRoute requiredPermission={{ resource: 'gyms', action: 'read' }}>
+        <div style={{ padding: '24px', textAlign: 'center' }}>
+          <Alert
+            message="Gym Not Found"
+            description={error?.message || "The requested gym could not be found."}
+            type="error"
+            showIcon
+            action={
+              <Button onClick={() => router.push(`/${locale}/admin/gyms`)}>
+                Back to Gyms
+              </Button>
+            }
+          />
+        </div>
+      </AdminProtectedRoute>
+    );
+  }
+
+  const gym = data.gym;
+  const branches = gym.branches || [];
+  const users = gym.users || [];
+  const clients = gym.clients || [];
+  const subscription = gym.subscription;
+  
+  // Calculate statistics
+  const totalStaff = users.length;
+  const totalClients = clients.length;
+  const activeBranches = branches.filter((branch: any) => branch.status === 'active').length;
+  const activeStaff = users.filter((user: any) => user.isActive).length;
+  const activeClients = clients.filter((client: any) => client.status === 'active').length;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -90,24 +178,36 @@ export default function GymDetailsPage({ params }: PageProps) {
     }
   };
 
-  const handleDeleteGym = (gymId: string) => {
+  const handleDeleteGym = async (gymId: string) => {
     Modal.confirm({
       title: 'Delete Gym',
       content: 'Are you sure you want to delete this gym? This action cannot be undone.',
       okText: 'Yes, Delete',
       okType: 'danger',
       cancelText: 'Cancel',
-      onOk() {
-        router.push(`/${locale}/admin/gyms`);
+      async onOk() {
+        try {
+          await deleteGymMutation({
+            variables: { id: gymId },
+          });
+          message.success('Gym deleted successfully');
+          router.push(`/${locale}/admin/gyms`);
+        } catch (err: any) {
+          message.error(err?.message || 'Failed to delete gym');
+        }
       },
     });
+  };
+
+  const handleEditGym = () => {
+    router.push(`/${locale}/admin/gyms/${gymId}/edit`);
   };
 
   const branchColumns = [
     {
       title: 'Branch Name',
       key: 'name',
-      render: (branch: Branch) => (
+      render: (branch: any) => (
         <div>
           <div style={{ fontWeight: '500' }}>{branch.name}</div>
           <div style={{ fontSize: '12px', color: '#8c8c8c' }}>{branch.address}</div>
@@ -115,28 +215,22 @@ export default function GymDetailsPage({ params }: PageProps) {
       ),
     },
     {
-      title: 'Manager',
-      dataIndex: 'manager',
-      key: 'manager',
-      render: (manager: string) => manager || 'Not assigned',
-    },
-    {
-      title: 'Staff',
-      key: 'staff',
-      render: (branch: Branch) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <FaUsers style={{ color: '#4CAF50' }} />
-          <span>{branch.staff.length}</span>
-        </div>
-      ),
-    },
-    {
-      title: 'Clients',
-      key: 'clients',
-      render: (branch: Branch) => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <FaUsers style={{ color: '#52c41a' }} />
-          <span>{branch.clients.length}</span>
+      title: 'Contact',
+      key: 'contact',
+      render: (branch: any) => (
+        <div>
+          {branch.email && (
+            <div style={{ fontSize: '12px', color: '#666' }}>
+              <FaEnvelope style={{ marginRight: '4px' }} />
+              {branch.email}
+            </div>
+          )}
+          {branch.phone && (
+            <div style={{ fontSize: '12px', color: '#666' }}>
+              <FaPhone style={{ marginRight: '4px' }} />
+              {branch.phone}
+            </div>
+          )}
         </div>
       ),
     },
@@ -146,14 +240,14 @@ export default function GymDetailsPage({ params }: PageProps) {
       key: 'status',
       render: (status: string) => (
         <Tag color={status === 'active' ? 'success' : 'error'}>
-          {status.toUpperCase()}
+          {status?.toUpperCase() || 'UNKNOWN'}
         </Tag>
       ),
     },
     {
       title: 'Actions',
       key: 'actions',
-      render: (branch: Branch) => (
+      render: (branch: any) => (
         <Space>
           <Button 
             type="text" 
@@ -163,14 +257,38 @@ export default function GymDetailsPage({ params }: PageProps) {
           >
             View
           </Button>
-          <Button 
-            type="text" 
-            size="small" 
-            icon={<FaEdit />}
-          >
-            Edit
-          </Button>
         </Space>
+      ),
+    },
+  ];
+
+  const userColumns = [
+    {
+      title: 'Name',
+      key: 'name',
+      render: (user: any) => (
+        <div>
+          <div style={{ fontWeight: '500' }}>{user.name}</div>
+          <div style={{ fontSize: '12px', color: '#8c8c8c' }}>{user.email}</div>
+        </div>
+      ),
+    },
+    {
+      title: 'Role',
+      dataIndex: 'role',
+      key: 'role',
+      render: (role: string) => (
+        <Tag>{role?.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()) || 'N/A'}</Tag>
+      ),
+    },
+    {
+      title: 'Status',
+      dataIndex: 'isActive',
+      key: 'isActive',
+      render: (isActive: boolean) => (
+        <Tag color={isActive ? 'success' : 'default'}>
+          {isActive ? 'ACTIVE' : 'INACTIVE'}
+        </Tag>
       ),
     },
   ];
@@ -184,25 +302,54 @@ export default function GymDetailsPage({ params }: PageProps) {
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={16}>
               <Card title="Gym Information">
+                <div style={{ marginBottom: '16px', textAlign: 'center' }}>
+                  <AntImage
+                    src={gym.image || '/images/gym-placeholder.jpg'}
+                    alt={gym.name}
+                    width={200}
+                    height={150}
+                    style={{ borderRadius: '8px', objectFit: 'cover' }}
+                    fallback="/images/gym-placeholder.jpg"
+                  />
+                </div>
                 <Descriptions column={2} bordered>
-                  <Descriptions.Item label="Gym Name">{selectedGym.name}</Descriptions.Item>
-                  <Descriptions.Item label="Location">{selectedGym.location}</Descriptions.Item>
-                  <Descriptions.Item label="Owner ID">{selectedGym.ownerId}</Descriptions.Item>
+                  <Descriptions.Item label="Gym Name">{gym.name}</Descriptions.Item>
+                  <Descriptions.Item label="Location">{gym.location}</Descriptions.Item>
+                  <Descriptions.Item label="Owner">
+                    {gym.owner ? (
+                      <div>
+                        <div style={{ fontWeight: '500' }}>{gym.owner.name}</div>
+                        <div style={{ fontSize: '12px', color: '#8c8c8c' }}>{gym.owner.email}</div>
+                      </div>
+                    ) : (
+                      <Text type="secondary">Not assigned</Text>
+                    )}
+                  </Descriptions.Item>
                   <Descriptions.Item label="Featured">
-                    {selectedGym.featured ? (
+                    {gym.featured ? (
                       <Tag color="gold" icon={<FaCrown />}>FEATURED</Tag>
                     ) : (
                       <Tag>STANDARD</Tag>
                     )}
                   </Descriptions.Item>
+                  <Descriptions.Item label="Subscription Status">
+                    <Tag color={getStatusColor(gym.subscriptionStatus?.toLowerCase() || '')}>
+                      {gym.subscriptionStatus?.toUpperCase() || 'N/A'}
+                    </Tag>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Payment Status">
+                    <Tag color={getPaymentColor(gym.paymentStatus?.toLowerCase() || '')}>
+                      {gym.paymentStatus?.toUpperCase() || 'N/A'}
+                    </Tag>
+                  </Descriptions.Item>
                   <Descriptions.Item label="Created">
-                    {new Date(selectedGym.createdAt).toLocaleDateString()}
+                    {gym.createdAt ? new Date(gym.createdAt).toLocaleDateString() : 'N/A'}
                   </Descriptions.Item>
                   <Descriptions.Item label="Last Active">
-                    {selectedGym.lastActive ? new Date(selectedGym.lastActive).toLocaleDateString() : 'Never'}
+                    {gym.lastActive ? new Date(gym.lastActive).toLocaleDateString() : 'Never'}
                   </Descriptions.Item>
                   <Descriptions.Item label="Description" span={2}>
-                    {selectedGym.description || 'No description provided'}
+                    {gym.description || 'No description provided'}
                   </Descriptions.Item>
                 </Descriptions>
               </Card>
@@ -214,7 +361,7 @@ export default function GymDetailsPage({ params }: PageProps) {
                   <Card>
                     <Statistic
                       title="Total Branches"
-                      value={selectedGym.branches.length}
+                      value={branches.length}
                       prefix={<FaBuilding style={{ color: '#4CAF50' }} />}
                       suffix={`(${activeBranches} active)`}
                     />
@@ -226,6 +373,7 @@ export default function GymDetailsPage({ params }: PageProps) {
                       title="Total Staff"
                       value={totalStaff}
                       prefix={<FaUsers style={{ color: '#52c41a' }} />}
+                      suffix={`(${activeStaff} active)`}
                     />
                   </Card>
                 </Col>
@@ -235,6 +383,7 @@ export default function GymDetailsPage({ params }: PageProps) {
                       title="Total Clients"
                       value={totalClients}
                       prefix={<FaUsers style={{ color: '#722ed1' }} />}
+                      suffix={`(${activeClients} active)`}
                     />
                   </Card>
                 </Col>
@@ -246,7 +395,7 @@ export default function GymDetailsPage({ params }: PageProps) {
     },
     {
       key: 'branches',
-      label: `Branches (${selectedGym.branches.length})`,
+      label: `Branches (${branches.length})`,
       children: (
         <div>
           <div style={{ 
@@ -265,12 +414,58 @@ export default function GymDetailsPage({ params }: PageProps) {
             </Button>
           </div>
           
-          <Table
-            columns={branchColumns}
-            dataSource={selectedGym.branches}
-            rowKey="id"
-            pagination={false}
-          />
+          {branches.length === 0 ? (
+            <Card>
+              <div style={{ textAlign: 'center', padding: '40px' }}>
+                <Text type="secondary">No branches found for this gym.</Text>
+              </div>
+            </Card>
+          ) : (
+            <Table
+              columns={branchColumns}
+              dataSource={branches}
+              rowKey="id"
+              pagination={branches.length > 10 ? { pageSize: 10 } : false}
+            />
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'users',
+      label: `Users (${users.length})`,
+      children: (
+        <div>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            marginBottom: '16px' 
+          }}>
+            <Title level={4} style={{ margin: 0 }}>Gym Staff & Users</Title>
+            <Button 
+              type="primary"
+              icon={<FaPlus />}
+              onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/users/new`)}
+            >
+              Add User
+            </Button>
+          </div>
+          
+          {users.length === 0 ? (
+            <Card>
+              <div style={{ textAlign: 'center', padding: '40px' }}>
+                <Text type="secondary">No users found for this gym.</Text>
+              </div>
+            </Card>
+          ) : (
+            <Table
+              columns={userColumns}
+              dataSource={users}
+              rowKey="id"
+              pagination={users.length > 10 ? { pageSize: 10 } : false}
+            />
+          )}
         </div>
       ),
     },
@@ -284,16 +479,31 @@ export default function GymDetailsPage({ params }: PageProps) {
               <Card title="Subscription Status">
                 <div style={{ marginBottom: '16px' }}>
                   <Tag 
-                    color={getStatusColor(selectedGym.subscriptionStatus)} 
+                    color={getStatusColor(gym.subscriptionStatus?.toLowerCase() || '')} 
                     style={{ fontSize: '14px', padding: '4px 12px' }}
                   >
-                    {selectedGym.subscriptionStatus.toUpperCase()}
+                    {gym.subscriptionStatus?.toUpperCase() || 'N/A'}
                   </Tag>
                 </div>
                 <Descriptions column={1}>
-                  <Descriptions.Item label="Plan">Premium Business</Descriptions.Item>
-                  <Descriptions.Item label="Monthly Fee">$299.99</Descriptions.Item>
-                  <Descriptions.Item label="Next Billing">January 15, 2025</Descriptions.Item>
+                  <Descriptions.Item label="Plan">
+                    {subscription?.planType || 'Not subscribed'}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Amount">
+                    {subscription?.amount ? `$${subscription.amount.toFixed(2)}` : 'N/A'}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Billing Cycle">
+                    {subscription?.billingCycle ? subscription.billingCycle.charAt(0).toUpperCase() + subscription.billingCycle.slice(1) : 'N/A'}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Start Date">
+                    {subscription?.startDate ? new Date(subscription.startDate).toLocaleDateString() : 'N/A'}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="End Date">
+                    {subscription?.endDate ? new Date(subscription.endDate).toLocaleDateString() : 'N/A'}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Next Billing">
+                    {subscription?.nextPaymentDate ? new Date(subscription.nextPaymentDate).toLocaleDateString() : 'N/A'}
+                  </Descriptions.Item>
                 </Descriptions>
               </Card>
             </Col>
@@ -302,16 +512,19 @@ export default function GymDetailsPage({ params }: PageProps) {
               <Card title="Payment Status">
                 <div style={{ marginBottom: '16px' }}>
                   <Tag 
-                    color={getPaymentColor(selectedGym.paymentStatus)}
+                    color={getPaymentColor(gym.paymentStatus?.toLowerCase() || '')}
                     style={{ fontSize: '14px', padding: '4px 12px' }}
                   >
-                    {selectedGym.paymentStatus === 'current' ? 'CURRENT' : 'OVERDUE'}
+                    {gym.paymentStatus?.toUpperCase() || 'N/A'}
                   </Tag>
                 </div>
                 <Descriptions column={1}>
-                  <Descriptions.Item label="Last Payment">December 15, 2024</Descriptions.Item>
-                  <Descriptions.Item label="Payment Method">Credit Card (**** 1234)</Descriptions.Item>
-                  <Descriptions.Item label="Amount">$299.99</Descriptions.Item>
+                  <Descriptions.Item label="Last Payment">
+                    {subscription?.lastPaymentDate ? new Date(subscription.lastPaymentDate).toLocaleDateString() : 'N/A'}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Status">
+                    {subscription?.status ? subscription.status.charAt(0).toUpperCase() + subscription.status.slice(1) : 'N/A'}
+                  </Descriptions.Item>
                 </Descriptions>
               </Card>
             </Col>
@@ -326,24 +539,33 @@ export default function GymDetailsPage({ params }: PageProps) {
       <div>
         <div className="dashboard-page-header">
           <div style={{ flex: 1 }}>
-            <h1 className="dashboard-page-title">
-              <span className="dashboard-page-title-icon">
-                <FaDumbbell />
-              </span>
-              {selectedGym.name}
-              {selectedGym.featured && <FaCrown style={{ color: '#faad14', marginLeft: '8px', fontSize: '20px' }} />}
-            </h1>
-            <p className="dashboard-page-subtitle">{selectedGym.location}</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+              <Button 
+                icon={<FaArrowLeft />} 
+                onClick={() => router.push(`/${locale}/admin/gyms`)}
+                style={{ marginRight: '8px' }}
+              >
+                Back
+              </Button>
+              <h1 className="dashboard-page-title" style={{ margin: 0 }}>
+                <span className="dashboard-page-title-icon">
+                  <FaDumbbell />
+                </span>
+                {gym.name}
+                {gym.featured && <FaCrown style={{ color: '#faad14', marginLeft: '8px', fontSize: '20px' }} />}
+              </h1>
+            </div>
+            <p className="dashboard-page-subtitle">{gym.location}</p>
           </div>
           <div>
             <Space>
-              <Button icon={<FaEdit />}>
+              <Button icon={<FaEdit />} onClick={handleEditGym}>
                 Edit Gym
               </Button>
               <Button 
                 icon={<FaTrash />} 
                 danger
-                onClick={() => handleDeleteGym(selectedGym.id)}
+                onClick={() => handleDeleteGym(gym.id)}
               >
                 Delete
               </Button>
@@ -352,7 +574,7 @@ export default function GymDetailsPage({ params }: PageProps) {
         </div>
 
         {/* Status Alerts */}
-        {selectedGym.paymentStatus === 'overdue' && (
+        {gym.paymentStatus?.toLowerCase() === 'overdue' && (
           <Alert
             message="Payment Overdue"
             description="This gym has overdue payments. Consider suspending services."
@@ -362,6 +584,21 @@ export default function GymDetailsPage({ params }: PageProps) {
             action={
               <Button size="small" type="primary">
                 Send Payment Reminder
+              </Button>
+            }
+          />
+        )}
+
+        {gym.subscriptionStatus?.toLowerCase() === 'expired' && (
+          <Alert
+            message="Subscription Expired"
+            description="This gym's subscription has expired. Renew to restore access."
+            type="error"
+            showIcon
+            style={{ marginBottom: '24px' }}
+            action={
+              <Button size="small" type="primary">
+                Renew Subscription
               </Button>
             }
           />

@@ -50,11 +50,11 @@ export default function BranchCard({ branch, onEdit, onDelete }: BranchCardProps
               {branch.email}
             </span>
           </div>
-          {branch.manager && (
+          {(branch.manager || (branch as any).manager?.name) && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
               <FaUser style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)', flexShrink: 0 }} />
               <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
-                {branch.manager}
+                {(branch as any).manager?.name || branch.manager || 'Not assigned'}
               </span>
             </div>
           )}
@@ -88,5 +88,6 @@ export default function BranchCard({ branch, onEdit, onDelete }: BranchCardProps
     </div>
   );
 }
+
 
 

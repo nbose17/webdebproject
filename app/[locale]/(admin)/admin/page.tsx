@@ -271,16 +271,6 @@ export default function AdminDashboard() {
             <Button 
               block 
               size="large"
-              icon={<FaUsers />}
-              onClick={() => window.location.href = `/admin/users`}
-            >
-              User Management
-            </Button>
-          </Col>
-          <Col xs={24} sm={8} md={6}>
-            <Button 
-              block 
-              size="large"
               icon={<FaCreditCard />}
               onClick={() => window.location.href = `/admin/payments`}
             >

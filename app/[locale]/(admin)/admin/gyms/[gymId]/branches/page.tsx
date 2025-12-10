@@ -3,6 +3,7 @@
 import { useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { 
   Card, 
   Table, 
@@ -16,7 +17,10 @@ import {
   Typography,
   Row,
   Col,
-  Statistic
+  Statistic,
+  Skeleton,
+  Alert,
+  message
 } from 'antd';
 import { 
   FaArrowLeft,
@@ -30,38 +34,127 @@ import {
   FaEnvelope,
   FaMapMarker
 } from 'react-icons/fa';
-import { mockAdminGyms, mockGymUsers } from '@/lib/constants';
-import type { AdminGym, Branch } from '@/lib/types';
-import BranchTree from '@/components/admin/BranchTree';
 import AdminProtectedRoute from '@/components/shared/AdminProtectedRoute';
+import { GET_GYM, GET_BRANCHES, CREATE_BRANCH, UPDATE_BRANCH, DELETE_BRANCH } from '@/graphql/queries/admin';
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
 interface PageProps {
-  params: Promise<{ gymId: string }>;
+  params: Promise<{ gymId: string; locale: string }>;
 }
 
 export default function BranchManagementPage({ params }: PageProps) {
   const { gymId } = use(params);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
+  const [editingBranch, setEditingBranch] = useState<any | null>(null);
   const [form] = Form.useForm();
   const router = useRouter();
   const routeParams = useParams();
   const locale = routeParams.locale as string;
 
-  const gym = mockAdminGyms.find(g => g.id === gymId);
-  const [branches, setBranches] = useState<Branch[]>(gym?.branches || []);
+  // Fetch gym data
+  const { data: gymData, loading: gymLoading, error: gymError } = useQuery(GET_GYM, {
+    variables: { id: gymId },
+    fetchPolicy: 'cache-and-network',
+    onError: (err) => {
+      console.error('Error fetching gym:', err);
+    },
+  });
 
-  if (!gym) {
+  // Fetch branches
+  const { data: branchesData, loading: branchesLoading, error: branchesError, refetch: refetchBranches } = useQuery(GET_BRANCHES, {
+    variables: { gymId },
+    fetchPolicy: 'cache-and-network',
+    onError: (err) => {
+      console.error('Error fetching branches:', err);
+    },
+  });
+
+  const [createBranchMutation] = useMutation(CREATE_BRANCH, {
+    onError: (err) => {
+      console.error('Error creating branch:', err);
+      message.error(err.message || 'Failed to create branch');
+    },
+  });
+
+  const [updateBranchMutation] = useMutation(UPDATE_BRANCH, {
+    onError: (err) => {
+      console.error('Error updating branch:', err);
+      message.error(err.message || 'Failed to update branch');
+    },
+  });
+
+  const [deleteBranchMutation] = useMutation(DELETE_BRANCH, {
+    onError: (err) => {
+      console.error('Error deleting branch:', err);
+      message.error(err.message || 'Failed to delete branch');
+    },
+  });
+
+  const gym = gymData?.gym;
+  const branches = branchesData?.branches || [];
+
+  // Loading skeleton
+  if (gymLoading) {
     return (
-      <div style={{ padding: '24px', textAlign: 'center' }}>
-        <Text>Gym not found</Text>
-        <Button onClick={() => router.push(`/${locale}/admin/gyms`)}>
-          Back to Gyms
-        </Button>
-      </div>
+      <AdminProtectedRoute requiredPermission={{ resource: 'branches', action: 'read' }}>
+        <div>
+          <div className="dashboard-page-header">
+            <div style={{ flex: 1 }}>
+              <Skeleton.Button active size="large" style={{ width: 300, height: 32, marginBottom: 8 }} />
+              <Skeleton.Input active size="small" style={{ width: 200 }} />
+            </div>
+          </div>
+          <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
+            <Col xs={24} sm={8}>
+              <Card><Skeleton active paragraph={{ rows: 1 }} /></Card>
+            </Col>
+            <Col xs={24} sm={8}>
+              <Card><Skeleton active paragraph={{ rows: 1 }} /></Card>
+            </Col>
+            <Col xs={24} sm={8}>
+              <Card><Skeleton active paragraph={{ rows: 1 }} /></Card>
+            </Col>
+          </Row>
+          <Card style={{ marginTop: '24px' }}>
+            <Skeleton active paragraph={{ rows: 5 }} />
+          </Card>
+        </div>
+      </AdminProtectedRoute>
+    );
+  }
+
+  // Error state
+  if (gymError || !gym) {
+    return (
+      <AdminProtectedRoute requiredPermission={{ resource: 'branches', action: 'read' }}>
+        <div>
+          <div className="dashboard-page-header">
+            <div style={{ flex: 1 }}>
+              <Button 
+                icon={<FaArrowLeft />} 
+                onClick={() => router.push(`/${locale}/admin/gyms`)}
+              >
+                Back
+              </Button>
+            </div>
+          </div>
+          <Card>
+            <Alert
+              message="Gym Not Found"
+              description={gymError?.message || "The requested gym could not be found."}
+              type="error"
+              showIcon
+              action={
+                <Button onClick={() => router.push(`/${locale}/admin/gyms`)}>
+                  Back to Gyms
+                </Button>
+              }
+            />
+          </Card>
+        </div>
+      </AdminProtectedRoute>
     );
   }
 
@@ -71,54 +164,76 @@ export default function BranchManagementPage({ params }: PageProps) {
     setIsModalVisible(true);
   };
 
-  const handleEditBranch = (branch: Branch) => {
+  const handleEditBranch = (branch: any) => {
     setEditingBranch(branch);
-    form.setFieldsValue(branch);
+    form.setFieldsValue({
+      name: branch.name,
+      address: branch.address,
+      phone: branch.phone,
+      email: branch.email,
+      status: branch.status,
+      managerId: branch.managerId,
+    });
     setIsModalVisible(true);
   };
 
-  const handleDeleteBranch = (branchId: string) => {
+  const handleDeleteBranch = async (branchId: string) => {
     Modal.confirm({
       title: 'Delete Branch',
       content: 'Are you sure you want to delete this branch? All associated staff and clients will need to be reassigned.',
       okText: 'Yes, Delete',
       okType: 'danger',
       cancelText: 'Cancel',
-      onOk() {
-        setBranches(branches.filter(branch => branch.id !== branchId));
+      async onOk() {
+        try {
+          await deleteBranchMutation({
+            variables: { id: branchId, gymId },
+          });
+          message.success('Branch deleted successfully');
+          await refetchBranches();
+        } catch (err: any) {
+          message.error(err?.message || 'Failed to delete branch');
+        }
       },
     });
   };
 
   const handleSaveBranch = async (values: any) => {
-    if (editingBranch) {
-      // Update existing branch
-      setBranches(branches.map(branch => 
-        branch.id === editingBranch.id 
-          ? { ...branch, ...values }
-          : branch
-      ));
-    } else {
-      // Add new branch
-      const newBranch: Branch = {
-        id: `branch-${Date.now()}`,
-        ...values,
-        staff: [],
-        clients: [],
-        createdAt: new Date().toISOString(),
-      };
-      setBranches([...branches, newBranch]);
+    try {
+      if (editingBranch) {
+        // Update existing branch
+        await updateBranchMutation({
+          variables: {
+            id: editingBranch.id,
+            gymId,
+            ...values,
+          },
+        });
+        message.success('Branch updated successfully');
+      } else {
+        // Create new branch
+        await createBranchMutation({
+          variables: {
+            ...values,
+            gymId,
+          },
+        });
+        message.success('Branch created successfully');
+      }
+      
+      setIsModalVisible(false);
+      form.resetFields();
+      await refetchBranches();
+    } catch (err: any) {
+      message.error(err?.message || 'Failed to save branch');
     }
-    
-    setIsModalVisible(false);
-    form.resetFields();
   };
 
   const columns = [
     {
       title: 'Branch Details',
       key: 'details',
-      render: (branch: Branch) => (
+      render: (branch: any) => (
         <div>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
             <FaBuilding style={{ marginRight: '8px', color: '#4CAF50' }} />
@@ -134,50 +249,36 @@ export default function BranchManagementPage({ params }: PageProps) {
     {
       title: 'Contact',
       key: 'contact',
-      render: (branch: Branch) => (
+      render: (branch: any) => (
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
-            <FaPhone style={{ marginRight: '6px', color: '#8c8c8c' }} />
-            <span style={{ fontSize: '13px' }}>{branch.phone}</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <FaEnvelope style={{ marginRight: '6px', color: '#8c8c8c' }} />
-            <span style={{ fontSize: '13px' }}>{branch.email}</span>
-          </div>
+          {branch.phone && (
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '4px' }}>
+              <FaPhone style={{ marginRight: '6px', color: '#8c8c8c' }} />
+              <span style={{ fontSize: '13px' }}>{branch.phone}</span>
+            </div>
+          )}
+          {branch.email && (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <FaEnvelope style={{ marginRight: '6px', color: '#8c8c8c' }} />
+              <span style={{ fontSize: '13px' }}>{branch.email}</span>
+            </div>
+          )}
         </div>
       ),
     },
     {
       title: 'Manager',
-      dataIndex: 'manager',
       key: 'manager',
-      render: (manager: string) => manager || <Text italic>Not assigned</Text>,
-    },
-    {
-      title: 'Staff',
-      key: 'staff',
-      render: (branch: Branch) => (
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '18px', fontWeight: '500', color: '#4CAF50' }}>
-            {branch.staff.length}
-          </div>
-          <div style={{ fontSize: '12px', color: '#8c8c8c' }}>
-            members
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: 'Clients',
-      key: 'clients',
-      render: (branch: Branch) => (
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '18px', fontWeight: '500', color: '#52c41a' }}>
-            {branch.clients.length}
-          </div>
-          <div style={{ fontSize: '12px', color: '#8c8c8c' }}>
-            clients
-          </div>
+      render: (branch: any) => (
+        <div>
+          {branch.manager ? (
+            <div>
+              <div style={{ fontWeight: '500' }}>{branch.manager.name}</div>
+              <div style={{ fontSize: '12px', color: '#8c8c8c' }}>{branch.manager.email}</div>
+            </div>
+          ) : (
+            <Text type="secondary" italic>Not assigned</Text>
+          )}
         </div>
       ),
     },
@@ -187,14 +288,14 @@ export default function BranchManagementPage({ params }: PageProps) {
       key: 'status',
       render: (status: string) => (
         <Tag color={status === 'active' ? 'success' : 'error'}>
-          {status.toUpperCase()}
+          {status?.toUpperCase() || 'UNKNOWN'}
         </Tag>
       ),
     },
     {
       title: 'Actions',
       key: 'actions',
-      render: (branch: Branch) => (
+      render: (branch: any) => (
         <Space>
           <Button 
             type="text" 
@@ -227,21 +328,27 @@ export default function BranchManagementPage({ params }: PageProps) {
   ];
 
   // Calculate statistics
-  const totalStaff = branches.reduce((sum, branch) => sum + branch.staff.length, 0);
-  const totalClients = branches.reduce((sum, branch) => sum + branch.clients.length, 0);
-  const activeBranches = branches.filter(branch => branch.status === 'active').length;
+  const activeBranches = branches.filter((branch: any) => branch.status === 'active').length;
 
   return (
     <AdminProtectedRoute requiredPermission={{ resource: 'branches', action: 'read' }}>
       <div>
         <div className="dashboard-page-header">
-          <div>
-            <h1 className="dashboard-page-title">
-              <span className="dashboard-page-title-icon">
-                <FaBuilding />
-              </span>
-              Branch Management - {gym.name}
-            </h1>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+              <Button 
+                icon={<FaArrowLeft />} 
+                onClick={() => router.push(`/${locale}/admin/gyms/${gymId}`)}
+              >
+                Back
+              </Button>
+              <h1 className="dashboard-page-title" style={{ margin: 0 }}>
+                <span className="dashboard-page-title-icon">
+                  <FaBuilding />
+                </span>
+                Branch Management - {gym.name}
+              </h1>
+            </div>
             <p className="dashboard-page-subtitle">Manage branches, staff assignments, and client distribution</p>
           </div>
         </div>
@@ -250,156 +357,90 @@ export default function BranchManagementPage({ params }: PageProps) {
         <Row gutter={[16, 16]} style={{ marginBottom: 'var(--spacing-2xl)' }}>
           <Col xs={24} sm={8}>
             <Card>
-              <Statistic
-                title="Total Branches"
-                value={branches.length}
-                prefix={<FaBuilding style={{ color: '#4CAF50' }} />}
-                suffix={`(${activeBranches} active)`}
-              />
+              {branchesLoading ? (
+                <Skeleton active paragraph={{ rows: 1 }} />
+              ) : (
+                <Statistic
+                  title="Total Branches"
+                  value={branches.length}
+                  prefix={<FaBuilding style={{ color: '#4CAF50' }} />}
+                  suffix={`(${activeBranches} active)`}
+                />
+              )}
             </Card>
           </Col>
           <Col xs={24} sm={8}>
             <Card>
-              <Statistic
-                title="Total Staff"
-                value={totalStaff}
-                prefix={<FaUsers style={{ color: '#52c41a' }} />}
-              />
+              {branchesLoading ? (
+                <Skeleton active paragraph={{ rows: 1 }} />
+              ) : (
+                <Statistic
+                  title="Active Branches"
+                  value={activeBranches}
+                  prefix={<FaBuilding style={{ color: '#52c41a' }} />}
+                />
+              )}
             </Card>
           </Col>
           <Col xs={24} sm={8}>
             <Card>
-              <Statistic
-                title="Total Clients"
-                value={totalClients}
-                prefix={<FaUsers style={{ color: '#722ed1' }} />}
-              />
+              {branchesLoading ? (
+                <Skeleton active paragraph={{ rows: 1 }} />
+              ) : (
+                <Statistic
+                  title="Inactive Branches"
+                  value={branches.length - activeBranches}
+                  prefix={<FaBuilding style={{ color: '#8c8c8c' }} />}
+                />
+              )}
             </Card>
           </Col>
         </Row>
 
-        {/* Branch Tree Visualization */}
-        <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-          <Col xs={24} lg={8}>
-            <Card title="Branch Hierarchy">
-              <BranchTree gym={gym} branches={branches} />
-            </Card>
-          </Col>
-          
-          <Col xs={24} lg={16}>
-            <Card 
-              title="Branch List"
-              extra={
+        {/* Branch List */}
+        <Card 
+          title="Branch List"
+          extra={
+            <Button 
+              type="primary"
+              icon={<FaPlus />}
+              onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/branches/new`)}
+            >
+              Add Branch
+            </Button>
+          }
+        >
+          {branchesLoading ? (
+            <Skeleton active paragraph={{ rows: 5 }} />
+          ) : branches.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px' }}>
+              <Text type="secondary">No branches found for this gym.</Text>
+              <div style={{ marginTop: '16px' }}>
                 <Button 
                   type="primary"
                   icon={<FaPlus />}
-                  onClick={handleAddBranch}
+                  onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/branches/new`)}
                 >
-                  Add Branch
-                </Button>
-              }
-            >
-              <Table
-                columns={columns}
-                dataSource={branches}
-                rowKey="id"
-                pagination={{
-                  pageSize: 5,
-                  showSizeChanger: false,
-                }}
-              />
-            </Card>
-          </Col>
-        </Row>
-
-        {/* Add/Edit Branch Modal */}
-        <Modal
-          title={editingBranch ? 'Edit Branch' : 'Add New Branch'}
-          open={isModalVisible}
-          onCancel={() => setIsModalVisible(false)}
-          footer={null}
-          width={600}
-        >
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={handleSaveBranch}
-          >
-            <Row gutter={16}>
-              <Col span={12}>
-                <Form.Item
-                  name="name"
-                  label="Branch Name"
-                  rules={[{ required: true, message: 'Please enter branch name' }]}
-                >
-                  <Input placeholder="e.g., Downtown Branch" />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  name="status"
-                  label="Status"
-                  rules={[{ required: true, message: 'Please select status' }]}
-                >
-                  <Select placeholder="Select status">
-                    <Option value="active">Active</Option>
-                    <Option value="inactive">Inactive</Option>
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-            
-            <Form.Item
-              name="address"
-              label="Address"
-              rules={[{ required: true, message: 'Please enter address' }]}
-            >
-              <Input.TextArea rows={2} placeholder="Full branch address" />
-            </Form.Item>
-            
-            <Row gutter={16}>
-              <Col span={12}>
-                <Form.Item
-                  name="phone"
-                  label="Phone"
-                  rules={[{ required: true, message: 'Please enter phone number' }]}
-                >
-                  <Input placeholder="+1 (555) 123-4567" />
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item
-                  name="email"
-                  label="Email"
-                  rules={[
-                    { required: true, message: 'Please enter email' },
-                    { type: 'email', message: 'Please enter valid email' }
-                  ]}
-                >
-                  <Input placeholder="branch@gym.com" />
-                </Form.Item>
-              </Col>
-            </Row>
-            
-            <Form.Item
-              name="manager"
-              label="Manager"
-            >
-              <Input placeholder="Branch manager name" />
-            </Form.Item>
-            
-            <Form.Item style={{ marginBottom: 0 }}>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                <Button onClick={() => setIsModalVisible(false)}>
-                  Cancel
-                </Button>
-                <Button type="primary" htmlType="submit">
-                  {editingBranch ? 'Update Branch' : 'Create Branch'}
+                  Create First Branch
                 </Button>
               </div>
-            </Form.Item>
-          </Form>
-        </Modal>
+            </div>
+          ) : (
+            <Table
+              columns={columns}
+              dataSource={branches}
+              rowKey="id"
+              pagination={{
+                pageSize: 10,
+                showSizeChanger: true,
+                showQuickJumper: true,
+                showTotal: (total, range) => 
+                  `${range[0]}-${range[1]} of ${total} branches`,
+              }}
+            />
+          )}
+        </Card>
+
       </div>
     </AdminProtectedRoute>
   );

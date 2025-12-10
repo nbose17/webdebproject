@@ -1,15 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useQuery } from '@apollo/client/react';
 import { Branch } from '@/lib/types';
 import Input from '@/components/shared/Input';
 import Button from '@/components/shared/Button';
 import Modal from '@/components/shared/Modal';
+import { Select, Skeleton } from 'antd';
+import { useAuth } from '@/hooks/useAuth';
+import { GET_USERS } from '@/graphql/queries/admin';
+
+const { Option } = Select;
 
 interface BranchFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (branch: Omit<Branch, 'id'>) => void;
+  onSubmit: (branch: any) => void;
   branch?: Branch | null;
 }
 
@@ -19,12 +25,28 @@ export default function BranchForm({
   onSubmit,
   branch,
 }: BranchFormProps) {
+  const { user } = useAuth();
+  const gymId = user?.gymId;
+  
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [manager, setManager] = useState('');
+  const [managerId, setManagerId] = useState<string | undefined>(undefined);
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
+
+  // Fetch gym managers for manager select
+  const { data: usersData, loading: usersLoading } = useQuery(GET_USERS, {
+    variables: { 
+      role: 'GYM_MANAGER',
+      gymId: gymId,
+      isActive: true 
+    },
+    skip: !gymId || !isOpen,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const managers = usersData?.users || [];
 
   useEffect(() => {
     if (branch) {
@@ -32,14 +54,14 @@ export default function BranchForm({
       setAddress(branch.address);
       setPhone(branch.phone);
       setEmail(branch.email);
-      setManager(branch.manager || '');
+      setManagerId(branch.managerId);
       setStatus(branch.status);
     } else {
       setName('');
       setAddress('');
       setPhone('');
       setEmail('');
-      setManager('');
+      setManagerId(undefined);
       setStatus('active');
     }
   }, [branch, isOpen]);
@@ -51,7 +73,7 @@ export default function BranchForm({
       address,
       phone,
       email,
-      manager: manager || undefined,
+      managerId: managerId || null,
       status,
     });
     onClose();
@@ -86,11 +108,26 @@ export default function BranchForm({
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <Input
-          label="Manager (Optional)"
-          value={manager}
-          onChange={(e) => setManager(e.target.value)}
-        />
+        <div className="input-group">
+          <label className="input-label">Manager (Optional)</label>
+          {usersLoading ? (
+            <Skeleton.Input active style={{ width: '100%', height: '40px' }} />
+          ) : (
+            <Select
+              value={managerId || undefined}
+              onChange={(value) => setManagerId(value || undefined)}
+              placeholder="Select a manager"
+              allowClear
+              style={{ width: '100%' }}
+            >
+              {managers.map((manager: any) => (
+                <Option key={manager.id} value={manager.id}>
+                  {manager.name} ({manager.email})
+                </Option>
+              ))}
+            </Select>
+          )}
+        </div>
         <div className="input-group">
           <label className="input-label">Status</label>
           <select
@@ -115,5 +152,6 @@ export default function BranchForm({
     </Modal>
   );
 }
+
 
 

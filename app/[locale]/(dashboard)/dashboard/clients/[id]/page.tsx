@@ -1,12 +1,14 @@
 'use client';
 
 import { use, useState } from 'react';
+import { useQuery } from '@apollo/client/react';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
-import { Client } from '@/lib/types';
-import { mockClients } from '@/lib/constants';
 import Button from '@/components/shared/Button';
 import { FaUsers, FaArrowLeft, FaEnvelope, FaPhone, FaCreditCard, FaCalendarAlt, FaFileContract, FaWhatsapp, FaTelegram, FaPaperPlane } from 'react-icons/fa';
+import { Skeleton, Alert } from 'antd';
+import { useAuth } from '@/hooks/useAuth';
+import { GET_CLIENT } from '@/graphql/queries/admin';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -17,20 +19,60 @@ export default function ClientDetailPage({ params }: PageProps) {
   const router = useRouter();
   const routeParams = useParams();
   const locale = routeParams.locale as string;
+  const { user } = useAuth();
+  const gymId = user?.gymId;
   const [isSending, setIsSending] = useState(false);
   const [selectedChannel, setSelectedChannel] = useState<'email' | 'whatsapp' | 'telegram' | null>(null);
 
-  const client = mockClients.find((c) => c.id === id);
+  const { data, loading, error } = useQuery(GET_CLIENT, {
+    variables: { id, gymId },
+    skip: !gymId || !id,
+    fetchPolicy: 'network-only',
+  });
+  
+  const client = data?.client;
 
-  if (!client) {
+  if (!gymId) {
+    return (
+      <div>
+        <Alert
+          message="No Gym Associated"
+          description="You need to be associated with a gym to view client details."
+          type="warning"
+          showIcon
+        />
+      </div>
+    );
+  }
+  
+  if (loading) {
+    return (
+      <div>
+        <div className="dashboard-page-header">
+          <h1 className="dashboard-page-title">Client Details</h1>
+        </div>
+        <Skeleton active paragraph={{ rows: 10 }} />
+      </div>
+    );
+  }
+  
+  if (error || !client) {
     return (
       <div>
         <div className="dashboard-page-header">
           <h1 className="dashboard-page-title">Client Not Found</h1>
         </div>
-        <Button variant="outline" onClick={() => router.push(`/${locale}/dashboard/clients`)}>
-          Back to Clients
-        </Button>
+        <Alert
+          message="Error Loading Client"
+          description={error?.message || 'Client not found'}
+          type="error"
+          showIcon
+        />
+        <div style={{ marginTop: 'var(--spacing-lg)' }}>
+          <Button variant="outline" onClick={() => router.push(`/${locale}/dashboard/clients`)}>
+            Back to Clients
+          </Button>
+        </div>
       </div>
     );
   }

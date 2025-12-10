@@ -1,83 +1,233 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, UserRole, Permission, AdminSession } from '@/lib/types';
+import { apolloClient } from '@/lib/apollo-client';
+import { UserRole, Permission, AdminSession } from '@/lib/types';
 import { getRolePermissions, isAdmin, canAccessAdminPanel } from '@/lib/roles';
+import { LOGIN_MUTATION, GET_ME } from '@/graphql/queries/admin';
+import { graphQLRoleToDb, dbRoleToGraphQL } from '@/lib/role-mapper';
 
 interface AdminAuthContextType {
   adminSession: AdminSession | null;
-  loginAsAdmin: (email: string, password: string) => Promise<boolean>;
+  loginAsAdmin: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
   logoutAdmin: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
   canAccess: (resource: string, action: string) => boolean;
   isLoading: boolean;
+  refreshSession: () => Promise<void>;
 }
 
 const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined);
-
-// Mock admin users for development
-const mockAdminUsers: User[] = [
-  {
-    id: 'admin-1',
-    email: 'admin@fitconnect.com',
-    name: 'FitConnect Admin',
-    role: UserRole.FITCONNECT_ADMIN,
-  },
-  {
-    id: 'admin-2', 
-    email: 'superadmin@fitconnect.com',
-    name: 'Super Admin',
-    role: UserRole.FITCONNECT_ADMIN,
-  }
-];
 
 export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const [adminSession, setAdminSession] = useState<AdminSession | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Check for stored admin session
+  // Validate and refresh session from API
+  const validateSession = async () => {
+    const token = localStorage.getItem('adminToken');
     const storedSession = localStorage.getItem('adminSession');
-    if (storedSession) {
+    
+    if (!token || !storedSession) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      // Verify session with API
+      const { data, errors } = await apolloClient.query({
+        query: GET_ME,
+        fetchPolicy: 'network-only', // Always fetch fresh data
+        errorPolicy: 'all', // Return both data and errors
+      });
+
+      if (errors && errors.length > 0) {
+        // GraphQL errors (likely authentication failure)
+        console.error('Session validation errors:', errors);
+        logoutAdmin();
+        setIsLoading(false);
+        return;
+      }
+
+      if (data?.me) {
+        const user = data.me;
+        // Convert GraphQL role (uppercase) to database format (lowercase) for role checking
+        const dbRole = graphQLRoleToDb(user.role);
+        
+        // Check if role is admin (handle both formats)
+        const isAdminRole = dbRole === UserRole.FITCONNECT_ADMIN || 
+                           dbRole.toLowerCase() === 'fitconnect_admin' ||
+                           user.role?.toUpperCase() === 'FITCONNECT_ADMIN';
+        
+        if (isAdminRole) {
+          // Normalize to UserRole enum format
+          const normalizedRole = UserRole.FITCONNECT_ADMIN;
+          const permissions = user.permissions || getRolePermissions(normalizedRole);
+          const session: AdminSession = {
+            user: {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: normalizedRole, // Store in database format
+              permissions,
+            },
+            permissions,
+            isAdmin: true,
+          };
+          setAdminSession(session);
+          localStorage.setItem('adminSession', JSON.stringify(session));
+        } else {
+          // Not an admin, clear session
+          console.log('User is not an admin, clearing session. Role:', dbRole);
+          logoutAdmin();
+        }
+      } else {
+        // Invalid session, clear it
+        console.log('No user data from GET_ME query');
+        logoutAdmin();
+      }
+    } catch (error: any) {
+      console.error('Session validation error:', error);
+      // Token might be expired or invalid, clear session
+      // But don't call logoutAdmin if it's a network error - might be temporary
+      if (error?.networkError) {
+        // Keep existing session if it's just a network error
+        const storedSession = localStorage.getItem('adminSession');
+        if (storedSession) {
+          try {
+            const session = JSON.parse(storedSession);
+            // Ensure role is in database format for checking
+            const dbRole = typeof session.user?.role === 'string' 
+              ? (session.user.role.includes('FITCONNECT') ? UserRole.FITCONNECT_ADMIN : session.user.role)
+              : session.user?.role;
+            if (session.user && canAccessAdminPanel(dbRole as UserRole)) {
+              // Normalize role to database format
+              session.user.role = dbRole;
+              setAdminSession(session);
+            } else {
+              logoutAdmin();
+            }
+          } catch {
+            logoutAdmin();
+          }
+        }
+      } else {
+        logoutAdmin();
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Check if we have a stored session first (for faster initial render)
+    const storedSession = localStorage.getItem('adminSession');
+    const token = localStorage.getItem('adminToken');
+    
+    if (storedSession && token) {
       try {
         const session = JSON.parse(storedSession);
-        // Validate session and ensure user is admin
-        if (session.user && canAccessAdminPanel(session.user.role)) {
+        // Ensure role is in correct format
+        const role = session.user?.role || '';
+        // Handle both GraphQL format (FITCONNECT_ADMIN) and DB format (fitconnect_admin)
+        const dbRole = role.toLowerCase() === 'fitconnect_admin' || role === UserRole.FITCONNECT_ADMIN
+          ? UserRole.FITCONNECT_ADMIN
+          : role;
+        
+        if (session.user && canAccessAdminPanel(dbRole as UserRole)) {
+          // Normalize session role
+          session.user.role = dbRole;
+          // Set session immediately for faster UI
           setAdminSession(session);
-        } else {
-          localStorage.removeItem('adminSession');
+          setIsLoading(false);
+          // Then validate in background (but don't block)
+          validateSession().catch(err => {
+            console.error('Background session validation failed:', err);
+            // Don't clear session on validation error - let it stay if token is valid
+          });
+          return;
         }
       } catch (e) {
-        localStorage.removeItem('adminSession');
+        console.error('Error parsing stored session:', e);
       }
     }
-    setIsLoading(false);
+    
+    // No valid stored session, validate with API
+    validateSession();
   }, []);
 
-  const loginAsAdmin = async (email: string, password: string): Promise<boolean> => {
-    // Mock admin authentication
-    const adminUser = mockAdminUsers.find(user => user.email === email);
-    
-    if (adminUser && password) {
-      const permissions = getRolePermissions(adminUser.role);
-      const session: AdminSession = {
-        user: adminUser,
-        permissions,
-        isAdmin: isAdmin(adminUser.role),
-      };
+  const loginAsAdmin = async (email: string, password: string): Promise<{ success: boolean; message?: string }> => {
+    try {
+      const { data } = await apolloClient.mutate({
+        mutation: LOGIN_MUTATION,
+        variables: { email, password },
+      });
+
+      if (data?.login?.success && data?.login?.user) {
+        const { token, user } = data.login;
+        
+        // Store token
+        if (token) {
+          localStorage.setItem('adminToken', token);
+        }
+
+        // Convert GraphQL role (uppercase) to database format (lowercase) for role checking
+        const dbRole = graphQLRoleToDb(user.role);
+        
+        // Normalize to UserRole enum format
+        const normalizedRole = dbRole === 'fitconnect_admin' || dbRole.toLowerCase() === 'fitconnect_admin'
+          ? UserRole.FITCONNECT_ADMIN
+          : dbRole as UserRole;
+        
+        const permissions = user.permissions || getRolePermissions(normalizedRole);
+        const session: AdminSession = {
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: normalizedRole, // Store in database format
+            permissions,
+          },
+          permissions,
+          isAdmin: true, // We know it's admin if login succeeded
+        };
+        
+        setAdminSession(session);
+        localStorage.setItem('adminSession', JSON.stringify(session));
+        
+        // Wait a bit to ensure state is updated
+        await new Promise(resolve => setTimeout(resolve, 150));
+        
+        return { success: true };
+      }
       
-      setAdminSession(session);
-      localStorage.setItem('adminSession', JSON.stringify(session));
-      return true;
+      return { 
+        success: false, 
+        message: data?.login?.message || 'Invalid email or password' 
+      };
+    } catch (error: any) {
+      console.error('Login error:', error);
+      const errorMessage = error?.graphQLErrors?.[0]?.message || 
+                          error?.networkError?.message ||
+                          error?.message ||
+                          'An error occurred during login. Please try again.';
+      
+      return { 
+        success: false, 
+        message: errorMessage 
+      };
     }
-    
-    return false;
+  };
+
+  const refreshSession = async () => {
+    await validateSession();
   };
 
   const logoutAdmin = () => {
     setAdminSession(null);
     localStorage.removeItem('adminSession');
+    localStorage.removeItem('adminToken');
   };
 
   const canAccess = (resource: string, action: string): boolean => {
@@ -100,6 +250,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         isAdmin: adminSession?.isAdmin || false,
         canAccess,
         isLoading,
+        refreshSession,
       }}
     >
       {children}

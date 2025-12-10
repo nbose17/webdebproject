@@ -144,6 +144,8 @@ export interface Client {
   subscriptionEndDate?: string;
   contractStartDate?: string;
   contractEndDate?: string;
+  gymId?: string;
+  branchId?: string;
 }
 
 

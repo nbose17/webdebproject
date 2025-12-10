@@ -85,7 +85,7 @@ export default function PublicGymListingPage() {
 
   return (
     <div className="public-page">
-      <Header />
+      <Header variant="listing" />
       <main className="public-main">
         <div className="container">
           <section className="public-section">

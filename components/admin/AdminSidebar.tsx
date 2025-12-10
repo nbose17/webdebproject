@@ -25,7 +25,6 @@ import { usePermissions } from '@/hooks/usePermissions';
 const adminMainItems = [
   { href: '/admin', label: 'Admin Dashboard', icon: FaHome },
   { href: '/admin/gyms', label: 'Gym Management', icon: FaDumbbell, permission: { resource: 'gyms', action: 'read' } },
-  { href: '/admin/users', label: 'User Management', icon: FaUsers, permission: { resource: 'users', action: 'read' } },
 ];
 
 const systemManagementItems = [

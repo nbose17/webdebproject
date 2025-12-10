@@ -5,6 +5,7 @@ import AdminProtectedRoute from '@/components/shared/AdminProtectedRoute';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AdminTopBar from '@/components/admin/AdminTopBar';
 import { AdminAuthProvider } from '@/contexts/AdminAuthContext';
+import { CustomApolloProvider } from '@/components/providers/ApolloProvider';
 
 export default function AdminLayout({
   children,
@@ -12,8 +13,9 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AdminAuthProvider>
-      <ConfigProvider
+    <CustomApolloProvider>
+      <AdminAuthProvider>
+        <ConfigProvider
         theme={{
           token: {
             colorPrimary: '#4CAF50',
@@ -53,6 +55,7 @@ export default function AdminLayout({
           </div>
         </AdminProtectedRoute>
       </ConfigProvider>
-    </AdminAuthProvider>
+      </AdminAuthProvider>
+    </CustomApolloProvider>
   );
 }

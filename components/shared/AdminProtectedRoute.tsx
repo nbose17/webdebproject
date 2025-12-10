@@ -27,11 +27,17 @@ export default function AdminProtectedRoute({
 
   useEffect(() => {
     // Wait for initial load to complete before checking authentication
-    if (isLoading) return;
+    if (isLoading) {
+      return; // Still loading, don't redirect yet
+    }
 
     // Check if user is authenticated as admin
     if (!isAuthenticated || !isAdmin) {
-      router.push(`/${locale}${fallbackPath}`);
+      // Only redirect if we're not already on the login page
+      const currentPath = window.location.pathname;
+      if (!currentPath.includes('/admin-login')) {
+        router.push(`/${locale}${fallbackPath}`);
+      }
       return;
     }
 

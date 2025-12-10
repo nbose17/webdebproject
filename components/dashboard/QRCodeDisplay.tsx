@@ -1,24 +1,61 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useQuery } from '@apollo/client/react';
 import { QRCodeSVG } from 'qrcode.react';
-import { mockGyms } from '@/lib/constants';
 import { useAuth } from '@/hooks/useAuth';
+import { useParams } from 'next/navigation';
 import Button from '@/components/shared/Button';
 import { FaWhatsapp, FaTelegram, FaDownload } from 'react-icons/fa';
+import { Skeleton, Alert } from 'antd';
+import { GET_GYM } from '@/graphql/queries/admin';
 
 export default function QRCodeDisplay() {
   const { user } = useAuth();
-  // In a real app, this would come from the user's gym data
-  // For now, using gym ID '1' as default (first gym in mock data)
-  const gymId = '1';
-  const gym = mockGyms.find(g => g.id === gymId) || mockGyms[0];
-  const [gymPageUrl, setGymPageUrl] = useState(`/gym/${gymId}`);
-
+  const params = useParams();
+  const locale = params.locale as string;
+  const gymId = user?.gymId;
+  
+  const { data, loading, error } = useQuery(GET_GYM, {
+    variables: { id: gymId },
+    skip: !gymId,
+    fetchPolicy: 'network-only',
+  });
+  
+  const gym = data?.gym;
+  const [gymPageUrl, setGymPageUrl] = useState('');
+  
   useEffect(() => {
-    // Set the full URL only on client side to avoid hydration mismatch
-    setGymPageUrl(`${window.location.origin}/gym/${gymId}`);
-  }, [gymId]);
+    if (gym && typeof window !== 'undefined') {
+      setGymPageUrl(`${window.location.origin}/${locale}/gym/${gym.id}`);
+    }
+  }, [gym, locale]);
+
+  if (!gymId) {
+    return (
+      <Alert
+        message="No Gym Associated"
+        description="You need to be associated with a gym to view the QR code."
+        type="warning"
+        showIcon
+      />
+    );
+  }
+  
+  if (loading) {
+    return <Skeleton active paragraph={{ rows: 10 }} />;
+  }
+  
+  if (error || !gym) {
+    return (
+      <Alert
+        message="Error Loading Gym"
+        description={error?.message || 'Gym not found'}
+        type="error"
+        showIcon
+      />
+    );
+  }
 
   const handleDownloadQR = () => {
     const qrContainer = document.querySelector('.qr-code-container');

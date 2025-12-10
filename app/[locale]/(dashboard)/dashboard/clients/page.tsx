@@ -1,16 +1,17 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useQuery, useMutation } from '@apollo/client/react';
 import Link from 'next/link';
-import { Select, Input as AntdInput } from 'antd';
+import { Select, Input as AntdInput, Skeleton, Alert, message } from 'antd';
 import { Client } from '@/lib/types';
-import { mockClients } from '@/lib/constants';
-import { generateId } from '@/lib/utils';
 import DataTable from '@/components/dashboard/DataTable';
 import ClientCard from '@/components/dashboard/ClientCard';
 import ClientForm from '@/components/dashboard/ClientForm';
 import Button from '@/components/shared/Button';
 import { FaUsers, FaDownload, FaIdCard, FaTable, FaTh, FaSearch, FaFilter, FaSort } from 'react-icons/fa';
+import { useAuth } from '@/hooks/useAuth';
+import { GET_CLIENTS, CREATE_CLIENT, UPDATE_CLIENT, DELETE_CLIENT } from '@/graphql/queries/admin';
 
 const { Search } = AntdInput;
 
@@ -19,10 +20,50 @@ type SortField = 'name' | 'joinDate' | 'status' | 'membershipType';
 type SortDirection = 'asc' | 'desc';
 
 export default function ClientsPage() {
-  const [clients, setClients] = useState<Client[]>(mockClients);
+  const { user } = useAuth();
+  const gymId = user?.gymId;
+  
+  const { data, loading, error, refetch } = useQuery(GET_CLIENTS, {
+    variables: { gymId },
+    skip: !gymId,
+    fetchPolicy: 'network-only',
+  });
+  
+  const [createClient] = useMutation(CREATE_CLIENT, {
+    onCompleted: () => {
+      message.success('Client created successfully!');
+      refetch();
+    },
+    onError: (error) => {
+      message.error(`Failed to create client: ${error.message}`);
+    },
+  });
+  
+  const [updateClient] = useMutation(UPDATE_CLIENT, {
+    onCompleted: () => {
+      message.success('Client updated successfully!');
+      refetch();
+    },
+    onError: (error) => {
+      message.error(`Failed to update client: ${error.message}`);
+    },
+  });
+  
+  const [deleteClient] = useMutation(DELETE_CLIENT, {
+    onCompleted: () => {
+      message.success('Client deleted successfully!');
+      refetch();
+    },
+    onError: (error) => {
+      message.error(`Failed to delete client: ${error.message}`);
+    },
+  });
+  
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
+  
+  const clients = data?.clients || [];
   
   // Filter and sort states
   const [searchQuery, setSearchQuery] = useState('');
@@ -364,25 +405,88 @@ Generated on: ${new Date().toLocaleDateString()}
     setIsFormOpen(true);
   };
 
-  const handleDelete = (client: Client) => {
+  const handleDelete = async (client: Client) => {
+    if (!gymId) return;
+    
     if (confirm(`Are you sure you want to delete "${client.name}"?`)) {
-      setClients(clients.filter((c) => c.id !== client.id));
+      await deleteClient({
+        variables: {
+          id: client.id,
+          gymId,
+        },
+      });
     }
   };
 
-  const handleSubmit = (clientData: Omit<Client, 'id'>) => {
+  const handleSubmit = async (clientData: Omit<Client, 'id'>) => {
+    if (!gymId) return;
+    
+    // Prepare variables with proper date handling
+    const variables: any = {
+      gymId,
+      name: clientData.name,
+      email: clientData.email,
+      phone: clientData.phone,
+      membershipType: clientData.membershipType,
+      status: clientData.status,
+      image: clientData.image,
+      joinDate: clientData.joinDate,
+      subscriptionEndDate: clientData.subscriptionEndDate,
+      contractStartDate: clientData.contractStartDate,
+      contractEndDate: clientData.contractEndDate,
+    };
+    
     if (editingClient) {
-      setClients(
-        clients.map((c) =>
-          c.id === editingClient.id ? { ...clientData, id: editingClient.id } : c
-        )
-      );
+      variables.id = editingClient.id;
+      await updateClient({ variables });
     } else {
-      setClients([...clients, { ...clientData, id: generateId() }]);
+      await createClient({ variables });
     }
     setIsFormOpen(false);
     setEditingClient(null);
   };
+  
+  if (!gymId) {
+    return (
+      <div>
+        <Alert
+          message="No Gym Associated"
+          description="You need to be associated with a gym to manage clients."
+          type="warning"
+          showIcon
+        />
+      </div>
+    );
+  }
+  
+  if (loading) {
+    return (
+      <div>
+        <div className="dashboard-page-header">
+          <h1 className="dashboard-page-title">
+            <span className="dashboard-page-title-icon">
+              <FaUsers />
+            </span>
+            Clients
+          </h1>
+        </div>
+        <Skeleton active paragraph={{ rows: 8 }} />
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div>
+        <Alert
+          message="Error Loading Clients"
+          description={error.message}
+          type="error"
+          showIcon
+        />
+      </div>
+    );
+  }
 
   return (
     <div>
