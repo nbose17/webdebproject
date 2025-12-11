@@ -7,3 +7,4 @@ export function CustomApolloProvider({ children }: { children: React.ReactNode }
   return <ApolloProvider client={apolloClient}>{children}</ApolloProvider>;
 }
 
+

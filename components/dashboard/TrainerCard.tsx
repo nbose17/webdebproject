@@ -63,3 +63,4 @@ export default function TrainerCard({ trainer, onEdit, onDelete }: TrainerCardPr
 
 
 
+

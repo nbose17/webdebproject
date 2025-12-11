@@ -447,3 +447,4 @@ export default function EditGymPage({ params }: PageProps) {
   );
 }
 
+

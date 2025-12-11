@@ -61,3 +61,4 @@ const IDCardTemplateSchema = new Schema<IIDCardTemplate>(
 
 export default mongoose.models.IDCardTemplate || mongoose.model<IIDCardTemplate>('IDCardTemplate', IDCardTemplateSchema);
 
+

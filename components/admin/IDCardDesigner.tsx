@@ -733,3 +733,4 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
     </div>
   );
 }
+

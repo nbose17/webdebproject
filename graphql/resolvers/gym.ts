@@ -14,11 +14,25 @@ export const gymResolvers = {
       return gyms.map(gym => ({ ...gym, id: gym._id.toString() }));
     },
     gym: async (_: any, { id }: { id: string }) => {
+      console.log('🔍 GET_GYM resolver called with ID:', id);
+      
       const AdminModels = await getAdminModels();
       const gym = await AdminModels.Gym.findById(id).lean();
+      
+      console.log('🔍 Gym lookup result:', { 
+        found: !!gym, 
+        id: gym?._id?.toString(), 
+        name: gym?.name 
+      });
+      
       if (!gym) {
-        throw new Error('Gym not found');
+        console.log('❌ Gym not found for ID:', id);
+        // Let's also check all gyms to see what IDs we have
+        const allGyms = await AdminModels.Gym.find({}).select('_id name').lean();
+        console.log('📋 Available gym IDs:', allGyms.map(g => ({ id: g._id.toString(), name: g.name })));
+        throw new Error(`Gym not found for ID: ${id}`);
       }
+      
       return { ...gym, id: gym._id.toString() };
     },
   },
@@ -164,4 +178,5 @@ export const gymResolvers = {
     },
   },
 };
+
 

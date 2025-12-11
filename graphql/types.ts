@@ -21,3 +21,4 @@ export type Resolvers = {
   IDCardTemplate: any;
 };
 
+

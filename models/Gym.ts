@@ -45,3 +45,4 @@ GymSchema.index({ paymentStatus: 1 });
 
 export default mongoose.models.Gym || mongoose.model<IGym>('Gym', GymSchema);
 
+

@@ -47,3 +47,4 @@ ClientSchema.index({ email: 1 });
 
 export default mongoose.models.Client || mongoose.model<IClient>('Client', ClientSchema);
 
+

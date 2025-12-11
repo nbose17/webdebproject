@@ -36,3 +36,4 @@ BranchSchema.index({ managerId: 1 });
 
 export default mongoose.models.Branch || mongoose.model<IBranch>('Branch', BranchSchema);
 
+

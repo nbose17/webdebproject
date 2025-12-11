@@ -166,3 +166,4 @@ All models are defined in the `models/` directory:
 - All mutations require authentication (except login)
 - The API includes fallback to mock data for development when MongoDB is unavailable
 
+

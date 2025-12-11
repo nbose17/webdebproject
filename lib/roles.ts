@@ -133,3 +133,4 @@ export function canAccessSettings(role: UserRole): boolean {
 export function canManageTemplates(role: UserRole): boolean {
   return hasPermission(getRolePermissions(role), 'templates', 'create');
 }
+

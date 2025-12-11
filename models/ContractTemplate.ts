@@ -23,3 +23,4 @@ const ContractTemplateSchema = new Schema<IContractTemplate>(
 
 export default mongoose.models.ContractTemplate || mongoose.model<IContractTemplate>('ContractTemplate', ContractTemplateSchema);
 
+

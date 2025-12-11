@@ -13,3 +13,4 @@ export function getOptions(lng = fallbackLng, ns = defaultNS) {
     ns,
   };
 }
+

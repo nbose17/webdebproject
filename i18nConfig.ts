@@ -8,3 +8,4 @@ const i18nConfig: Config = {
 };
 
 export default i18nConfig;
+

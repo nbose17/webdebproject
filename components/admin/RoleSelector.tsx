@@ -202,3 +202,4 @@ function getRolePermissionSummary(role: UserRole): string {
       return 'No specific permissions assigned.';
   }
 }
+

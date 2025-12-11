@@ -550,3 +550,4 @@ export default function ContractEditor({ template, onSave, onCancel }: ContractE
     </div>
   );
 }
+

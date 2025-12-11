@@ -285,3 +285,4 @@ export const TrainerSchema = new Schema(
 
 TrainerSchema.index({ gymId: 1 });
 
+

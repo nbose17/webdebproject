@@ -30,3 +30,4 @@ export async function useTranslation(
 }
 
 export default initI18next;
+

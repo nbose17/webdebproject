@@ -673,3 +673,4 @@ export default function SubscriptionsPage() {
     </AdminProtectedRoute>
   );
 }
+
