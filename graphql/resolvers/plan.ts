@@ -41,12 +41,12 @@ export const planResolvers = {
       }
 
       const { gymId, ...planData } = args;
-      
+
       // Verify user has access to this gym
       const userGymId = context.user.gymId?.toString();
       const userRole = context.user.role?.toUpperCase();
       const isAdmin = userRole === 'FITCONNECT_ADMIN';
-      
+
       if (!isAdmin && userGymId !== gymId) {
         throw new Error('You do not have permission to create plans for this gym');
       }
@@ -54,19 +54,20 @@ export const planResolvers = {
       try {
         const GymModels = await getGymModels(gymId);
         const gymObjectId = new mongoose.Types.ObjectId(gymId);
-        
+
         const plan = new GymModels.Plan({
           ...planData,
           gymId: gymObjectId,
+          includedClasses: args.includedClassIds ? args.includedClassIds.map((id: string) => new mongoose.Types.ObjectId(id)) : [],
         });
-        
+
         await plan.save();
-        
+
         return {
           id: plan._id.toString(),
           gymId: plan.gymId.toString(),
           name: plan.name,
-          duration: plan.duration,
+          durationMonths: plan.durationMonths,
           price: plan.price,
           description: plan.description,
           createdAt: plan.createdAt,
@@ -86,7 +87,7 @@ export const planResolvers = {
       const userGymId = context.user.gymId?.toString();
       const userRole = context.user.role?.toUpperCase();
       const isAdmin = userRole === 'FITCONNECT_ADMIN';
-      
+
       if (!isAdmin && userGymId !== gymId) {
         throw new Error('You do not have permission to update plans for this gym');
       }
@@ -95,14 +96,19 @@ export const planResolvers = {
         const GymModels = await getGymModels(gymId);
         const plan = await GymModels.Plan.findByIdAndUpdate(
           id,
-          { $set: updateData },
+          {
+            $set: {
+              ...updateData,
+              includedClasses: updateData.includedClassIds ? updateData.includedClassIds.map((id: string) => new mongoose.Types.ObjectId(id)) : undefined
+            }
+          },
           { new: true }
         ).lean();
-        
+
         if (!plan) {
           throw new Error('Plan not found');
         }
-        
+
         return {
           ...plan,
           id: plan._id.toString(),
@@ -122,7 +128,7 @@ export const planResolvers = {
       const userGymId = context.user.gymId?.toString();
       const userRole = context.user.role?.toUpperCase();
       const isAdmin = userRole === 'FITCONNECT_ADMIN';
-      
+
       if (!isAdmin && userGymId !== gymId) {
         throw new Error('You do not have permission to delete plans for this gym');
       }
@@ -130,11 +136,11 @@ export const planResolvers = {
       try {
         const GymModels = await getGymModels(gymId);
         const plan = await GymModels.Plan.findByIdAndDelete(id);
-        
+
         if (!plan) {
           throw new Error('Plan not found');
         }
-        
+
         return true;
       } catch (error: any) {
         console.error('Error deleting plan:', error);
@@ -148,7 +154,7 @@ export const planResolvers = {
       const AdminModels = await getAdminModels();
       const gym = await AdminModels.Gym.findById(parent.gymId).lean();
       if (!gym) return null;
-      
+
       return {
         id: gym._id.toString(),
         name: gym.name,
@@ -164,6 +170,23 @@ export const planResolvers = {
         updatedAt: gym.updatedAt,
       };
     },
+    includedClasses: async (parent: any, _: any, context: any) => {
+      if (!parent.includedClasses || parent.includedClasses.length === 0) return [];
+
+      const { getGymModels } = await import('@/lib/db-models');
+      const gymId = parent.gymId.toString();
+      const GymModels = await getGymModels(gymId);
+
+      const classes = await GymModels.Class.find({
+        _id: { $in: parent.includedClasses }
+      }).lean();
+
+      return classes.map((c: any) => ({
+        ...c,
+        id: c._id.toString(),
+        gymId: c.gymId.toString(),
+      }));
+    }
   },
 };
 

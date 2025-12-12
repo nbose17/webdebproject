@@ -240,10 +240,11 @@ CMSSchema.index({ gymId: 1 }, { unique: true });
 export const PlanSchema = new Schema(
   {
     name: { type: String, required: true, trim: true },
-    duration: { type: String, required: true, trim: true },
+    durationMonths: { type: Number, required: true, min: 1 },
     price: { type: Number, required: true, min: 0 },
     gymId: { type: Schema.Types.ObjectId, ref: 'Gym', required: true },
     description: { type: String },
+    includedClasses: [{ type: Schema.Types.ObjectId, ref: 'Class' }],
   },
   {
     timestamps: true,
@@ -256,7 +257,7 @@ PlanSchema.index({ gymId: 1 });
 export const ClassSchema = new Schema(
   {
     name: { type: String, required: true, trim: true },
-    duration: { type: String, required: true, trim: true },
+    durationMinutes: { type: Number, required: true, min: 1 },
     numberOfClasses: { type: Number, required: true, min: 1 },
     price: { type: Number, required: true, min: 0 },
     description: { type: String },

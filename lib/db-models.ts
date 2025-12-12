@@ -33,7 +33,7 @@ export async function getAdminModels() {
   if (adminModels) return adminModels;
 
   const conn = await getAdminConnection();
-  
+
   adminModels = {
     User: conn.models.User || conn.model('User', schemas.UserSchema),
     Gym: conn.models.Gym || conn.model('Gym', schemas.GymSchema),
@@ -52,7 +52,14 @@ export async function getAdminModels() {
 
 export async function getGymModels(gymId: string) {
   const conn = await connectGymDB(gymId);
-  
+
+  // In development, force model recompilation to pick up schema changes
+  if (process.env.NODE_ENV === 'development') {
+    const models = conn.models as any;
+    if (models.Class) delete models.Class;
+    if (models.Plan) delete models.Plan;
+  }
+
   // Get or create models (this ensures collections exist, which creates the database)
   const models = {
     Client: conn.models.Client || conn.model('Client', schemas.ClientSchema),
@@ -63,22 +70,22 @@ export async function getGymModels(gymId: string) {
     Class: conn.models.Class || conn.model('Class', schemas.ClassSchema),
     Trainer: conn.models.Trainer || conn.model('Trainer', schemas.TrainerSchema),
   };
-  
+
   // Ensure indexes exist (this also ensures collections exist)
   try {
     await Promise.all([
-      models.User.createIndexes().catch(() => {}),
-      models.Client.createIndexes().catch(() => {}),
-      models.Branch.createIndexes().catch(() => {}),
-      models.CMS.createIndexes().catch(() => {}),
-      models.Plan.createIndexes().catch(() => {}),
-      models.Class.createIndexes().catch(() => {}),
-      models.Trainer.createIndexes().catch(() => {}),
+      models.User.createIndexes().catch(() => { }),
+      models.Client.createIndexes().catch(() => { }),
+      models.Branch.createIndexes().catch(() => { }),
+      models.CMS.createIndexes().catch(() => { }),
+      models.Plan.createIndexes().catch(() => { }),
+      models.Class.createIndexes().catch(() => { }),
+      models.Trainer.createIndexes().catch(() => { }),
     ]);
   } catch (error) {
     // Ignore errors - database/collections might already exist
   }
-  
+
   return models;
 }
 

@@ -12,14 +12,16 @@ export interface Gym {
 export interface Plan {
   id: string;
   name: string;
-  duration: string;
+  durationMonths: number;
   price: number;
+  includedClasses?: Class[];
+  description?: string;
 }
 
 export interface Class {
   id: string;
   name: string;
-  duration: string;
+  durationMinutes: number;
   numberOfClasses: number;
   price: number;
   description?: string;

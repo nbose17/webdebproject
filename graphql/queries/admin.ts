@@ -532,12 +532,14 @@ export const GET_PLANS = gql`
     plans(gymId: $gymId) {
       id
       name
-      duration
+      durationMonths
       price
       description
-      gymId
-      createdAt
-      updatedAt
+      includedClasses {
+        id
+        name
+        price
+      }
     }
   }
 `;
@@ -547,10 +549,14 @@ export const GET_PLAN = gql`
     plan(id: $id, gymId: $gymId) {
       id
       name
-      duration
+      durationMonths
       price
       description
       gymId
+      includedClasses {
+        id
+        name
+      }
       createdAt
       updatedAt
     }
@@ -560,24 +566,30 @@ export const GET_PLAN = gql`
 export const CREATE_PLAN = gql`
   mutation CreatePlan(
     $name: String!
-    $duration: String!
+    $durationMonths: Int!
     $price: Float!
     $gymId: ID!
     $description: String
+    $includedClassIds: [ID!]
   ) {
     createPlan(
       name: $name
-      duration: $duration
+      durationMonths: $durationMonths
       price: $price
       gymId: $gymId
       description: $description
+      includedClassIds: $includedClassIds
     ) {
       id
       name
-      duration
+      durationMonths
       price
       description
       gymId
+      includedClasses {
+        id
+        name
+      }
     }
   }
 `;
@@ -587,24 +599,30 @@ export const UPDATE_PLAN = gql`
     $id: ID!
     $gymId: ID!
     $name: String
-    $duration: String
+    $durationMonths: Int
     $price: Float
     $description: String
+    $includedClassIds: [ID!]
   ) {
     updatePlan(
       id: $id
       gymId: $gymId
       name: $name
-      duration: $duration
+      durationMonths: $durationMonths
       price: $price
       description: $description
+      includedClassIds: $includedClassIds
     ) {
       id
       name
-      duration
+      durationMonths
       price
       description
       gymId
+      includedClasses {
+        id
+        name
+      }
     }
   }
 `;
@@ -620,7 +638,7 @@ export const GET_CLASSES = gql`
     classes(gymId: $gymId) {
       id
       name
-      duration
+      durationMinutes
       numberOfClasses
       price
       description
@@ -636,7 +654,7 @@ export const GET_CLASS = gql`
     class(id: $id, gymId: $gymId) {
       id
       name
-      duration
+      durationMinutes
       numberOfClasses
       price
       description
@@ -650,7 +668,7 @@ export const GET_CLASS = gql`
 export const CREATE_CLASS = gql`
   mutation CreateClass(
     $name: String!
-    $duration: String!
+    $durationMinutes: Int!
     $numberOfClasses: Int!
     $price: Float!
     $gymId: ID!
@@ -658,7 +676,7 @@ export const CREATE_CLASS = gql`
   ) {
     createClass(
       name: $name
-      duration: $duration
+      durationMinutes: $durationMinutes
       numberOfClasses: $numberOfClasses
       price: $price
       gymId: $gymId
@@ -666,7 +684,7 @@ export const CREATE_CLASS = gql`
     ) {
       id
       name
-      duration
+      durationMinutes
       numberOfClasses
       price
       description
@@ -680,7 +698,7 @@ export const UPDATE_CLASS = gql`
     $id: ID!
     $gymId: ID!
     $name: String
-    $duration: String
+    $durationMinutes: Int
     $numberOfClasses: Int
     $price: Float
     $description: String
@@ -689,14 +707,14 @@ export const UPDATE_CLASS = gql`
       id: $id
       gymId: $gymId
       name: $name
-      duration: $duration
+      durationMinutes: $durationMinutes
       numberOfClasses: $numberOfClasses
       price: $price
       description: $description
     ) {
       id
       name
-      duration
+      durationMinutes
       numberOfClasses
       price
       description

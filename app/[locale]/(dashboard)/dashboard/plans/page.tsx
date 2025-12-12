@@ -3,34 +3,38 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { Plan } from '@/lib/types';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatDuration } from '@/lib/utils';
 import DataTable from '@/components/dashboard/DataTable';
 import PlanForm from '@/components/dashboard/PlanForm';
 import Button from '@/components/shared/Button';
 import { FaCreditCard } from 'react-icons/fa';
-import { Skeleton, Alert, message, Popconfirm } from 'antd';
+import { Skeleton, Alert, message, Popconfirm, Tag, Tooltip } from 'antd';
 import { useAuth } from '@/hooks/useAuth';
 import { GET_PLANS, CREATE_PLAN, UPDATE_PLAN, DELETE_PLAN } from '@/graphql/queries/admin';
+import { FaTable, FaTh } from 'react-icons/fa';
+import PlanCard from '@/components/dashboard/PlanCard';
+
+type ViewMode = 'table' | 'card';
 
 export default function PlansPage() {
   const { user, isLoading } = useAuth();
   const gymId = user?.gymId;
-  
-  console.log('🎯 PlansPage render:', { 
-    hasUser: !!user, 
-    userId: user?.id, 
-    role: user?.role, 
+
+  console.log('🎯 PlansPage render:', {
+    hasUser: !!user,
+    userId: user?.id,
+    role: user?.role,
     gymId: user?.gymId,
     isLoading,
-    authContextUser: user 
+    authContextUser: user
   });
-  
-  const { data, loading, error, refetch } = useQuery(GET_PLANS, {
+
+  const { data, loading, error, refetch } = useQuery<{ plans: Plan[] }>(GET_PLANS, {
     variables: { gymId },
     skip: !gymId,
     fetchPolicy: 'network-only',
   });
-  
+
   const [createPlan] = useMutation(CREATE_PLAN, {
     onCompleted: () => {
       message.success('Plan created successfully!');
@@ -40,7 +44,7 @@ export default function PlansPage() {
       message.error(`Failed to create plan: ${error.message}`);
     },
   });
-  
+
   const [updatePlan] = useMutation(UPDATE_PLAN, {
     onCompleted: () => {
       message.success('Plan updated successfully!');
@@ -50,7 +54,7 @@ export default function PlansPage() {
       message.error(`Failed to update plan: ${error.message}`);
     },
   });
-  
+
   const [deletePlan] = useMutation(DELETE_PLAN, {
     onCompleted: () => {
       message.success('Plan deleted successfully!');
@@ -60,27 +64,78 @@ export default function PlansPage() {
       message.error(`Failed to delete plan: ${error.message}`);
     },
   });
-  
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
-  
+  const [viewMode, setViewMode] = useState<ViewMode>('table');
+
   const plans = data?.plans || [];
-  
-  console.log('🎯 PlansPage query setup:', { 
-    gymId, 
-    hasGymId: !!gymId, 
+
+  console.log('🎯 PlansPage query setup:', {
+    gymId,
+    hasGymId: !!gymId,
     querySkipped: !gymId,
     userFromAuth: user ? { id: user.id, role: user.role, gymId: user.gymId } : null
   });
 
   const columns = [
-    { key: 'id', label: 'No', render: (_: any, row: any, index: number) => index + 1 },
+    { key: 'id', label: 'No', render: (_: any, row: any, index: any) => index + 1 },
     { key: 'name', label: 'Name' },
-    { key: 'duration', label: 'Duration' },
+    {
+      key: 'durationMonths',
+      label: 'Duration',
+      render: (value: number) => formatDuration(value),
+    },
     {
       key: 'price',
       label: 'Price',
       render: (value: number) => formatCurrency(value),
+    },
+    {
+      key: 'totalPrice',
+      label: 'Total Price',
+      render: (_: any, plan: any) => {
+        const classTotal = plan.includedClasses?.reduce((sum: number, cls: any) => sum + cls.price, 0) || 0;
+        return formatCurrency(plan.price + classTotal);
+      },
+    },
+    {
+      key: 'includedClasses',
+      label: 'Classes',
+      render: (classes: any[]) => {
+        if (!classes || classes.length === 0) {
+          return <Tag>No classes included</Tag>;
+        }
+
+        if (classes.length <= 2) {
+          return (
+            <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+              {classes.map((c: any) => (
+                <Tag color="blue" key={c.id}>
+                  {c.name}
+                </Tag>
+              ))}
+            </div>
+          );
+        }
+
+        const firstTwo = classes.slice(0, 2);
+        const remainingCount = classes.length - 2;
+        const remainingNames = classes.slice(2).map((c: any) => c.name).join(', ');
+
+        return (
+          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+            {firstTwo.map((c: any) => (
+              <Tag color="blue" key={c.id}>
+                {c.name}
+              </Tag>
+            ))}
+            <Tooltip title={remainingNames}>
+              <Tag>+{remainingCount} more</Tag>
+            </Tooltip>
+          </div>
+        );
+      },
     },
   ];
 
@@ -96,7 +151,7 @@ export default function PlansPage() {
 
   const handleDelete = async (plan: Plan) => {
     if (!gymId) return;
-    
+
     await deletePlan({
       variables: {
         id: plan.id,
@@ -107,7 +162,7 @@ export default function PlansPage() {
 
   const handleSubmit = async (planData: Omit<Plan, 'id'>) => {
     if (!gymId) return;
-    
+
     if (editingPlan) {
       await updatePlan({
         variables: {
@@ -127,7 +182,7 @@ export default function PlansPage() {
     setIsFormOpen(false);
     setEditingPlan(null);
   };
-  
+
   if (isLoading) {
     return (
       <div>
@@ -146,22 +201,22 @@ export default function PlansPage() {
 
   if (!gymId) {
     const lsUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
-    console.log('❌ Plans page: No gymId found', { 
+    console.log('❌ Plans page: No gymId found', {
       user: user ? { id: user.id, email: user.email, role: user.role, gymId: user.gymId } : null,
       localStorageUser: lsUser,
       localStorageParsed: lsUser ? JSON.parse(lsUser) : null,
       isLoading,
     });
-    
+
     // Force refresh user data if gym owner
     const handleRefresh = async () => {
       if (typeof window !== 'undefined') {
         // Clear all cached data
         localStorage.removeItem('user');
         const token = localStorage.getItem('token');
-        
+
         console.log('🔄 Force refreshing user data...', { hasToken: !!token });
-        
+
         if (token) {
           try {
             // Direct API call to bypass all caching
@@ -187,10 +242,10 @@ export default function PlansPage() {
                 `,
               }),
             });
-            
+
             const result = await response.json();
             console.log('🎯 Direct API response:', result);
-            
+
             if (result.data?.me) {
               const userData = {
                 id: result.data.me.id,
@@ -200,7 +255,7 @@ export default function PlansPage() {
                 gymId: result.data.me.gymId,
                 branchId: result.data.me.branchId,
               };
-              
+
               console.log('💾 Saving fresh user data:', userData);
               localStorage.setItem('user', JSON.stringify(userData));
               window.location.reload();
@@ -216,7 +271,7 @@ export default function PlansPage() {
         }
       }
     };
-    
+
     return (
       <div>
         <Alert
@@ -245,15 +300,15 @@ export default function PlansPage() {
             <Button variant="primary" onClick={handleRefresh} style={{ marginTop: '8px' }}>
               Force Refresh User Data (Direct API Call)
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => {
                 // Add session debug helper to window
                 (window as any).debugSession = () => {
                   const token = localStorage.getItem('token');
                   const user = localStorage.getItem('user');
                   const adminToken = localStorage.getItem('adminToken');
-                  
+
                   console.log('🔍 Session Debug Info:', {
                     hasToken: !!token,
                     tokenPreview: token ? `${token.substring(0, 30)}...` : null,
@@ -263,7 +318,7 @@ export default function PlansPage() {
                     hasAdminToken: !!adminToken,
                     location: window.location.href,
                   });
-                  
+
                   // Test token validity
                   if (token) {
                     fetch('/api/graphql', {
@@ -276,19 +331,19 @@ export default function PlansPage() {
                         query: 'query { me { id email role gymId } }',
                       }),
                     })
-                    .then(r => r.json())
-                    .then(result => {
-                      console.log('🎯 Token test result:', result);
-                    })
-                    .catch(err => {
-                      console.error('❌ Token test error:', err);
-                    });
+                      .then(r => r.json())
+                      .then(result => {
+                        console.log('🎯 Token test result:', result);
+                      })
+                      .catch(err => {
+                        console.error('❌ Token test error:', err);
+                      });
                   }
                 };
-                
+
                 console.log('🔧 Debug helper added! Run debugSession() in console to check session state.');
                 (window as any).debugSession();
-              }} 
+              }}
               style={{ marginTop: '8px', marginLeft: '8px' }}
             >
               Debug Session
@@ -298,7 +353,7 @@ export default function PlansPage() {
       </div>
     );
   }
-  
+
   if (loading) {
     return (
       <div>
@@ -314,7 +369,7 @@ export default function PlansPage() {
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <div>
@@ -337,16 +392,75 @@ export default function PlansPage() {
           </span>
           Plans (Monthly / Yearly)
         </h1>
-        <Button variant="primary" onClick={handleAdd}>
-          Add Plan
-        </Button>
+        <div style={{ display: 'flex', gap: 'var(--spacing-md)', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 'var(--spacing-xs)', backgroundColor: 'var(--color-bg-secondary)', padding: '4px', borderRadius: 'var(--radius-md)' }}>
+            <button
+              onClick={() => setViewMode('table')}
+              style={{
+                padding: 'var(--spacing-xs) var(--spacing-sm)',
+                border: 'none',
+                borderRadius: 'var(--radius-sm)',
+                backgroundColor: viewMode === 'table' ? 'var(--color-white)' : 'transparent',
+                color: viewMode === 'table' ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--spacing-xs)',
+                fontSize: 'var(--font-size-sm)',
+                fontWeight: viewMode === 'table' ? 'var(--font-weight-semibold)' : 'var(--font-weight-normal)',
+                transition: 'all var(--transition-base)',
+                boxShadow: viewMode === 'table' ? 'var(--shadow-sm)' : 'none',
+              }}
+            >
+              <FaTable />
+              <span>Table</span>
+            </button>
+            <button
+              onClick={() => setViewMode('card')}
+              style={{
+                padding: 'var(--spacing-xs) var(--spacing-sm)',
+                border: 'none',
+                borderRadius: 'var(--radius-sm)',
+                backgroundColor: viewMode === 'card' ? 'var(--color-white)' : 'transparent',
+                color: viewMode === 'card' ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--spacing-xs)',
+                fontSize: 'var(--font-size-sm)',
+                fontWeight: viewMode === 'card' ? 'var(--font-weight-semibold)' : 'var(--font-weight-normal)',
+                transition: 'all var(--transition-base)',
+                boxShadow: viewMode === 'card' ? 'var(--shadow-sm)' : 'none',
+              }}
+            >
+              <FaTh />
+              <span>Card</span>
+            </button>
+          </div>
+          <Button variant="primary" onClick={handleAdd}>
+            Add Plan
+          </Button>
+        </div>
       </div>
-      <DataTable
-        columns={columns}
-        data={plans}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      {viewMode === 'table' ? (
+        <DataTable
+          columns={columns}
+          data={plans}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      ) : (
+        <div className="dashboard-trainer-cards-grid">
+          {plans.map((plan) => (
+            <PlanCard
+              key={plan.id}
+              plan={plan}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
+      )}
       <PlanForm
         isOpen={isFormOpen}
         onClose={() => {

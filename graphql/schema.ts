@@ -207,11 +207,12 @@ export const typeDefs = gql`
   type Plan {
     id: ID!
     name: String!
-    duration: String!
+    durationMonths: Int!
     price: Float!
     gymId: ID!
     gym: Gym
     description: String
+    includedClasses: [Class!]
     createdAt: Date!
     updatedAt: Date!
   }
@@ -219,7 +220,7 @@ export const typeDefs = gql`
   type Class {
     id: ID!
     name: String!
-    duration: String!
+    durationMinutes: Int!
     numberOfClasses: Int!
     price: Float!
     description: String
@@ -277,6 +278,7 @@ export const typeDefs = gql`
     contractTemplates(isActive: Boolean): [ContractTemplate!]!
     contractTemplate(id: ID!): ContractTemplate
     
+    # ID Card Templates
     idCardTemplates(isActive: Boolean): [IDCardTemplate!]!
     idCardTemplate(id: ID!): IDCardTemplate
     
@@ -520,19 +522,21 @@ export const typeDefs = gql`
     # Plans
     createPlan(
       name: String!
-      duration: String!
+      durationMonths: Int!
       price: Float!
       gymId: ID!
       description: String
+      includedClassIds: [ID!]
     ): Plan!
     
     updatePlan(
       id: ID!
       gymId: ID!
       name: String
-      duration: String
+      durationMonths: Int
       price: Float
       description: String
+      includedClassIds: [ID!]
     ): Plan!
     
     deletePlan(id: ID!, gymId: ID!): Boolean!
@@ -540,7 +544,7 @@ export const typeDefs = gql`
     # Classes
     createClass(
       name: String!
-      duration: String!
+      durationMinutes: Int!
       numberOfClasses: Int!
       price: Float!
       gymId: ID!
@@ -551,7 +555,7 @@ export const typeDefs = gql`
       id: ID!
       gymId: ID!
       name: String
-      duration: String
+      durationMinutes: Int
       numberOfClasses: Int
       price: Float
       description: String

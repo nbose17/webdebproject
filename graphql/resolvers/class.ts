@@ -41,12 +41,12 @@ export const classResolvers = {
       }
 
       const { gymId, ...classData } = args;
-      
+
       // Verify user has access to this gym
       const userGymId = context.user.gymId?.toString();
       const userRole = context.user.role?.toUpperCase();
       const isAdmin = userRole === 'FITCONNECT_ADMIN';
-      
+
       if (!isAdmin && userGymId !== gymId) {
         throw new Error('You do not have permission to create classes for this gym');
       }
@@ -54,19 +54,19 @@ export const classResolvers = {
       try {
         const GymModels = await getGymModels(gymId);
         const gymObjectId = new mongoose.Types.ObjectId(gymId);
-        
+
         const classItem = new GymModels.Class({
           ...classData,
           gymId: gymObjectId,
         });
-        
+
         await classItem.save();
-        
+
         return {
           id: classItem._id.toString(),
           gymId: classItem.gymId.toString(),
           name: classItem.name,
-          duration: classItem.duration,
+          durationMinutes: classItem.durationMinutes,
           numberOfClasses: classItem.numberOfClasses,
           price: classItem.price,
           description: classItem.description,
@@ -87,7 +87,7 @@ export const classResolvers = {
       const userGymId = context.user.gymId?.toString();
       const userRole = context.user.role?.toUpperCase();
       const isAdmin = userRole === 'FITCONNECT_ADMIN';
-      
+
       if (!isAdmin && userGymId !== gymId) {
         throw new Error('You do not have permission to update classes for this gym');
       }
@@ -99,11 +99,11 @@ export const classResolvers = {
           { $set: updateData },
           { new: true }
         ).lean();
-        
+
         if (!classItem) {
           throw new Error('Class not found');
         }
-        
+
         return {
           ...classItem,
           id: classItem._id.toString(),
@@ -123,7 +123,7 @@ export const classResolvers = {
       const userGymId = context.user.gymId?.toString();
       const userRole = context.user.role?.toUpperCase();
       const isAdmin = userRole === 'FITCONNECT_ADMIN';
-      
+
       if (!isAdmin && userGymId !== gymId) {
         throw new Error('You do not have permission to delete classes for this gym');
       }
@@ -131,11 +131,11 @@ export const classResolvers = {
       try {
         const GymModels = await getGymModels(gymId);
         const classItem = await GymModels.Class.findByIdAndDelete(id);
-        
+
         if (!classItem) {
           throw new Error('Class not found');
         }
-        
+
         return true;
       } catch (error: any) {
         console.error('Error deleting class:', error);
@@ -149,7 +149,7 @@ export const classResolvers = {
       const AdminModels = await getAdminModels();
       const gym = await AdminModels.Gym.findById(parent.gymId).lean();
       if (!gym) return null;
-      
+
       return {
         id: gym._id.toString(),
         name: gym.name,

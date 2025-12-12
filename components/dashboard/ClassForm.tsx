@@ -20,19 +20,22 @@ export default function ClassForm({
   classItem,
 }: ClassFormProps) {
   const [name, setName] = useState('');
-  const [duration, setDuration] = useState('');
+  const [hours, setHours] = useState('');
+  const [minutes, setMinutes] = useState('');
   const [numberOfClasses, setNumberOfClasses] = useState('');
   const [price, setPrice] = useState('');
 
   useEffect(() => {
-    if (classItem) {
+    if (classItem && classItem.durationMinutes) {
       setName(classItem.name);
-      setDuration(classItem.duration);
+      setHours(Math.floor(classItem.durationMinutes / 60).toString());
+      setMinutes((classItem.durationMinutes % 60).toString());
       setNumberOfClasses(classItem.numberOfClasses.toString());
       setPrice(classItem.price.toString());
     } else {
       setName('');
-      setDuration('');
+      setHours('');
+      setMinutes('');
       setNumberOfClasses('');
       setPrice('');
     }
@@ -40,9 +43,11 @@ export default function ClassForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const totalMinutes = (parseInt(hours || '0') * 60) + parseInt(minutes || '0');
+
     onSubmit({
       name,
-      duration,
+      durationMinutes: totalMinutes,
       numberOfClasses: parseInt(numberOfClasses),
       price: parseFloat(price),
     });
@@ -58,13 +63,27 @@ export default function ClassForm({
           onChange={(e) => setName(e.target.value)}
           required
         />
-        <Input
-          label="Duration"
-          value={duration}
-          onChange={(e) => setDuration(e.target.value)}
-          required
-          placeholder="e.g., 1 Hour, 45 Minutes"
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            label="Hours"
+            type="number"
+            value={hours}
+            onChange={(e) => setHours(e.target.value)}
+            min="0"
+            required={!minutes} // Required if minutes is empty
+            placeholder="0"
+          />
+          <Input
+            label="Minutes"
+            type="number"
+            value={minutes}
+            onChange={(e) => setMinutes(e.target.value)}
+            min="0"
+            max="59"
+            required={!hours} // Required if hours is empty
+            placeholder="0"
+          />
+        </div>
         <Input
           label="No of Classes"
           type="number"
