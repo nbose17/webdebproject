@@ -8,7 +8,9 @@ import Button from '@/components/shared/Button';
 import Modal from '@/components/shared/Modal';
 import { Select, Skeleton } from 'antd';
 import { useAuth } from '@/hooks/useAuth';
+
 import { GET_USERS } from '@/graphql/queries/admin';
+import { useTranslation } from 'react-i18next';
 
 const { Option } = Select;
 
@@ -23,11 +25,13 @@ export default function BranchForm({
   isOpen,
   onClose,
   onSubmit,
+
   branch,
 }: BranchFormProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const gymId = user?.gymId;
-  
+
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
@@ -36,11 +40,11 @@ export default function BranchForm({
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
 
   // Fetch gym managers for manager select
-  const { data: usersData, loading: usersLoading } = useQuery(GET_USERS, {
-    variables: { 
+  const { data: usersData, loading: usersLoading } = useQuery<{ users: any[] }>(GET_USERS, {
+    variables: {
       role: 'GYM_MANAGER',
       gymId: gymId,
-      isActive: true 
+      isActive: true
     },
     skip: !gymId || !isOpen,
     fetchPolicy: 'cache-and-network',
@@ -80,43 +84,43 @@ export default function BranchForm({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={branch ? 'Edit Branch' : 'Add Branch'}>
+    <Modal isOpen={isOpen} onClose={onClose} title={branch ? t('branches.edit') : t('branches.add')}>
       <form onSubmit={handleSubmit} className="dashboard-form">
         <Input
-          label="Branch Name"
+          label={t('branches.fields.name')}
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
         />
         <Input
-          label="Address"
+          label={t('branches.fields.address')}
           value={address}
           onChange={(e) => setAddress(e.target.value)}
           required
         />
         <Input
-          label="Phone"
+          label={t('branches.fields.phone')}
           type="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           required
         />
         <Input
-          label="Email"
+          label={t('branches.fields.email')}
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
         />
         <div className="input-group">
-          <label className="input-label">Manager (Optional)</label>
+          <label className="input-label">{t('branches.fields.manager')} ({t('common.optional')})</label>
           {usersLoading ? (
             <Skeleton.Input active style={{ width: '100%', height: '40px' }} />
           ) : (
             <Select
               value={managerId || undefined}
               onChange={(value) => setManagerId(value || undefined)}
-              placeholder="Select a manager"
+              placeholder={t('forms.placeholders.selectManager')}
               allowClear
               style={{ width: '100%' }}
             >
@@ -129,23 +133,23 @@ export default function BranchForm({
           )}
         </div>
         <div className="input-group">
-          <label className="input-label">Status</label>
+          <label className="input-label">{t('branches.fields.status')}</label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as 'active' | 'inactive')}
             className="input"
             required
           >
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option value="active">{t('dashboard.common.status.active')}</option>
+            <option value="inactive">{t('dashboard.common.status.inactive')}</option>
           </select>
         </div>
         <div className="dashboard-form-actions">
           <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button type="submit" variant="primary">
-            {branch ? 'Update' : 'Add'}
+            {branch ? t('common.update') : t('dashboard.common.actions.add')}
           </Button>
         </div>
       </form>

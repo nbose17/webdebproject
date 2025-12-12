@@ -33,6 +33,11 @@ export const typeDefs = gql`
     inactive
   }
 
+  enum DashboardViewMode {
+    table
+    card
+  }
+
   type Permission {
     resource: String!
     actions: [String!]!
@@ -44,6 +49,7 @@ export const typeDefs = gql`
     name: String!
     role: UserRole!
     permissions: [Permission!]
+    preferences: UserPreferences
     gymId: ID
     branchId: ID
     isActive: Boolean!
@@ -108,6 +114,10 @@ export const typeDefs = gql`
     joinDate: Date!
     createdAt: Date!
     updatedAt: Date!
+  }
+
+  type UserPreferences {
+    dashboardViewMode: DashboardViewMode!
   }
 
   type Subscription {
@@ -301,17 +311,17 @@ export const typeDefs = gql`
     dashboardStats: DashboardStats!
   }
 
+  type PlanDistributionItem {
+    name: String!
+    value: Int!
+  }
+
   type DashboardStats {
-    totalGyms: Int!
-    activeGyms: Int!
-    totalUsers: Int!
-    activeUsers: Int!
-    totalBranches: Int!
-    activeBranches: Int!
     totalClients: Int!
-    activeClients: Int!
-    overduePayments: Int!
-    expiredSubscriptions: Int!
+    totalRevenue: Float!
+    activePlans: Int!
+    activeClasses: Int!
+    planDistribution: [PlanDistributionItem!]!
   }
 
   # Mutation types
@@ -340,6 +350,7 @@ export const typeDefs = gql`
       gymId: ID
       branchId: ID
       permissions: [PermissionInput!]
+      preferences: UserPreferencesInput
       isActive: Boolean
     ): User!
     
@@ -587,6 +598,10 @@ export const typeDefs = gql`
   input PermissionInput {
     resource: String!
     actions: [String!]!
+  }
+
+  input UserPreferencesInput {
+    dashboardViewMode: DashboardViewMode
   }
 
   input IDCardElementInput {

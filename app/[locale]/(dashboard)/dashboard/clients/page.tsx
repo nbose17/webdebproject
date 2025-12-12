@@ -10,8 +10,10 @@ import ClientCard from '@/components/dashboard/ClientCard';
 import ClientForm from '@/components/dashboard/ClientForm';
 import Button from '@/components/shared/Button';
 import { FaUsers, FaDownload, FaIdCard, FaTable, FaTh, FaSearch, FaFilter, FaSort } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
-import { GET_CLIENTS, CREATE_CLIENT, UPDATE_CLIENT, DELETE_CLIENT, GET_PLANS } from '@/graphql/queries/admin';
+import { GET_CLIENTS, CREATE_CLIENT, UPDATE_CLIENT, DELETE_CLIENT, GET_PLANS, UPDATE_USER } from '@/graphql/queries/admin';
+import { useEffect } from 'react';
 
 const { Search } = AntdInput;
 
@@ -20,6 +22,7 @@ type SortField = 'name' | 'joinDate' | 'status' | 'membershipType';
 type SortDirection = 'asc' | 'desc';
 
 export default function ClientsPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const gymId = user?.gymId;
 
@@ -32,6 +35,12 @@ export default function ClientsPage() {
   const { data: plansData } = useQuery<{ plans: Plan[] }>(GET_PLANS, {
     variables: { gymId },
     skip: !gymId,
+  });
+
+  const [updateUserMutation] = useMutation(UPDATE_USER, {
+    onError: (error) => {
+      console.error('Failed to update user preferences:', error);
+    },
   });
 
   const [createClient] = useMutation(CREATE_CLIENT, {
@@ -67,6 +76,24 @@ export default function ClientsPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
+
+  useEffect(() => {
+    if (user?.preferences?.dashboardViewMode) {
+      setViewMode(user.preferences.dashboardViewMode as ViewMode);
+    }
+  }, [user]);
+
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    if (user) {
+      updateUserMutation({
+        variables: {
+          id: user.id,
+          preferences: { dashboardViewMode: mode },
+        },
+      });
+    }
+  };
 
 
 
@@ -282,7 +309,7 @@ Generated on: ${new Date().toLocaleDateString()}
     { key: 'id', label: 'No', render: (_: any, row: any, index?: number) => (index ?? 0) + 1 },
     {
       key: 'image',
-      label: 'Image',
+      label: t('clients.fields.image'),
       render: (value: string) => (
         value ? (
           <img
@@ -297,7 +324,7 @@ Generated on: ${new Date().toLocaleDateString()}
     },
     {
       key: 'name',
-      label: 'Name',
+      label: t('clients.fields.name'),
       render: (value: string, row: Client) => (
         <Link
           href={`/dashboard/clients/${row.id}`}
@@ -317,17 +344,17 @@ Generated on: ${new Date().toLocaleDateString()}
         </Link>
       )
     },
-    { key: 'email', label: 'Email' },
-    { key: 'phone', label: 'Phone' },
-    { key: 'membershipType', label: 'Membership Type' },
+    { key: 'email', label: t('clients.fields.email') },
+    { key: 'phone', label: t('clients.fields.phone') },
+    { key: 'membershipType', label: t('clients.fields.membershipType') },
     {
       key: 'joinDate',
-      label: 'Join Date',
+      label: t('clients.fields.joinDate'),
       render: (value: string) => formatDate(value)
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('clients.fields.status'),
       render: (value: string) => (
         <span style={{
           padding: 'var(--spacing-xs) var(--spacing-sm)',
@@ -370,7 +397,7 @@ Generated on: ${new Date().toLocaleDateString()}
             title="Download Contract"
           >
             <FaDownload />
-            <span>Contract</span>
+            <span>{t('clients.downloadContract')}</span>
           </button>
           <button
             onClick={() => handleDownloadIDCard(row)}
@@ -396,7 +423,7 @@ Generated on: ${new Date().toLocaleDateString()}
             title="Download ID Card"
           >
             <FaIdCard />
-            <span>ID Card</span>
+            <span>{t('clients.downloadId')}</span>
           </button>
         </div>
       )
@@ -417,11 +444,11 @@ Generated on: ${new Date().toLocaleDateString()}
     if (!gymId) return;
 
     Modal.confirm({
-      title: 'Delete Client',
-      content: `Are you sure you want to delete "${client.name}"? This action cannot be undone.`,
-      okText: 'Yes, Delete',
+      title: t('clients.deleteModal.title'),
+      content: t('clients.deleteModal.content', { name: client.name }),
+      okText: t('dashboard.common.actions.delete'),
       okType: 'danger',
-      cancelText: 'Cancel',
+      cancelText: t('common.cancel'),
       onOk: async () => {
         try {
           await deleteClient({
@@ -510,8 +537,8 @@ Generated on: ${new Date().toLocaleDateString()}
     return (
       <div>
         <Alert
-          message="No Gym Associated"
-          description="You need to be associated with a gym to manage clients."
+          message={t('dashboard.alerts.noGym')}
+          description={t('dashboard.alerts.noGymDesc', { feature: t('clients.title') })}
           type="warning"
           showIcon
         />
@@ -527,7 +554,7 @@ Generated on: ${new Date().toLocaleDateString()}
             <span className="dashboard-page-title-icon">
               <FaUsers />
             </span>
-            Clients
+            {t('clients.title')}
           </h1>
         </div>
         <Skeleton active paragraph={{ rows: 8 }} />
@@ -555,12 +582,12 @@ Generated on: ${new Date().toLocaleDateString()}
           <span className="dashboard-page-title-icon">
             <FaUsers />
           </span>
-          Clients
+          {t('clients.title')}
         </h1>
         <div style={{ display: 'flex', gap: 'var(--spacing-md)', alignItems: 'center' }}>
           <div style={{ display: 'flex', gap: 'var(--spacing-xs)', backgroundColor: 'var(--color-bg-secondary)', padding: '4px', borderRadius: 'var(--radius-md)' }}>
             <button
-              onClick={() => setViewMode('table')}
+              onClick={() => handleViewModeChange('table')}
               style={{
                 padding: 'var(--spacing-xs) var(--spacing-sm)',
                 border: 'none',
@@ -578,10 +605,10 @@ Generated on: ${new Date().toLocaleDateString()}
               }}
             >
               <FaTable />
-              <span>Table</span>
+              <span>{t('dashboard.common.viewMode.table')}</span>
             </button>
             <button
-              onClick={() => setViewMode('card')}
+              onClick={() => handleViewModeChange('card')}
               style={{
                 padding: 'var(--spacing-xs) var(--spacing-sm)',
                 border: 'none',
@@ -599,11 +626,11 @@ Generated on: ${new Date().toLocaleDateString()}
               }}
             >
               <FaTh />
-              <span>Card</span>
+              <span>{t('dashboard.common.viewMode.card')}</span>
             </button>
           </div>
           <Button variant="primary" onClick={handleAdd}>
-            Add Client
+            {t('clients.add')}
           </Button>
         </div>
       </div>
@@ -620,7 +647,7 @@ Generated on: ${new Date().toLocaleDateString()}
           {/* Search Input */}
           <div style={{ flex: '1', minWidth: '250px' }}>
             <Search
-              placeholder="Search by name, email, or phone..."
+              placeholder={t('dashboard.common.filters.search')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               allowClear
@@ -638,16 +665,16 @@ Generated on: ${new Date().toLocaleDateString()}
               fontWeight: 'var(--font-weight-medium)'
             }}>
               <FaFilter style={{ display: 'inline', marginRight: 'var(--spacing-xs)' }} />
-              Status
+              {t('dashboard.common.filters.status')}
             </label>
             <Select
               value={statusFilter}
               onChange={(value) => setStatusFilter(value as 'all' | 'active' | 'inactive')}
               style={{ width: '100%' }}
               options={[
-                { label: 'All Status', value: 'all' },
-                { label: 'Active', value: 'active' },
-                { label: 'Inactive', value: 'inactive' },
+                { label: t('dashboard.common.status.all'), value: 'all' },
+                { label: t('dashboard.common.status.active'), value: 'active' },
+                { label: t('dashboard.common.status.inactive'), value: 'inactive' },
               ]}
             />
           </div>
@@ -661,14 +688,14 @@ Generated on: ${new Date().toLocaleDateString()}
               marginBottom: 'var(--spacing-xs)',
               fontWeight: 'var(--font-weight-medium)'
             }}>
-              Membership
+              {t('dashboard.common.filters.membership')}
             </label>
             <Select
               value={membershipTypeFilter}
               onChange={(value) => setMembershipTypeFilter(value)}
               style={{ width: '100%' }}
               options={[
-                { label: 'All Types', value: 'all' },
+                { label: t('dashboard.common.status.all'), value: 'all' },
                 ...membershipTypes.map(type => ({ label: type, value: type }))
               ]}
             />
@@ -684,17 +711,17 @@ Generated on: ${new Date().toLocaleDateString()}
               fontWeight: 'var(--font-weight-medium)'
             }}>
               <FaSort style={{ display: 'inline', marginRight: 'var(--spacing-xs)' }} />
-              Sort By
+              {t('dashboard.common.filters.sortBy')}
             </label>
             <Select
               value={sortField}
               onChange={(value) => setSortField(value as SortField)}
               style={{ width: '100%' }}
               options={[
-                { label: 'Name', value: 'name' },
-                { label: 'Join Date', value: 'joinDate' },
-                { label: 'Status', value: 'status' },
-                { label: 'Membership Type', value: 'membershipType' },
+                { label: t('clients.fields.name'), value: 'name' },
+                { label: t('clients.fields.joinDate'), value: 'joinDate' },
+                { label: t('clients.fields.status'), value: 'status' },
+                { label: t('clients.fields.membershipType'), value: 'membershipType' },
               ]}
             />
           </div>
@@ -708,15 +735,15 @@ Generated on: ${new Date().toLocaleDateString()}
               marginBottom: 'var(--spacing-xs)',
               fontWeight: 'var(--font-weight-medium)'
             }}>
-              Order
+              {t('dashboard.common.filters.order')}
             </label>
             <Select
               value={sortDirection}
               onChange={(value) => setSortDirection(value as SortDirection)}
               style={{ width: '100%' }}
               options={[
-                { label: 'Ascending', value: 'asc' },
-                { label: 'Descending', value: 'desc' },
+                { label: t('dashboard.common.filters.ascending'), value: 'asc' },
+                { label: t('dashboard.common.filters.descending'), value: 'desc' },
               ]}
             />
           </div>
@@ -733,7 +760,7 @@ Generated on: ${new Date().toLocaleDateString()}
               }}
               style={{ alignSelf: 'flex-end' }}
             >
-              Clear Filters
+              {t('dashboard.common.filters.clear')}
             </Button>
           )}
         </div>
@@ -770,8 +797,8 @@ Generated on: ${new Date().toLocaleDateString()}
           borderRadius: 'var(--radius-lg)',
           boxShadow: 'var(--shadow-md)'
         }}>
-          <p style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--spacing-sm)' }}>No clients found</p>
-          <p style={{ fontSize: 'var(--font-size-sm)' }}>Try adjusting your filters or search query</p>
+          <p style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--spacing-sm)' }}>{t('clients.empty.title')}</p>
+          <p style={{ fontSize: 'var(--font-size-sm)' }}>{t('clients.empty.description')}</p>
         </div>
       )}
       <ClientForm

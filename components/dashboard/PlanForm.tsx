@@ -8,8 +8,9 @@ import Button from '@/components/shared/Button';
 import Modal from '@/components/shared/Modal';
 import { GET_CLASSES } from '@/graphql/queries/admin';
 import { useAuth } from '@/hooks/useAuth';
+
 import { Checkbox, Skeleton, Empty } from 'antd';
-// Removed invalid import
+import { useTranslation } from 'react-i18next'; // Added import
 
 interface PlanFormProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ export default function PlanForm({
   onSubmit,
   plan,
 }: PlanFormProps) {
+  const { t } = useTranslation(); // Added hook
   const { user } = useAuth();
   const gymId = user?.gymId;
 
@@ -95,10 +97,10 @@ export default function PlanForm({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={plan ? 'Edit Plan' : 'Add Plan'}>
+    <Modal isOpen={isOpen} onClose={onClose} title={plan ? t('plans.edit') : t('plans.add')}>
       <form onSubmit={handleSubmit} className="dashboard-form">
         <Input
-          label="Name"
+          label={t('plans.fields.name')}
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
@@ -107,7 +109,7 @@ export default function PlanForm({
         <div style={{ display: 'flex', gap: '1rem' }}>
           <div style={{ flex: 1 }}>
             <Input
-              label="Years"
+              label={t('forms.labels.years')}
               type="number"
               value={years}
               onChange={(e) => setYears(e.target.value)}
@@ -117,7 +119,7 @@ export default function PlanForm({
           </div>
           <div style={{ flex: 1 }}>
             <Input
-              label="Months"
+              label={t('forms.labels.months')}
               type="number"
               value={months}
               onChange={(e) => setMonths(e.target.value)}
@@ -129,7 +131,7 @@ export default function PlanForm({
         </div>
 
         <Input
-          label="Price ($)"
+          label={t('plans.fields.price')}
           type="number"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
@@ -139,12 +141,12 @@ export default function PlanForm({
         />
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Included Classes</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('plans.fields.includedClasses')}</label>
           <div className="border rounded-md p-3 max-h-48 overflow-y-auto">
             {classesLoading ? (
               <Skeleton active paragraph={{ rows: 2 }} />
             ) : availableClasses.length === 0 ? (
-              <Empty description="No classes available" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+              <Empty description={t('plans.fields.noClasses')} image={Empty.PRESENTED_IMAGE_SIMPLE} />
             ) : (
               <Checkbox.Group
                 style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '8px' }}
@@ -163,10 +165,10 @@ export default function PlanForm({
 
         <div className="dashboard-form-actions">
           <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button type="submit" variant="primary">
-            {plan ? 'Update' : 'Add'}
+            {plan ? t('common.update') : t('dashboard.common.actions.add')}
           </Button>
         </div>
       </form>

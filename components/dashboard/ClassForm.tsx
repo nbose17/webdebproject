@@ -5,6 +5,7 @@ import { Class } from '@/lib/types';
 import Input from '@/components/shared/Input';
 import Button from '@/components/shared/Button';
 import Modal from '@/components/shared/Modal';
+import { useTranslation } from 'react-i18next';
 
 interface ClassFormProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ export default function ClassForm({
   onSubmit,
   classItem,
 }: ClassFormProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [hours, setHours] = useState('');
   const [minutes, setMinutes] = useState('');
@@ -55,17 +57,17 @@ export default function ClassForm({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={classItem ? 'Edit Class' : 'Add Class'}>
+    <Modal isOpen={isOpen} onClose={onClose} title={classItem ? t('classes.edit') : t('classes.add')}>
       <form onSubmit={handleSubmit} className="dashboard-form">
         <Input
-          label="Name"
+          label={t('classes.fields.name')}
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
         />
         <div className="grid grid-cols-2 gap-4">
           <Input
-            label="Hours"
+            label={t('forms.labels.hours')}
             type="number"
             value={hours}
             onChange={(e) => setHours(e.target.value)}
@@ -74,7 +76,7 @@ export default function ClassForm({
             placeholder="0"
           />
           <Input
-            label="Minutes"
+            label={t('forms.labels.minutes')}
             type="number"
             value={minutes}
             onChange={(e) => setMinutes(e.target.value)}
@@ -85,7 +87,7 @@ export default function ClassForm({
           />
         </div>
         <Input
-          label="No of Classes"
+          label={t('classes.fields.sessions')}
           type="number"
           value={numberOfClasses}
           onChange={(e) => setNumberOfClasses(e.target.value)}
@@ -93,7 +95,7 @@ export default function ClassForm({
           min="1"
         />
         <Input
-          label="Price ($)"
+          label={t('classes.fields.price')}
           type="number"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
@@ -103,10 +105,10 @@ export default function ClassForm({
         />
         <div className="dashboard-form-actions">
           <Button type="button" variant="outline" onClick={onClose}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button type="submit" variant="primary">
-            {classItem ? 'Update' : 'Add'}
+            {classItem ? t('common.update') : t('dashboard.common.actions.add')}
           </Button>
         </div>
       </form>

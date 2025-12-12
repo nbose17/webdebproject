@@ -61,6 +61,180 @@
     "description": "Sorry, we couldn't find the page you're looking for.",
     "backToHome": "Back to Home",
     "backToHomeButton": "Go Home"
+  },
+  "dashboard": {
+    "sidebar": {
+      "plans": "Plans",
+      "classes": "Classes",
+      "branches": "Branches",
+      "clients": "Clients",
+      "trainers": "Trainers",
+      "dashboard": "Dashboard"
+    },
+    "common": {
+      "viewMode": {
+        "table": "Table",
+        "card": "Card"
+      },
+      "filters": {
+        "search": "Search...",
+        "clear": "Clear Filters",
+        "status": "Status",
+        "membership": "Membership",
+        "sortBy": "Sort By",
+        "order": "Order",
+        "ascending": "Ascending",
+        "descending": "Descending"
+      },
+      "actions": {
+        "add": "Add",
+        "edit": "Edit",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "save": "Save",
+        "download": "Download"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "all": "All"
+      },
+      "columns": {
+        "actions": "Actions"
+      },
+      "stats": {
+        "revenue": "Total Revenue",
+        "clients": "Total Clients",
+        "activePlans": "Active Plans",
+        "activeClasses": "Active Classes",
+        "planDistribution": "Plan Distribution"
+      }
+    },
+    "alerts": {
+      "noGym": "No Gym Associated",
+      "noGymDesc": "You need to be associated with a gym to manage {{feature}}.",
+      "refreshUser": "Refresh User Data",
+      "debugSession": "Debug Session"
+    }
+  },
+  "plans": {
+    "title": "Plans",
+    "subtitle": "",
+    "add": "Add Plan",
+    "edit": "Edit Plan",
+    "delete": "Delete Plan",
+    "fields": {
+      "name": "Name",
+      "duration": "Duration",
+      "price": "Price",
+      "totalPrice": "Total Price",
+      "includedClasses": "Included Classes",
+      "noClasses": "No classes included",
+      "more": "more"
+    },
+    "deleteModal": {
+      "title": "Delete Plan",
+      "content": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone."
+    }
+  },
+  "classes": {
+    "title": "Classes",
+    "add": "Add Class",
+    "edit": "Edit Class",
+    "delete": "Delete Class",
+    "fields": {
+      "name": "Name",
+      "duration": "Duration",
+      "sessions": "Sessions",
+      "price": "Price",
+      "unlimited": "Unlimited Sessions"
+    },
+    "deleteModal": {
+      "title": "Delete Class",
+      "content": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone."
+    }
+  },
+  "branches": {
+    "title": "Branches",
+    "add": "Add Branch",
+    "edit": "Edit Branch",
+    "delete": "Delete Branch",
+    "fields": {
+      "name": "Branch Name",
+      "address": "Address",
+      "phone": "Phone",
+      "email": "Email",
+      "manager": "Manager",
+      "status": "Status"
+    },
+    "deleteModal": {
+      "title": "Delete Branch",
+      "content": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone."
+    }
+  },
+  "clients": {
+    "title": "Clients",
+    "add": "Add Client",
+    "edit": "Edit Client",
+    "delete": "Delete Client",
+    "renew": "Renew",
+    "downloadContract": "Contract",
+    "downloadId": "ID Card",
+    "fields": {
+      "image": "Image",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "membershipType": "Membership Type",
+      "joinDate": "Join Date",
+      "status": "Status",
+      "contractStart": "Contract Start",
+      "contractEnd": "Contract End"
+    },
+    "deleteModal": {
+      "title": "Delete Client",
+      "content": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone."
+    },
+    "renewal": {
+      "success": "Membership renewed until {{date}}",
+      "failed": "Renewal failed: {{error}}",
+      "notFound": "Cannot renew: Plan \"{{plan}}\" not found."
+    },
+    "contract": {
+      "title": "CLIENT MEMBERSHIP CONTRACT",
+      "terms": "Terms and Conditions"
+    },
+    "empty": {
+      "title": "No clients found",
+      "description": "Try adjusting your filters or search query"
+    }
+  },
+  "forms": {
+    "validation": {
+      "required": "This field is required",
+      "email": "Please enter a valid email",
+      "phone": "Please enter a valid phone number",
+      "imageType": "Please select a valid image file",
+      "imageSize": "Image size should be less than 5MB"
+    },
+    "placeholders": {
+      "select": "Select...",
+      "selectManager": "Select a manager",
+      "enterName": "Enter name",
+      "enterEmail": "Enter email address",
+      "enterPhone": "Enter phone number",
+      "enterUrl": "Enter image URL"
+    },
+    "labels": {
+      "years": "Years",
+      "months": "Months",
+      "contractStart": "Contract Start Date",
+      "contractEnd": "Contract End Date",
+      "image": "Client Image (Optional)",
+      "chooseFile": "Choose File",
+      "or": "or",
+      "removeImage": "Remove image"
+    }
   }
 }
-

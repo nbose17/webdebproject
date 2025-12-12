@@ -56,6 +56,10 @@ export interface User {
   role: UserRole;
   permissions?: Permission[];
   gymId?: string; // For gym-specific users
+  gym?: Gym;
+  preferences?: {
+    dashboardViewMode: 'table' | 'card';
+  };
 }
 
 // Admin-specific interfaces

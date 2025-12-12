@@ -5,6 +5,7 @@ import { Table } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import Button from '@/components/shared/Button';
 import { FaEdit, FaTrash } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 interface Column {
   key: string;
@@ -25,6 +26,8 @@ export default function DataTable({
   onEdit,
   onDelete,
 }: DataTableProps) {
+  const { t } = useTranslation();
+
   // Convert custom column format to Ant Design column format
   const antdColumns: ColumnsType<any> = useMemo(() => {
     const convertedColumns: ColumnsType<any> = columns.map((col) => ({
@@ -42,7 +45,7 @@ export default function DataTable({
     // Add Actions column if edit or delete handlers are provided
     if (onEdit || onDelete) {
       convertedColumns.push({
-        title: 'Actions',
+        title: t('dashboard.common.columns.actions'),
         key: 'actions',
         width: 120,
         render: (_: any, record: any) => (
@@ -52,10 +55,10 @@ export default function DataTable({
                 variant="outline"
                 size="sm"
                 onClick={() => onEdit(record)}
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   padding: 'var(--spacing-sm)',
                   minWidth: 'auto'
                 }}
@@ -69,10 +72,10 @@ export default function DataTable({
                 variant="outline"
                 size="sm"
                 onClick={() => onDelete(record)}
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   padding: 'var(--spacing-sm)',
                   minWidth: 'auto'
                 }}
@@ -90,11 +93,11 @@ export default function DataTable({
   }, [columns, onEdit, onDelete]);
 
   return (
-    <div style={{ 
-      background: 'var(--color-white)', 
-      padding: 'var(--spacing-lg)', 
-      borderRadius: 'var(--radius-lg)', 
-      boxShadow: 'var(--shadow-md)' 
+    <div style={{
+      background: 'var(--color-white)',
+      padding: 'var(--spacing-lg)',
+      borderRadius: 'var(--radius-lg)',
+      boxShadow: 'var(--shadow-md)'
     }}>
       <Table
         columns={antdColumns}

@@ -9,6 +9,7 @@ import Modal from '@/components/shared/Modal';
 import { useAuth } from '@/hooks/useAuth';
 import { GET_PLANS } from '@/graphql/queries/admin';
 import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
 
 const { Option } = Select;
 
@@ -23,8 +24,10 @@ export default function ClientForm({
   isOpen,
   onClose,
   onSubmit,
+
   client,
 }: ClientFormProps) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const gymId = user?.gymId;
 
@@ -89,13 +92,13 @@ export default function ClientForm({
     if (file) {
       // Validate file type
       if (!file.type.startsWith('image/')) {
-        alert('Please select a valid image file');
+        alert(t('forms.validation.imageType'));
         return;
       }
 
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        alert('Image size should be less than 5MB');
+        alert(t('forms.validation.imageSize'));
         return;
       }
 
@@ -150,7 +153,7 @@ export default function ClientForm({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={client ? 'Edit Client' : 'Add Client'}>
+    <Modal isOpen={isOpen} onClose={onClose} title={client ? t('clients.edit') : t('clients.add')}>
       <Form
         form={form}
         layout="vertical"
@@ -160,37 +163,37 @@ export default function ClientForm({
       >
         <Form.Item
           name="name"
-          label="Name"
-          rules={[{ required: true, message: 'Please enter client name' }]}
+          label={t('clients.fields.name')}
+          rules={[{ required: true, message: t('forms.validation.required') }]}
         >
-          <AntInput placeholder="Enter client name" />
+          <AntInput placeholder={t('forms.placeholders.enterName')} />
         </Form.Item>
 
         <Form.Item
           name="email"
-          label="Email"
+          label={t('clients.fields.email')}
           rules={[
-            { required: true, message: 'Please enter email' },
-            { type: 'email', message: 'Please enter a valid email' }
+            { required: true, message: t('forms.validation.required') },
+            { type: 'email', message: t('forms.validation.email') }
           ]}
         >
-          <AntInput placeholder="Enter email address" />
+          <AntInput placeholder={t('forms.placeholders.enterEmail')} />
         </Form.Item>
 
         <Form.Item
           name="phone"
-          label="Phone"
-          rules={[{ required: true, message: 'Please enter phone number' }]}
+          label={t('clients.fields.phone')}
+          rules={[{ required: true, message: t('forms.validation.required') }]}
         >
-          <AntInput placeholder="Enter phone number" />
+          <AntInput placeholder={t('forms.placeholders.enterPhone')} />
         </Form.Item>
 
         <Form.Item
           name="membershipType"
-          label="Membership Plan"
-          rules={[{ required: true, message: 'Please select a plan' }]}
+          label={t('clients.fields.membershipType')}
+          rules={[{ required: true, message: t('forms.validation.required') }]}
         >
-          <Select placeholder="Select a Plan">
+          <Select placeholder={t('forms.placeholders.select')}>
             {plansData?.plans.map((plan) => (
               <Option key={plan.id} value={plan.name}>
                 {plan.name} ({plan.durationMonths} months - ${plan.price})
@@ -201,8 +204,8 @@ export default function ClientForm({
 
         <Form.Item
           name="joinDate"
-          label="Join Date"
-          rules={[{ required: true, message: 'Please select join date' }]}
+          label={t('clients.fields.joinDate')}
+          rules={[{ required: true, message: t('forms.validation.required') }]}
         >
           <DatePicker style={{ width: '100%' }} />
         </Form.Item>
@@ -210,22 +213,22 @@ export default function ClientForm({
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <Form.Item
             name="contractStartDate"
-            label="Contract Start Date"
-            rules={[{ required: true, message: 'Please select start date' }]}
+            label={t('forms.labels.contractStart')}
+            rules={[{ required: true, message: t('forms.validation.required') }]}
           >
             <DatePicker style={{ width: '100%' }} />
           </Form.Item>
 
           <Form.Item
             name="contractEndDate"
-            label="Contract End Date"
+            label={t('forms.labels.contractEnd')}
             help="Calculated automatically based on plan"
           >
             <DatePicker style={{ width: '100%' }} disabled />
           </Form.Item>
         </div>
 
-        <Form.Item label="Client Image (Optional)">
+        <Form.Item label={t('forms.labels.image')}>
           <div className="dashboard-form-image-upload-container">
             {imagePreview ? (
               <div className="dashboard-form-image-preview-container">
@@ -245,7 +248,7 @@ export default function ClientForm({
               </div>
             ) : (
               <div className="dashboard-form-image-placeholder">
-                <span>No image selected</span>
+                <span>{t('forms.labels.image')}</span>
               </div>
             )}
             <div className="dashboard-form-image-input-container">
@@ -258,11 +261,11 @@ export default function ClientForm({
                 id="client-image-upload"
               />
               <label htmlFor="client-image-upload" className="dashboard-form-file-input-label">
-                Choose File
+                {t('forms.labels.chooseFile')}
               </label>
-              <span className="dashboard-form-or-text">or</span>
+              <span className="dashboard-form-or-text">{t('forms.labels.or')}</span>
               <AntInput
-                placeholder="Enter image URL"
+                placeholder={t('forms.placeholders.enterUrl')}
                 value={image && !image.startsWith('data:') ? image : ''}
                 onChange={handleImageUrlChange}
                 className="dashboard-form-url-input"
@@ -273,8 +276,8 @@ export default function ClientForm({
 
         <Form.Item
           name="status"
-          label="Status"
-          rules={[{ required: true, message: 'Please select status' }]}
+          label={t('clients.fields.status')}
+          rules={[{ required: true, message: t('forms.validation.required') }]}
         >
           <Select>
             <Option value="active">Active</Option>
@@ -284,10 +287,10 @@ export default function ClientForm({
 
         <div className="dashboard-form-actions">
           <AntButton onClick={onClose} style={{ marginRight: '8px' }}>
-            Cancel
+            {t('common.cancel')}
           </AntButton>
           <AntButton type="primary" htmlType="submit">
-            {client ? 'Update' : 'Add'}
+            {client ? t('common.update') : t('dashboard.common.actions.add')}
           </AntButton>
         </div>
       </Form>

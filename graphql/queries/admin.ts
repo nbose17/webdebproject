@@ -37,26 +37,17 @@ export const GET_ME = gql`
       isActive
       gymId
       branchId
+      gym {
+        name
+      }
+      preferences {
+        dashboardViewMode
+      }
     }
   }
 `;
 
-export const GET_DASHBOARD_STATS = gql`
-  query GetDashboardStats {
-    dashboardStats {
-      totalGyms
-      activeGyms
-      totalUsers
-      activeUsers
-      totalBranches
-      activeBranches
-      totalClients
-      activeClients
-      overduePayments
-      expiredSubscriptions
-    }
-  }
-`;
+
 
 export const GET_GYMS = gql`
   query GetGyms($featured: Boolean, $subscriptionStatus: SubscriptionStatus, $paymentStatus: PaymentStatus) {
@@ -322,6 +313,7 @@ export const UPDATE_USER = gql`
     $branchId: ID
     $isActive: Boolean
     $permissions: [PermissionInput!]
+    $preferences: UserPreferencesInput
   ) {
     updateUser(
       id: $id
@@ -333,12 +325,16 @@ export const UPDATE_USER = gql`
       branchId: $branchId
       isActive: $isActive
       permissions: $permissions
+      preferences: $preferences
     ) {
       id
       email
       name
       role
       isActive
+      preferences {
+        dashboardViewMode
+      }
     }
   }
 `;
@@ -1058,6 +1054,21 @@ export const UPDATE_CMS = gql`
       facebookUrl
       twitterUrl
       instagramUrl
+    }
+  }
+`;
+
+export const GET_DASHBOARD_STATS = gql`
+  query GetDashboardStats {
+    dashboardStats {
+      totalClients
+      totalRevenue
+      activePlans
+      activeClasses
+      planDistribution {
+        name
+        value
+      }
     }
   }
 `;

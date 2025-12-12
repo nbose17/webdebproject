@@ -15,16 +15,16 @@ export const gymResolvers = {
     },
     gym: async (_: any, { id }: { id: string }) => {
       console.log('🔍 GET_GYM resolver called with ID:', id);
-      
+
       const AdminModels = await getAdminModels();
       const gym = await AdminModels.Gym.findById(id).lean();
-      
-      console.log('🔍 Gym lookup result:', { 
-        found: !!gym, 
-        id: gym?._id?.toString(), 
-        name: gym?.name 
+
+      console.log('🔍 Gym lookup result:', {
+        found: !!gym,
+        id: gym?._id?.toString(),
+        name: gym?.name
       });
-      
+
       if (!gym) {
         console.log('❌ Gym not found for ID:', id);
         // Let's also check all gyms to see what IDs we have
@@ -32,8 +32,71 @@ export const gymResolvers = {
         console.log('📋 Available gym IDs:', allGyms.map(g => ({ id: g._id.toString(), name: g.name })));
         throw new Error(`Gym not found for ID: ${id}`);
       }
-      
+
       return { ...gym, id: gym._id.toString() };
+    },
+    dashboardStats: async (_: any, __: any, context: any) => {
+      if (!context.user || !context.user.gymId) {
+        throw new Error('Not authenticated or no gym associated');
+      }
+
+      const gymId = context.user.gymId;
+      const GymModels = await getGymModels(gymId);
+      const AdminModels = await getAdminModels();
+
+      // 1. Total Clients
+      const totalClients = await GymModels.Client.countDocuments({ gymId });
+
+      // 2. Active Plans & Classes count
+      const activePlans = await GymModels.Plan.countDocuments({ gymId });
+      const activeClasses = await GymModels.Class.countDocuments({ gymId });
+
+      // 3. Plan Distribution & Revenue Estimation
+      // We need to fetch all clients to group by plan, and also need plan prices to calc revenue.
+      // Optimization: aggregate on db
+      const clients = await GymModels.Client.find({ gymId }).lean();
+      const plans = await GymModels.Plan.find({ gymId }).lean();
+
+      const planMap = new Map<string, number>(); // planName -> count
+      let totalRevenue = 0;
+
+      // Create a lookup for plan prices
+      const planPriceMap = new Map<string, number>();
+      plans.forEach(p => planPriceMap.set(p.name, p.price));
+
+      console.log('📊 Calculating dashboard stats for gym:', gymId);
+
+      clients.forEach(client => {
+        const planName = client.membershipType;
+        if (planName) {
+          planMap.set(planName, (planMap.get(planName) || 0) + 1);
+          // Add price to revenue if plan exists. 
+          const planPrice = planPriceMap.get(planName);
+          // console.log(`💰 Adding revenue for plan ${planName}: ${planPrice}`);
+          totalRevenue += planPrice || 0;
+        }
+      });
+
+      const planDistribution = Array.from(planMap.entries()).map(([name, value]) => ({
+        name,
+        value
+      }));
+
+      console.log('✅ Dashboard Stats:', {
+        totalClients,
+        totalRevenue,
+        activePlans,
+        activeClasses,
+        planDistributionCount: planMap.size
+      });
+
+      return {
+        totalClients: totalClients || 0,
+        totalRevenue: totalRevenue || 0,
+        activePlans: activePlans || 0,
+        activeClasses: activeClasses || 0,
+        planDistribution
+      };
     },
   },
   Mutation: {
@@ -43,7 +106,7 @@ export const gymResolvers = {
       }
 
       const AdminModels = await getAdminModels();
-      
+
       // Enum values from GraphQL are already lowercase
       const gym = new AdminModels.Gym({
         name: args.name,
@@ -56,7 +119,7 @@ export const gymResolvers = {
         paymentStatus: args.paymentStatus || 'current',
       });
       await gym.save();
-      
+
       // Automatically create the gym-specific database
       const gymId = gym._id.toString();
       try {
@@ -66,7 +129,7 @@ export const gymResolvers = {
         console.error(`⚠️ Failed to initialize gym database for ${gymId}:`, error.message);
         // Don't fail the gym creation if database init fails - it can be fixed later
       }
-      
+
       const populated = await AdminModels.Gym.findById(gym._id).lean();
       return { ...populated!, id: populated!._id.toString() };
     },
@@ -76,7 +139,7 @@ export const gymResolvers = {
       }
 
       const AdminModels = await getAdminModels();
-      
+
       // Build update object (enum values are already lowercase from GraphQL)
       const updateData: any = {};
       if (args.name !== undefined) updateData.name = args.name;
@@ -85,7 +148,7 @@ export const gymResolvers = {
       if (args.featured !== undefined) updateData.featured = args.featured;
       if (args.description !== undefined) updateData.description = args.description;
       if (args.ownerId !== undefined) updateData.ownerId = args.ownerId;
-      
+
       // Enum values from GraphQL are already lowercase, use directly
       if (args.subscriptionStatus !== undefined) {
         updateData.subscriptionStatus = args.subscriptionStatus;
@@ -132,21 +195,21 @@ export const gymResolvers = {
       // Get users from admin database (gym owner)
       const AdminModels = await getAdminModels();
       const adminUsers = await AdminModels.User.find({ gymId: parent.id }).lean();
-      
+
       // Also get users from gym-specific database (staff)
       try {
         const GymModels = await getGymModels(parent.id);
         const gymUsers = await GymModels.User.find({ gymId: parent.id }).lean();
         const allUsers = [...adminUsers, ...gymUsers];
-        return allUsers.map(user => ({ 
-          ...user, 
+        return allUsers.map(user => ({
+          ...user,
           id: user._id.toString(),
           role: user.role ? user.role.toUpperCase().replace(/-/g, '_') : user.role, // Convert to GraphQL enum format
         }));
       } catch (error) {
         // Gym database might not exist yet, return only admin users
-        return adminUsers.map(user => ({ 
-          ...user, 
+        return adminUsers.map(user => ({
+          ...user,
           id: user._id.toString(),
           role: user.role ? user.role.toUpperCase().replace(/-/g, '_') : user.role, // Convert to GraphQL enum format
         }));
@@ -169,8 +232,8 @@ export const gymResolvers = {
       // Try to find by string ID first, then by ObjectId
       let subscription = await AdminModels.Subscription.findOne({ gymId: parent.id }).lean();
       if (!subscription && mongoose.default.Types.ObjectId.isValid(parent.id)) {
-        subscription = await AdminModels.Subscription.findOne({ 
-          gymId: new mongoose.default.Types.ObjectId(parent.id) 
+        subscription = await AdminModels.Subscription.findOne({
+          gymId: new mongoose.default.Types.ObjectId(parent.id)
         }).lean();
       }
       if (!subscription) return null;

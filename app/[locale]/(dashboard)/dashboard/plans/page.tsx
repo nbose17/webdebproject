@@ -9,25 +9,21 @@ import PlanForm from '@/components/dashboard/PlanForm';
 import Button from '@/components/shared/Button';
 import { FaCreditCard } from 'react-icons/fa';
 import { Skeleton, Alert, message, Modal, Tag, Tooltip } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
-import { GET_PLANS, CREATE_PLAN, UPDATE_PLAN, DELETE_PLAN } from '@/graphql/queries/admin';
+import { GET_PLANS, CREATE_PLAN, UPDATE_PLAN, DELETE_PLAN, UPDATE_USER } from '@/graphql/queries/admin'; // Added UPDATE_USER
 import { FaTable, FaTh } from 'react-icons/fa';
 import PlanCard from '@/components/dashboard/PlanCard';
+import { useEffect } from 'react'; // Added useEffect
 
 type ViewMode = 'table' | 'card';
 
 export default function PlansPage() {
+  const { t } = useTranslation();
   const { user, isLoading } = useAuth();
   const gymId = user?.gymId;
 
-  console.log('🎯 PlansPage render:', {
-    hasUser: !!user,
-    userId: user?.id,
-    role: user?.role,
-    gymId: user?.gymId,
-    isLoading,
-    authContextUser: user
-  });
+  // ... (existing console logs)
 
   const { data, loading, error, refetch } = useQuery<{ plans: Plan[] }>(GET_PLANS, {
     variables: { gymId },
@@ -35,39 +31,67 @@ export default function PlansPage() {
     fetchPolicy: 'network-only',
   });
 
+  const [updateUserMutation] = useMutation(UPDATE_USER, {
+    onError: (error) => {
+      console.error('Failed to update user preferences:', error);
+    },
+  });
+
   const [createPlan] = useMutation(CREATE_PLAN, {
     onCompleted: () => {
-      message.success('Plan created successfully!');
+      message.success(t('common.success'));
       refetch();
     },
     onError: (error) => {
-      message.error(`Failed to create plan: ${error.message}`);
+      message.error(`${t('common.error')}: ${error.message}`);
     },
   });
 
   const [updatePlan] = useMutation(UPDATE_PLAN, {
     onCompleted: () => {
-      message.success('Plan updated successfully!');
+      message.success(t('common.success'));
       refetch();
     },
     onError: (error) => {
-      message.error(`Failed to update plan: ${error.message}`);
+      message.error(`${t('common.error')}: ${error.message}`);
     },
   });
 
   const [deletePlan] = useMutation(DELETE_PLAN, {
     onCompleted: () => {
-      message.success('Plan deleted successfully!');
+      message.success(t('common.success'));
       refetch();
     },
     onError: (error) => {
-      message.error(`Failed to delete plan: ${error.message}`);
+      message.error(`${t('common.error')}: ${error.message}`);
     },
   });
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
+
+  // Sync viewMode from user preferences
+  useEffect(() => {
+    if (user?.preferences?.dashboardViewMode) {
+      setViewMode(user.preferences.dashboardViewMode as ViewMode);
+    }
+  }, [user]);
+
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    if (user) {
+      updateUserMutation({
+        variables: {
+          id: user.id,
+          preferences: { dashboardViewMode: mode },
+        },
+      });
+    }
+  };
+
+  // ... (rest of component)
+
 
   const plans = data?.plans || [];
 
@@ -80,20 +104,20 @@ export default function PlansPage() {
 
   const columns = [
     { key: 'id', label: 'No', render: (_: any, row: any, index: any) => index + 1 },
-    { key: 'name', label: 'Name' },
+    { key: 'name', label: t('plans.fields.name') },
     {
       key: 'durationMonths',
-      label: 'Duration',
+      label: t('plans.fields.duration'),
       render: (value: number) => formatDuration(value),
     },
     {
       key: 'price',
-      label: 'Price',
+      label: t('plans.fields.price'),
       render: (value: number) => formatCurrency(value),
     },
     {
       key: 'totalPrice',
-      label: 'Total Price',
+      label: t('plans.fields.totalPrice'),
       render: (_: any, plan: any) => {
         const classTotal = plan.includedClasses?.reduce((sum: number, cls: any) => sum + cls.price, 0) || 0;
         return formatCurrency(plan.price + classTotal);
@@ -101,10 +125,10 @@ export default function PlansPage() {
     },
     {
       key: 'includedClasses',
-      label: 'Classes',
+      label: t('plans.fields.includedClasses'),
       render: (classes: any[]) => {
         if (!classes || classes.length === 0) {
-          return <Tag>No classes included</Tag>;
+          return <Tag>{t('plans.fields.noClasses')}</Tag>;
         }
 
         if (classes.length <= 2) {
@@ -131,7 +155,7 @@ export default function PlansPage() {
               </Tag>
             ))}
             <Tooltip title={remainingNames}>
-              <Tag>+{remainingCount} more</Tag>
+              <Tag>+{remainingCount} {t('plans.fields.more')}</Tag>
             </Tooltip>
           </div>
         );
@@ -153,11 +177,11 @@ export default function PlansPage() {
     if (!gymId) return;
 
     Modal.confirm({
-      title: 'Delete Plan',
-      content: `Are you sure you want to delete "${plan.name}"? This action cannot be undone.`,
-      okText: 'Yes, Delete',
+      title: t('plans.deleteModal.title'),
+      content: t('plans.deleteModal.content', { name: plan.name }),
+      okText: t('common.yes', { defaultValue: 'Yes' }),
       okType: 'danger',
-      cancelText: 'Cancel',
+      cancelText: t('common.cancel'),
       onOk: async () => {
         try {
           await deletePlan({
@@ -204,7 +228,7 @@ export default function PlansPage() {
             <span className="dashboard-page-title-icon">
               <FaCreditCard />
             </span>
-            Plans
+            {t('plans.title')}
           </h1>
         </div>
         <Skeleton active paragraph={{ rows: 8 }} />
@@ -288,14 +312,14 @@ export default function PlansPage() {
     return (
       <div>
         <Alert
-          message="No Gym Associated"
-          description={`You need to be associated with a gym to manage plans. ${user?.role === 'gym_owner' ? 'Please click the refresh button below to reload your user data.' : ''}`}
+          message={t('dashboard.alerts.noGym')}
+          description={`${t('dashboard.alerts.noGymDesc', { feature: t('plans.title') })} ${user?.role === 'gym_owner' ? 'Please click the refresh button below to reload your user data.' : ''}`}
           type="warning"
           showIcon
           action={
             user?.role === 'gym_owner' ? (
               <Button variant="primary" onClick={handleRefresh} style={{ marginTop: '8px' }}>
-                Refresh User Data
+                {t('dashboard.alerts.refreshUser')}
               </Button>
             ) : null
           }
@@ -311,7 +335,7 @@ export default function PlansPage() {
               {typeof window !== 'undefined' ? localStorage.getItem('user') : 'N/A'}
             </pre>
             <Button variant="primary" onClick={handleRefresh} style={{ marginTop: '8px' }}>
-              Force Refresh User Data (Direct API Call)
+              {t('dashboard.alerts.refreshUser')} (Direct API Call)
             </Button>
             <Button
               variant="outline"
@@ -359,7 +383,7 @@ export default function PlansPage() {
               }}
               style={{ marginTop: '8px', marginLeft: '8px' }}
             >
-              Debug Session
+              {t('dashboard.alerts.debugSession')}
             </Button>
           </div>
         )}
@@ -375,7 +399,7 @@ export default function PlansPage() {
             <span className="dashboard-page-title-icon">
               <FaCreditCard />
             </span>
-            Plans (Monthly / Yearly)
+            {t('plans.title')} {t('plans.subtitle')}
           </h1>
         </div>
         <Skeleton active paragraph={{ rows: 8 }} />
@@ -387,7 +411,7 @@ export default function PlansPage() {
     return (
       <div>
         <Alert
-          message="Error Loading Plans"
+          message={t('common.error')}
           description={error.message}
           type="error"
           showIcon
@@ -403,12 +427,12 @@ export default function PlansPage() {
           <span className="dashboard-page-title-icon">
             <FaCreditCard />
           </span>
-          Plans (Monthly / Yearly)
+          {t('plans.title')} {t('plans.subtitle')}
         </h1>
         <div style={{ display: 'flex', gap: 'var(--spacing-md)', alignItems: 'center' }}>
           <div style={{ display: 'flex', gap: 'var(--spacing-xs)', backgroundColor: 'var(--color-bg-secondary)', padding: '4px', borderRadius: 'var(--radius-md)' }}>
             <button
-              onClick={() => setViewMode('table')}
+              onClick={() => handleViewModeChange('table')}
               style={{
                 padding: 'var(--spacing-xs) var(--spacing-sm)',
                 border: 'none',
@@ -426,10 +450,10 @@ export default function PlansPage() {
               }}
             >
               <FaTable />
-              <span>Table</span>
+              <span>{t('dashboard.common.viewMode.table')}</span>
             </button>
             <button
-              onClick={() => setViewMode('card')}
+              onClick={() => handleViewModeChange('card')}
               style={{
                 padding: 'var(--spacing-xs) var(--spacing-sm)',
                 border: 'none',
@@ -447,11 +471,11 @@ export default function PlansPage() {
               }}
             >
               <FaTh />
-              <span>Card</span>
+              <span>{t('dashboard.common.viewMode.card')}</span>
             </button>
           </div>
           <Button variant="primary" onClick={handleAdd}>
-            Add Plan
+            {t('plans.add')}
           </Button>
         </div>
       </div>

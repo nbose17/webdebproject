@@ -9,14 +9,17 @@ import ClassForm from '@/components/dashboard/ClassForm';
 import Button from '@/components/shared/Button';
 import { FaCalendarAlt } from 'react-icons/fa';
 import { Skeleton, Alert, message, Modal } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
-import { GET_CLASSES, CREATE_CLASS, UPDATE_CLASS, DELETE_CLASS } from '@/graphql/queries/admin';
+import { GET_CLASSES, CREATE_CLASS, UPDATE_CLASS, DELETE_CLASS, UPDATE_USER } from '@/graphql/queries/admin';
+import { useEffect } from 'react';
 import { FaTable, FaTh } from 'react-icons/fa';
 import ClassCard from '@/components/dashboard/ClassCard';
 
 type ViewMode = 'table' | 'card';
 
 export default function ClassesPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const gymId = user?.gymId;
 
@@ -26,33 +29,39 @@ export default function ClassesPage() {
     fetchPolicy: 'network-only',
   });
 
+  const [updateUserMutation] = useMutation(UPDATE_USER, {
+    onError: (error) => {
+      console.error('Failed to update user preferences:', error);
+    },
+  });
+
   const [createClass] = useMutation(CREATE_CLASS, {
     onCompleted: () => {
-      message.success('Class created successfully!');
+      message.success(t('common.success'));
       refetch();
     },
     onError: (error) => {
-      message.error(`Failed to create class: ${error.message}`);
+      message.error(`${t('common.error')}: ${error.message}`);
     },
   });
 
   const [updateClass] = useMutation(UPDATE_CLASS, {
     onCompleted: () => {
-      message.success('Class updated successfully!');
+      message.success(t('common.success'));
       refetch();
     },
     onError: (error) => {
-      message.error(`Failed to update class: ${error.message}`);
+      message.error(`${t('common.error')}: ${error.message}`);
     },
   });
 
   const [deleteClass] = useMutation(DELETE_CLASS, {
     onCompleted: () => {
-      message.success('Class deleted successfully!');
+      message.success(t('common.success'));
       refetch();
     },
     onError: (error) => {
-      message.error(`Failed to delete class: ${error.message}`);
+      message.error(`${t('common.error')}: ${error.message}`);
     },
   });
 
@@ -60,20 +69,38 @@ export default function ClassesPage() {
   const [editingClass, setEditingClass] = useState<Class | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
 
+  useEffect(() => {
+    if (user?.preferences?.dashboardViewMode) {
+      setViewMode(user.preferences.dashboardViewMode as ViewMode);
+    }
+  }, [user]);
+
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    if (user) {
+      updateUserMutation({
+        variables: {
+          id: user.id,
+          preferences: { dashboardViewMode: mode },
+        },
+      });
+    }
+  };
+
   const classes = data?.classes || [];
 
   const columns = [
     { key: 'id', label: 'No', render: (_: any, row: any, index: any) => index + 1 },
-    { key: 'name', label: 'Name' },
+    { key: 'name', label: t('classes.fields.name') },
     {
       key: 'durationMinutes',
-      label: 'Duration',
+      label: t('classes.fields.duration'),
       render: (value: number) => formatClassDuration(value),
     },
-    { key: 'numberOfClasses', label: 'No of Classes' },
+    { key: 'numberOfClasses', label: t('classes.fields.sessions') },
     {
       key: 'price',
-      label: 'Price',
+      label: t('classes.fields.price'),
       render: (value: number) => formatCurrency(value),
     },
   ];
@@ -92,11 +119,11 @@ export default function ClassesPage() {
     if (!gymId) return;
 
     Modal.confirm({
-      title: 'Delete Class',
-      content: `Are you sure you want to delete "${classItem.name}"? This action cannot be undone.`,
-      okText: 'Yes, Delete',
+      title: t('classes.deleteModal.title'),
+      content: t('classes.deleteModal.content', { name: classItem.name }),
+      okText: t('common.yes', { defaultValue: 'Yes' }),
       okType: 'danger',
-      cancelText: 'Cancel',
+      cancelText: t('common.cancel'),
       onOk: async () => {
         try {
           await deleteClass({
@@ -139,8 +166,8 @@ export default function ClassesPage() {
     return (
       <div>
         <Alert
-          message="No Gym Associated"
-          description="You need to be associated with a gym to manage classes."
+          message={t('dashboard.alerts.noGym')}
+          description={t('dashboard.alerts.noGymDesc', { feature: t('classes.title') })}
           type="warning"
           showIcon
         />
@@ -156,7 +183,7 @@ export default function ClassesPage() {
             <span className="dashboard-page-title-icon">
               <FaCalendarAlt />
             </span>
-            Classes
+            {t('classes.title')}
           </h1>
         </div>
         <Skeleton active paragraph={{ rows: 8 }} />
@@ -168,7 +195,7 @@ export default function ClassesPage() {
     return (
       <div>
         <Alert
-          message="Error Loading Classes"
+          message={t('common.error')}
           description={error.message}
           type="error"
           showIcon
@@ -184,12 +211,12 @@ export default function ClassesPage() {
           <span className="dashboard-page-title-icon">
             <FaCalendarAlt />
           </span>
-          Classes
+          {t('classes.title')}
         </h1>
         <div style={{ display: 'flex', gap: 'var(--spacing-md)', alignItems: 'center' }}>
           <div style={{ display: 'flex', gap: 'var(--spacing-xs)', backgroundColor: 'var(--color-bg-secondary)', padding: '4px', borderRadius: 'var(--radius-md)' }}>
             <button
-              onClick={() => setViewMode('table')}
+              onClick={() => handleViewModeChange('table')}
               style={{
                 padding: 'var(--spacing-xs) var(--spacing-sm)',
                 border: 'none',
@@ -207,10 +234,10 @@ export default function ClassesPage() {
               }}
             >
               <FaTable />
-              <span>Table</span>
+              <span>{t('dashboard.common.viewMode.table')}</span>
             </button>
             <button
-              onClick={() => setViewMode('card')}
+              onClick={() => handleViewModeChange('card')}
               style={{
                 padding: 'var(--spacing-xs) var(--spacing-sm)',
                 border: 'none',
@@ -228,11 +255,11 @@ export default function ClassesPage() {
               }}
             >
               <FaTh />
-              <span>Card</span>
+              <span>{t('dashboard.common.viewMode.card')}</span>
             </button>
           </div>
           <Button variant="primary" onClick={handleAdd}>
-            Add Class
+            {t('classes.add')}
           </Button>
         </div>
       </div>

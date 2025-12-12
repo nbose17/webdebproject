@@ -25,6 +25,13 @@ export const UserSchema = new Schema(
     permissions: [PermissionSchema],
     gymId: { type: Schema.Types.ObjectId, ref: 'Gym' },
     branchId: { type: Schema.Types.ObjectId, ref: 'Branch' },
+    preferences: {
+      dashboardViewMode: {
+        type: String,
+        enum: ['table', 'card'],
+        default: 'table'
+      }
+    },
     isActive: { type: Boolean, default: true },
   },
   {

@@ -107,6 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           permissions: apiUser.permissions,
           gymId: apiUser.gymId || null,
           branchId: apiUser.branchId || null,
+          gym: apiUser.gym || undefined,
         };
 
         console.log('👤 User data after processing:', {
@@ -272,6 +273,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           permissions: apiUser.permissions,
           gymId: apiUser.gymId,
           branchId: apiUser.branchId,
+          gym: apiUser.gym,
         };
 
         console.log('👤 Setting user data:', userData);

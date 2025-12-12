@@ -9,12 +9,15 @@ import BranchForm from '@/components/dashboard/BranchForm';
 import Button from '@/components/shared/Button';
 import { FaCodeBranch, FaTable, FaTh } from 'react-icons/fa';
 import { Skeleton, Alert, message, Modal } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
-import { GET_BRANCHES, CREATE_BRANCH, UPDATE_BRANCH, DELETE_BRANCH } from '@/graphql/queries/admin';
+import { GET_BRANCHES, CREATE_BRANCH, UPDATE_BRANCH, DELETE_BRANCH, UPDATE_USER } from '@/graphql/queries/admin';
+import { useEffect } from 'react';
 
 type ViewMode = 'table' | 'card';
 
 export default function BranchesPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const gymId = user?.gymId;
 
@@ -24,33 +27,39 @@ export default function BranchesPage() {
     fetchPolicy: 'network-only',
   });
 
+  const [updateUserMutation] = useMutation(UPDATE_USER, {
+    onError: (error) => {
+      console.error('Failed to update user preferences:', error);
+    },
+  });
+
   const [createBranch] = useMutation(CREATE_BRANCH, {
     onCompleted: () => {
-      message.success('Branch created successfully!');
+      message.success(t('common.success'));
       refetch();
     },
     onError: (error) => {
-      message.error(`Failed to create branch: ${error.message}`);
+      message.error(`${t('common.error')}: ${error.message}`);
     },
   });
 
   const [updateBranch] = useMutation(UPDATE_BRANCH, {
     onCompleted: () => {
-      message.success('Branch updated successfully!');
+      message.success(t('common.success'));
       refetch();
     },
     onError: (error) => {
-      message.error(`Failed to update branch: ${error.message}`);
+      message.error(`${t('common.error')}: ${error.message}`);
     },
   });
 
   const [deleteBranch] = useMutation(DELETE_BRANCH, {
     onCompleted: () => {
-      message.success('Branch deleted successfully!');
+      message.success(t('common.success'));
       refetch();
     },
     onError: (error) => {
-      message.error(`Failed to delete branch: ${error.message}`);
+      message.error(`${t('common.error')}: ${error.message}`);
     },
   });
 
@@ -58,22 +67,40 @@ export default function BranchesPage() {
   const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
 
+  useEffect(() => {
+    if (user?.preferences?.dashboardViewMode) {
+      setViewMode(user.preferences.dashboardViewMode as ViewMode);
+    }
+  }, [user]);
+
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    if (user) {
+      updateUserMutation({
+        variables: {
+          id: user.id,
+          preferences: { dashboardViewMode: mode },
+        },
+      });
+    }
+  };
+
   const branches = data?.branches || [];
 
   const columns = [
     { key: 'id', label: 'No', render: (_: any, row: any, index?: number) => (index ?? 0) + 1 },
-    { key: 'name', label: 'Branch Name' },
-    { key: 'address', label: 'Address' },
-    { key: 'phone', label: 'Phone' },
-    { key: 'email', label: 'Email' },
+    { key: 'name', label: t('branches.fields.name') },
+    { key: 'address', label: t('branches.fields.address') },
+    { key: 'phone', label: t('branches.fields.phone') },
+    { key: 'email', label: t('branches.fields.email') },
     {
       key: 'manager',
-      label: 'Manager',
-      render: (_: any, row: any) => row.manager?.name || 'Not assigned'
+      label: t('branches.fields.manager'),
+      render: (_: any, row: any) => row.manager?.name || t('common.notAssigned')
     },
     {
       key: 'status',
-      label: 'Status',
+      label: t('branches.fields.status'),
       render: (value: string) => (
         <span style={{
           padding: 'var(--spacing-xs) var(--spacing-sm)',
@@ -83,7 +110,7 @@ export default function BranchesPage() {
           background: value === 'active' ? 'var(--color-primary-light)' : 'var(--color-bg-secondary)',
           color: value === 'active' ? 'var(--color-primary)' : 'var(--color-text-secondary)'
         }}>
-          {value.charAt(0).toUpperCase() + value.slice(1)}
+          {value === 'active' ? t('dashboard.common.status.active') : t('dashboard.common.status.inactive')}
         </span>
       )
     },
@@ -103,11 +130,11 @@ export default function BranchesPage() {
     if (!gymId) return;
 
     Modal.confirm({
-      title: 'Delete Branch',
-      content: `Are you sure you want to delete "${branch.name}"? This action cannot be undone.`,
-      okText: 'Yes, Delete',
+      title: t('branches.deleteModal.title'),
+      content: t('branches.deleteModal.content', { name: branch.name }),
+      okText: t('common.yes'),
       okType: 'danger',
-      cancelText: 'Cancel',
+      cancelText: t('common.cancel'),
       onOk: async () => {
         try {
           await deleteBranch({
@@ -150,8 +177,8 @@ export default function BranchesPage() {
     return (
       <div>
         <Alert
-          message="No Gym Associated"
-          description="You need to be associated with a gym to manage branches."
+          message={t('dashboard.alerts.noGym')}
+          description={t('dashboard.alerts.noGymDesc', { feature: t('branches.title') })}
           type="warning"
           showIcon
         />
@@ -167,7 +194,7 @@ export default function BranchesPage() {
             <span className="dashboard-page-title-icon">
               <FaCodeBranch />
             </span>
-            Branches
+            {t('branches.title')}
           </h1>
         </div>
         <Skeleton active paragraph={{ rows: 8 }} />
@@ -179,7 +206,7 @@ export default function BranchesPage() {
     return (
       <div>
         <Alert
-          message="Error Loading Branches"
+          message={t('common.error')}
           description={error.message}
           type="error"
           showIcon
@@ -195,12 +222,12 @@ export default function BranchesPage() {
           <span className="dashboard-page-title-icon">
             <FaCodeBranch />
           </span>
-          Branches
+          {t('branches.title')}
         </h1>
         <div style={{ display: 'flex', gap: 'var(--spacing-md)', alignItems: 'center' }}>
           <div style={{ display: 'flex', gap: 'var(--spacing-xs)', backgroundColor: 'var(--color-bg-secondary)', padding: '4px', borderRadius: 'var(--radius-md)' }}>
             <button
-              onClick={() => setViewMode('table')}
+              onClick={() => handleViewModeChange('table')}
               style={{
                 padding: 'var(--spacing-xs) var(--spacing-sm)',
                 border: 'none',
@@ -218,10 +245,10 @@ export default function BranchesPage() {
               }}
             >
               <FaTable />
-              <span>Table</span>
+              <span>{t('dashboard.common.viewMode.table')}</span>
             </button>
             <button
-              onClick={() => setViewMode('card')}
+              onClick={() => handleViewModeChange('card')}
               style={{
                 padding: 'var(--spacing-xs) var(--spacing-sm)',
                 border: 'none',
@@ -239,11 +266,11 @@ export default function BranchesPage() {
               }}
             >
               <FaTh />
-              <span>Card</span>
+              <span>{t('dashboard.common.viewMode.card')}</span>
             </button>
           </div>
           <Button variant="primary" onClick={handleAdd}>
-            Add Branch
+            {t('branches.add')}
           </Button>
         </div>
       </div>
