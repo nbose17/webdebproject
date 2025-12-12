@@ -15,16 +15,16 @@ export default function QRCodeDisplay() {
   const params = useParams();
   const locale = params.locale as string;
   const gymId = user?.gymId;
-  
+
   const { data, loading, error } = useQuery(GET_GYM, {
     variables: { id: gymId },
     skip: !gymId,
     fetchPolicy: 'network-only',
   });
-  
+
   const gym = data?.gym;
   const [gymPageUrl, setGymPageUrl] = useState('');
-  
+
   useEffect(() => {
     if (gym && typeof window !== 'undefined') {
       setGymPageUrl(`${window.location.origin}/${locale}/gym/${gym.id}`);
@@ -33,19 +33,25 @@ export default function QRCodeDisplay() {
 
   if (!gymId) {
     return (
-      <Alert
-        message="No Gym Associated"
-        description="You need to be associated with a gym to view the QR code."
-        type="warning"
-        showIcon
-      />
+      <div>
+        <Alert
+          message="No Gym Associated"
+          description="You need to be associated with a gym to view the QR code."
+          type="warning"
+          showIcon
+        />
+        <div style={{ marginTop: 20, padding: 10, background: '#f5f5f5', borderRadius: 4 }}>
+          <p>Debug Info:</p>
+          <pre style={{ overflow: 'auto' }}>{JSON.stringify(user, null, 2)}</pre>
+        </div>
+      </div>
     );
   }
-  
+
   if (loading) {
     return <Skeleton active paragraph={{ rows: 10 }} />;
   }
-  
+
   if (error || !gym) {
     return (
       <Alert
@@ -98,7 +104,7 @@ export default function QRCodeDisplay() {
       canvas.width = 800;
       canvas.height = 1000;
       const ctx = canvas.getContext('2d');
-      
+
       if (!ctx) return;
 
       // Background
@@ -163,7 +169,7 @@ export default function QRCodeDisplay() {
           ctx.fillStyle = '#999999';
           ctx.font = '14px Arial';
           ctx.fillText('Visit us online at', canvas.width / 2, qrY + qrSize + 80);
-          
+
           ctx.fillStyle = '#007bff';
           ctx.font = 'bold 16px Arial';
           ctx.fillText(gymPageUrl, canvas.width / 2, qrY + qrSize + 110);
@@ -286,9 +292,9 @@ export default function QRCodeDisplay() {
             Download Brochure
           </Button>
         </div>
-        
+
         {/* Preview of brochure */}
-        <div style={{ 
+        <div style={{
           border: '2px dashed var(--color-border)',
           borderRadius: 'var(--radius-md)',
           padding: 'var(--spacing-lg)',
@@ -302,7 +308,7 @@ export default function QRCodeDisplay() {
           <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginBottom: 'var(--spacing-md)' }}>
             Brochure Preview
           </p>
-          <div style={{ 
+          <div style={{
             display: 'inline-block',
             padding: 'var(--spacing-lg)',
             backgroundColor: '#ffffff',

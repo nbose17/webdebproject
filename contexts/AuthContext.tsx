@@ -27,13 +27,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const validateSession = async () => {
     const token = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-    
-    console.log('🔍 validateSession called:', { 
-      hasToken: !!token, 
+
+    console.log('🔍 validateSession called:', {
+      hasToken: !!token,
       hasStoredUser: !!storedUser,
       tokenPreview: token ? `${token.substring(0, 20)}...` : null
     });
-    
+
     if (!token) {
       console.log('❌ No token found, logging out');
       // Check if we're on admin pages - don't logout on admin routes
@@ -46,18 +46,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
       return;
     }
-    
+
     if (!storedUser) {
       console.log('⚠️ No stored user but token exists, continuing with validation');
     }
 
     try {
       console.log('🔄 Validating session with GET_ME query...');
-      
+
       // Clear Apollo cache for GET_ME to ensure fresh data
       apolloClient.cache.evict({ fieldName: 'me' });
       apolloClient.cache.gc();
-      
+
       // Verify session with API
       const { data, errors } = await apolloClient.query({
         query: GET_ME,
@@ -70,9 +70,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       });
 
-      console.log('📥 GET_ME response:', { 
-        data: data ? { me: data.me ? { ...data.me, gymId: data.me.gymId } : null } : null, 
-        errors 
+      console.log('📥 GET_ME response:', {
+        data: data ? { me: data.me ? { ...data.me, gymId: data.me.gymId } : null } : null,
+        errors
       });
 
       if (errors && errors.length > 0) {
@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const apiUser = data.me;
         const dbRole = graphQLRoleToDb(apiUser.role);
         const normalizedRole = dbRole as UserRole;
-        
+
         console.log('👤 User data from API (raw):', {
           id: apiUser.id,
           email: apiUser.email,
@@ -98,7 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           hasGymId: !!apiUser.gymId,
           gymIdType: typeof apiUser.gymId,
         });
-        
+
         const userData: User = {
           id: apiUser.id,
           email: apiUser.email,
@@ -108,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           gymId: apiUser.gymId || null,
           branchId: apiUser.branchId || null,
         };
-        
+
         console.log('👤 User data after processing:', {
           id: userData.id,
           email: userData.email,
@@ -116,7 +116,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           gymId: userData.gymId,
           branchId: userData.branchId,
         });
-        
+
         // Debug log to help diagnose gymId issues
         if (!userData.gymId && normalizedRole === UserRole.GYM_OWNER) {
           console.warn('⚠️ Gym owner without gymId:', {
@@ -129,7 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else if (userData.gymId) {
           console.log('✅ User has gymId - setting state:', userData.gymId);
         }
-        
+
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
         console.log('💾 User data saved to localStorage and state');
@@ -139,17 +139,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error: any) {
       console.error('❌ Session validation error:', error);
-      // Check if it's an authentication error
+
+      // Check if it's an authentication error (token invalid/expired)
       if (error?.graphQLErrors?.some((e: any) => e.message.includes('Not authenticated'))) {
         console.log('🔒 Authentication error - logging out');
         logout();
       } else if (error?.networkError) {
         console.log('🌐 Network error - keeping existing session');
-        // Keep existing session if it's just a network error
+        // Keep existing cached session if it's just a network error
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          try {
+            const parsedUser = JSON.parse(storedUser);
+            setUser(parsedUser);
+            console.log('📦 Using cached user due to network error');
+          } catch (e) {
+            console.error('Error parsing stored user:', e);
+            logout();
+          }
+        }
         setIsLoading(false);
       } else {
-        console.log('❌ Unknown error - logging out');
-        logout();
+        console.log('❌ Unknown error during validation');
+        // For unknown errors, try to use cached session if available
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          try {
+            const parsedUser = JSON.parse(storedUser);
+            setUser(parsedUser);
+            console.log('📦 Using cached user due to validation error');
+            setIsLoading(false);
+          } catch (e) {
+            console.error('Error parsing stored user:', e);
+            logout();
+          }
+        } else {
+          // No cached user, logout
+          logout();
+        }
       }
     } finally {
       setIsLoading(false);
@@ -161,13 +188,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Check if we have a stored session first
       const storedUser = localStorage.getItem('user');
       const token = localStorage.getItem('token');
-      
+
       console.log('🔍 AuthContext useEffect - checking stored session:', {
         hasStoredUser: !!storedUser,
         hasToken: !!token,
         storedUser: storedUser ? JSON.parse(storedUser) : null,
       });
-      
+
       if (storedUser && token) {
         try {
           const parsedUser = JSON.parse(storedUser);
@@ -177,7 +204,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             role: parsedUser.role,
             gymId: parsedUser.gymId,
           });
-          
+
           // For gym owners without gymId, always wait for validation
           // For others, use cached data and validate in background
           if (parsedUser.role === 'gym_owner' && !parsedUser.gymId) {
@@ -198,12 +225,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.error('Error parsing stored user:', e);
         }
       }
-      
+
       // No valid stored session
       console.log('🚫 No cached session found, validating...');
       await validateSession();
     };
-    
+
     initializeAuth();
   }, []);
 
@@ -216,7 +243,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (data?.login?.success && data?.login?.user) {
         const { token, user: apiUser } = data.login;
-        
+
         console.log('✅ Login successful, storing token and user data:', {
           hasToken: !!token,
           tokenPreview: token ? `${token.substring(0, 20)}...` : null,
@@ -225,7 +252,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           role: apiUser.role,
           gymId: apiUser.gymId,
         });
-        
+
         // Store token
         if (token) {
           localStorage.setItem('token', token);
@@ -236,7 +263,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const dbRole = graphQLRoleToDb(apiUser.role);
         const normalizedRole = dbRole as UserRole;
-        
+
         const userData: User = {
           id: apiUser.id,
           email: apiUser.email,
@@ -246,29 +273,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           gymId: apiUser.gymId,
           branchId: apiUser.branchId,
         };
-        
+
         console.log('👤 Setting user data:', userData);
         setUser(userData);
         localStorage.setItem('user', JSON.stringify(userData));
         console.log('💾 User data stored in localStorage');
-        
+
         return { success: true };
       }
-      
-      return { 
-        success: false, 
-        message: data?.login?.message || 'Invalid email or password' 
+
+      return {
+        success: false,
+        message: data?.login?.message || 'Invalid email or password'
       };
     } catch (error: any) {
       console.error('Login error:', error);
-      const errorMessage = error?.graphQLErrors?.[0]?.message || 
-                          error?.networkError?.message ||
-                          error?.message ||
-                          'An error occurred during login. Please try again.';
-      
-      return { 
-        success: false, 
-        message: errorMessage 
+      const errorMessage = error?.graphQLErrors?.[0]?.message ||
+        error?.networkError?.message ||
+        error?.message ||
+        'An error occurred during login. Please try again.';
+
+      return {
+        success: false,
+        message: errorMessage
       };
     }
   };
@@ -288,9 +315,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const canAccessAdmin = user ? canAccessAdminPanel(user.role) : false;
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      login, 
+    <AuthContext.Provider value={{
+      user,
+      login,
       logout,
       isAuthenticated,
       isAdmin: userIsAdmin,

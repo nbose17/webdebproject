@@ -28,7 +28,7 @@ async function seed() {
     // Connect to admin database
     await connectAdminDB();
     console.log('✅ Connected to Admin Database (fitconnect_admin)');
-    
+
     // Get admin models
     const AdminModels = await getAdminModels();
 
@@ -71,10 +71,14 @@ async function seed() {
     console.log('   - admin@fitconnect.com / admin123');
     console.log('   - superadmin@fitconnect.com / superadmin123');
 
-    // Create Gym Owner
-    console.log('👤 Creating gym owner...');
+    // Create Gym Owners (one for each gym)
+    console.log('👤 Creating gym owners...');
     const ownerPassword = await bcrypt.hash('owner123', 10);
-    const gymOwner = new AdminModels.User({
+
+    // Note: We'll create gyms first, then update owners with gymId
+    // This is needed because gymId depends on gym being created first
+
+    const gymOwner1 = new AdminModels.User({
       email: 'owner@fitnessgym.com',
       name: 'John Fitness Owner',
       password: ownerPassword,
@@ -82,12 +86,34 @@ async function seed() {
       permissions: getRolePermissions(UserRole.GYM_OWNER),
       isActive: true,
     });
-    await gymOwner.save();
-    const ownerId = gymOwner._id;
-    console.log('✅ Created gym owner');
-    console.log('   - owner@fitnessgym.com / owner123');
 
-    // Create Gyms
+    const gymOwner2 = new AdminModels.User({
+      email: 'owner2@fitnessgym.com',
+      name: 'Sarah Gym Owner',
+      password: ownerPassword,
+      role: UserRole.GYM_OWNER,
+      permissions: getRolePermissions(UserRole.GYM_OWNER),
+      isActive: true,
+    });
+
+    const gymOwner3 = new AdminModels.User({
+      email: 'owner3@fitnessgym.com',
+      name: 'Mike Fitness Owner',
+      password: ownerPassword,
+      role: UserRole.GYM_OWNER,
+      permissions: getRolePermissions(UserRole.GYM_OWNER),
+      isActive: true,
+    });
+
+    await gymOwner1.save();
+    await gymOwner2.save();
+    await gymOwner3.save();
+    console.log('✅ Created 3 gym owners');
+    console.log('   - owner@fitnessgym.com / owner123');
+    console.log('   - owner2@fitnessgym.com / owner123');
+    console.log('   - owner3@fitnessgym.com / owner123');
+
+    // Create Gyms (each with its own owner)
     console.log('🏋️ Creating gyms...');
     const gym1 = new AdminModels.Gym({
       name: 'FITNESS GYM - Downtown',
@@ -95,7 +121,7 @@ async function seed() {
       image: '/images/gym-placeholder.jpg',
       featured: true,
       description: 'A premier fitness center in the heart of downtown with state-of-the-art equipment.',
-      ownerId: ownerId,
+      ownerId: gymOwner1._id,
       subscriptionStatus: 'active',
       paymentStatus: 'current',
       lastActive: new Date(),
@@ -107,7 +133,7 @@ async function seed() {
       image: '/images/gym-placeholder.jpg',
       featured: false,
       description: 'Modern fitness facility in the uptown district.',
-      ownerId: ownerId,
+      ownerId: gymOwner2._id,
       subscriptionStatus: 'active',
       paymentStatus: 'overdue',
       lastActive: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
@@ -119,7 +145,7 @@ async function seed() {
       image: '/images/gym-placeholder.jpg',
       featured: false,
       description: 'Community-focused gym serving the eastside neighborhood.',
-      ownerId: ownerId,
+      ownerId: gymOwner3._id,
       subscriptionStatus: 'expired',
       paymentStatus: 'current',
       lastActive: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000), // 14 days ago
@@ -132,6 +158,13 @@ async function seed() {
     const gym2Id = gym2._id;
     const gym3Id = gym3._id;
     console.log('✅ Created 3 gyms');
+
+    // Update gym owners with their gymId
+    console.log('🔗 Associating gym owners with their gyms...');
+    await AdminModels.User.findByIdAndUpdate(gymOwner1._id, { gymId: gym1Id });
+    await AdminModels.User.findByIdAndUpdate(gymOwner2._id, { gymId: gym2Id });
+    await AdminModels.User.findByIdAndUpdate(gymOwner3._id, { gymId: gym3Id });
+    console.log('✅ Associated each gym owner with their respective gym');
 
     // Create Branches in admin database (metadata only)
     console.log('🏢 Creating branches...');
@@ -161,20 +194,20 @@ async function seed() {
 
     // Now create gym-specific databases and seed gym data
     console.log('\n🏋️ Creating gym-specific databases and seeding gym data...');
-    
+
     // Initialize all gym databases (ensure they exist)
     console.log('\n🔄 Initializing gym databases...');
     await initializeGymDatabase(gym1Id.toString());
     await initializeGymDatabase(gym2Id.toString());
     await initializeGymDatabase(gym3Id.toString());
     console.log('✅ All gym databases initialized');
-    
+
     // Gym 1 - Downtown
     await seedGymDatabase(gym1Id.toString(), branch1Id.toString(), 'Downtown');
-    
+
     // Gym 2 - Uptown
     await seedGymDatabase(gym2Id.toString(), branch2Id.toString(), 'Uptown');
-    
+
     // Gym 3 - Eastside (create database but no branches/staff/clients yet)
     console.log(`\n📦 Initializing database for Gym 3 (Eastside)...`);
     await seedGymDatabase(gym3Id.toString(), '', 'Eastside');
@@ -182,27 +215,27 @@ async function seed() {
     // Helper function to seed gym-specific database
     async function seedGymDatabase(gymId: string, branchId: string, gymName: string) {
       console.log(`\n  📦 Seeding database for ${gymName} (Gym ID: ${gymId})...`);
-      
+
       // Connect to gym database (ensures it exists)
       await connectGymDB(gymId);
       const GymModels = await getGymModels(gymId);
-      
+
       // Clear existing data
       await GymModels.Client.deleteMany({});
       await GymModels.User.deleteMany({});
       await GymModels.Branch.deleteMany({});
-      
+
       // Skip seeding if no branchId provided (empty gym)
       if (!branchId) {
         console.log(`    ℹ️ No branch data to seed for ${gymName}`);
         return;
       }
-      
+
       // Create gym staff
       const managerPassword = await bcrypt.hash('manager123', 10);
       const trainerPassword = await bcrypt.hash('trainer123', 10);
       const receptionistPassword = await bcrypt.hash('receptionist123', 10);
-      
+
       const manager = new GymModels.User({
         email: `manager@${gymName.toLowerCase()}.com`,
         name: `${gymName} Manager`,
@@ -213,7 +246,7 @@ async function seed() {
         branchId: branchId,
         isActive: true,
       });
-      
+
       const trainer = new GymModels.User({
         email: `trainer@${gymName.toLowerCase()}.com`,
         name: `${gymName} Trainer`,
@@ -224,7 +257,7 @@ async function seed() {
         branchId: branchId,
         isActive: true,
       });
-      
+
       const receptionist = new GymModels.User({
         email: `reception@${gymName.toLowerCase()}.com`,
         name: `${gymName} Receptionist`,
@@ -235,12 +268,12 @@ async function seed() {
         branchId: branchId,
         isActive: true,
       });
-      
+
       await manager.save();
       await trainer.save();
       await receptionist.save();
       console.log(`    ✅ Created gym staff for ${gymName}`);
-      
+
       // Create branch copy in gym database (with staff/clients data)
       const branchCopy = new GymModels.Branch({
         _id: branchId,
@@ -253,7 +286,7 @@ async function seed() {
         status: 'active',
       });
       await branchCopy.save();
-      
+
       // Create clients
       const clients = gymName === 'Downtown' ? [
         new GymModels.Client({
@@ -297,10 +330,10 @@ async function seed() {
           contractEndDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
         }),
       ];
-      
+
       await GymModels.Client.insertMany(clients);
       console.log(`    ✅ Created ${clients.length} clients for ${gymName}`);
-      
+
       // Update branch manager in admin DB
       if (gymName === 'Downtown') {
         await AdminModels.Branch.findByIdAndUpdate(branchId, { managerId: manager._id });
@@ -484,7 +517,7 @@ Date: {{signature.date}}`,
     });
 
     await idCardTemplate.save();
-    
+
     // Update gym subscription status based on subscriptions
     await AdminModels.Gym.findByIdAndUpdate(gym1Id, {
       subscriptionStatus: 'active',
@@ -504,7 +537,7 @@ Date: {{signature.date}}`,
     console.log('\n📊 Summary:');
     console.log('\n📦 Admin Database (fitconnect_admin):');
     console.log('   - 2 Admin users');
-    console.log('   - 1 Gym owner');
+    console.log('   - 3 Gym owners (one per gym)');
     console.log('   - 3 Gyms');
     console.log('   - 2 Branches (metadata)');
     console.log('   - 3 Subscriptions');
@@ -518,6 +551,10 @@ Date: {{signature.date}}`,
     console.log('   Password: admin123');
     console.log('\n   Email: superadmin@fitconnect.com');
     console.log('   Password: superadmin123');
+    console.log('\n🏋️ Gym Owner Login Credentials:');
+    console.log('   Email: owner@fitnessgym.com / Password: owner123 (Downtown)');
+    console.log('   Email: owner2@fitnessgym.com / Password: owner123 (Uptown)');
+    console.log('   Email: owner3@fitnessgym.com / Password: owner123 (Eastside)');
 
     // Close all database connections
     await AdminModels.User.db.close();

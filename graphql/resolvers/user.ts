@@ -11,28 +11,28 @@ export const userResolvers = {
       if (!context.user) {
         throw new Error('Not authenticated');
       }
-      
+
       const userId = context.user.userId;
       const userGymId = context.user.gymId;
-      
+
       console.log('🔍 GET_ME query called:', { userId, userGymId, email: context.user.email, role: context.user.role });
-      
+
       // First, try admin database
       const AdminModels = await getAdminModels();
       let user = await AdminModels.User.findById(userId)
         .populate('gymId')
         .populate('branchId')
         .lean();
-      
-      console.log('📋 User from database:', { 
-        found: !!user, 
-        userId: user?._id?.toString(), 
-        role: user?.role, 
-        gymId: user?.gymId 
+
+      console.log('📋 User from database:', {
+        found: !!user,
+        userId: user?._id?.toString(),
+        role: user?.role,
+        gymId: user?.gymId
       });
-      
+
       let finalGymId = userGymId || null;
-      
+
       // Extract gymId from user if it exists
       if (user) {
         // If gymId is populated as an object, extract its _id
@@ -44,7 +44,7 @@ export const userResolvers = {
           finalGymId = user.gymId.toString();
         }
       }
-      
+
       // If not found in admin DB and we have a gymId from context, check gym database
       if (!user && userGymId) {
         try {
@@ -59,7 +59,7 @@ export const userResolvers = {
           // Gym database might not exist
         }
       }
-      
+
       // If still not found, search all gym databases
       if (!user) {
         const gyms = await AdminModels.Gym.find({}).lean();
@@ -78,40 +78,56 @@ export const userResolvers = {
           }
         }
       }
-      
+
       // For gym owners, try to find their gym by ownerId
       if (user && !finalGymId) {
         const userRole = user.role?.toLowerCase();
-        
+
         // Check if user is a gym owner (case-insensitive comparison)
         const isGymOwner = userRole === 'gym_owner' || userRole === UserRole.GYM_OWNER?.toLowerCase();
-        
+
         if (isGymOwner) {
-          // Convert userId to ObjectId for the query (ownerId is stored as ObjectId in Gym schema)
-          const userIdObjectId = mongoose.Types.ObjectId.isValid(userId) 
-            ? new mongoose.Types.ObjectId(userId) 
+          console.log(`🔍 Searching for gym for owner: ${userId} (Role: ${userRole})`);
+
+          // Convert userId to ObjectId for the query
+          const userIdObjectId = mongoose.Types.ObjectId.isValid(userId)
+            ? new mongoose.Types.ObjectId(userId)
             : userId;
-          
-          const gym = await AdminModels.Gym.findOne({ ownerId: userIdObjectId }).lean();
-          
+
+          // Try multiple ways to find the gym
+          // 1. Exact match with ObjectId
+          let gym = await AdminModels.Gym.findOne({ ownerId: userIdObjectId }).lean();
+
+          // 2. Exact match with String ID (sometimes stored as string)
+          if (!gym) {
+            gym = await AdminModels.Gym.findOne({ ownerId: userId }).lean();
+          }
+
+          // 3. Match in string array (if stored weirdly) or using $in
+          if (!gym) {
+            gym = await AdminModels.Gym.findOne({
+              ownerId: { $in: [userId, userIdObjectId] }
+            }).lean();
+          }
+
           if (gym) {
             finalGymId = gym._id.toString();
             console.log(`✅ Found gym ${finalGymId} for gym owner ${userId}`);
           } else {
-            // Also try searching with string comparison in case ownerId is stored as string
-            const gymByString = await AdminModels.Gym.findOne({ 
-              ownerId: { $in: [userId, userIdObjectId] } 
-            }).lean();
-            if (gymByString) {
-              finalGymId = gymByString._id.toString();
-              console.log(`✅ Found gym ${finalGymId} for gym owner ${userId} (string match)`);
-            } else {
-              console.log(`⚠️ No gym found for gym owner ${userId}. User role: ${userRole}`);
-            }
+            console.warn(`⚠️ No gym found for gym owner ${userId}. User role: ${userRole}. Checked ObjectId(${userIdObjectId}) and String(${userId})`);
+
+            // Debug: List all gyms to see what's wrong
+            const allGyms = await AdminModels.Gym.find({}, { _id: 1, ownerId: 1, name: 1 }).lean();
+            console.log('📋 Available gyms:', allGyms.map((g: any) => ({
+              id: g._id,
+              name: g.name,
+              ownerId: g.ownerId,
+              ownerIdType: typeof g.ownerId
+            })));
           }
         }
       }
-      
+
       if (!user) {
         throw new Error('User not found');
       }
@@ -124,7 +140,7 @@ export const userResolvers = {
         gymId: finalGymId,
         branchId: user.branchId ? (typeof user.branchId === 'object' ? (user.branchId as any)._id?.toString() || (user.branchId as any).toString() : user.branchId.toString()) : null,
       };
-      
+
       console.log('🎯 GET_ME returning user data:', {
         id: result.id,
         email: result.email,
@@ -147,7 +163,7 @@ export const userResolvers = {
         .populate('gymId')
         .populate('branchId')
         .lean();
-      
+
       // If gymId is specified, also fetch gym-specific users
       if (args.gymId) {
         const GymModels = await getGymModels(args.gymId);
@@ -170,7 +186,7 @@ export const userResolvers = {
         .populate('gymId')
         .populate('branchId')
         .lean();
-      
+
       if (!user) {
         throw new Error('User not found');
       }
@@ -190,7 +206,7 @@ export const userResolvers = {
       }
 
       const hashedPassword = await bcrypt.hash(args.password, 10);
-      
+
       // If gymId is provided, create user in gym-specific database
       if (args.gymId) {
         const GymModels = await getGymModels(args.gymId);
@@ -211,7 +227,7 @@ export const userResolvers = {
           permissions: populated!.permissions || getRolePermissions(populated!.role),
         };
       }
-      
+
       // Otherwise create in admin database
       const AdminModels = await getAdminModels();
       // Convert GraphQL enum to database format
@@ -222,7 +238,7 @@ export const userResolvers = {
       });
 
       await user.save();
-      
+
       const populated = await AdminModels.User.findById(user._id)
         .populate('gymId')
         .populate('branchId')
@@ -252,7 +268,7 @@ export const userResolvers = {
       // Try to find user in admin DB first
       const AdminModels = await getAdminModels();
       let user = await AdminModels.User.findById(id).lean();
-      
+
       if (user) {
         // Update in admin DB
         const updated = await (
@@ -272,7 +288,7 @@ export const userResolvers = {
           permissions: updated!.permissions || getRolePermissions(updated!.role),
         };
       }
-      
+
       // If not found, check gym databases (would need gymId context)
       // For now, throw error if not found
       throw new Error('User not found');
@@ -284,7 +300,7 @@ export const userResolvers = {
 
       const AdminModels = await getAdminModels();
       let user = await AdminModels.User.findByIdAndDelete(id);
-      
+
       // If not found in admin DB, would need to check gym DBs
       // This would require gymId context - simplified for now
       return !!user;

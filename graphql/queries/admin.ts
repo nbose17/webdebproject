@@ -16,6 +16,8 @@ export const LOGIN_MUTATION = gql`
           actions
         }
         isActive
+        gymId
+        branchId
       }
     }
   }

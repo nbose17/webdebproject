@@ -16,19 +16,19 @@ export const authResolvers = {
         const AdminModels = await getAdminModels();
         let user = await AdminModels.User.findOne({ email }).lean();
         let isAdminUser = false;
-        
+
         // If not found in admin DB, check all gym databases
         if (!user) {
           // Get all gyms from admin DB
           const gyms = await AdminModels.Gym.find({}).lean();
-          
+
           // Search each gym database
           for (const gym of gyms) {
             try {
               const gymId = gym._id.toString();
               const GymModels = await getGymModels(gymId);
               const gymUser = await GymModels.User.findOne({ email }).lean();
-              
+
               if (gymUser) {
                 user = gymUser;
                 isAdminUser = false;
@@ -44,8 +44,29 @@ export const authResolvers = {
         } else {
           // User found in admin DB
           isAdminUser = user.role === UserRole.FITCONNECT_ADMIN;
+
+          // For gym owners in admin DB, find their gym
+          const userRole = user.role?.toLowerCase();
+          const isGymOwner = userRole === 'gym_owner' || userRole === UserRole.GYM_OWNER?.toLowerCase();
+
+          if (isGymOwner && !user.gymId) {
+            console.log(`🔍 Finding gym for owner: ${user._id.toString()}`);
+
+            // Convert userId to ObjectId for the query
+            const userIdObjectId = new mongoose.Types.ObjectId(user._id.toString());
+
+            // Try to find gym by ownerId
+            const gym = await AdminModels.Gym.findOne({ ownerId: userIdObjectId }).lean();
+
+            if (gym) {
+              (user as any).gymId = gym._id.toString();
+              console.log(`✅ Associated gym ${gym._id.toString()} with owner ${user._id.toString()}`);
+            } else {
+              console.warn(`⚠️ No gym found for gym owner ${user._id.toString()}`);
+            }
+          }
         }
-        
+
         if (!user) {
           return {
             success: false,
@@ -54,7 +75,7 @@ export const authResolvers = {
         }
 
         const isValidPassword = await bcrypt.compare(password, user.password);
-        
+
         if (!isValidPassword) {
           return {
             success: false,
@@ -71,9 +92,9 @@ export const authResolvers = {
         }
 
         const token = jwt.sign(
-          { 
-            userId: user._id.toString(), 
-            email: user.email, 
+          {
+            userId: user._id.toString(),
+            email: user.email,
             role: user.role,
             gymId: (user as any).gymId || user.gymId?.toString(),
           },
