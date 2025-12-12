@@ -8,7 +8,7 @@ import DataTable from '@/components/dashboard/DataTable';
 import PlanForm from '@/components/dashboard/PlanForm';
 import Button from '@/components/shared/Button';
 import { FaCreditCard } from 'react-icons/fa';
-import { Skeleton, Alert, message, Popconfirm, Tag, Tooltip } from 'antd';
+import { Skeleton, Alert, message, Modal, Tag, Tooltip } from 'antd';
 import { useAuth } from '@/hooks/useAuth';
 import { GET_PLANS, CREATE_PLAN, UPDATE_PLAN, DELETE_PLAN } from '@/graphql/queries/admin';
 import { FaTable, FaTh } from 'react-icons/fa';
@@ -149,13 +149,26 @@ export default function PlansPage() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = async (plan: Plan) => {
+  const handleDelete = (plan: Plan) => {
     if (!gymId) return;
 
-    await deletePlan({
-      variables: {
-        id: plan.id,
-        gymId,
+    Modal.confirm({
+      title: 'Delete Plan',
+      content: `Are you sure you want to delete "${plan.name}"? This action cannot be undone.`,
+      okText: 'Yes, Delete',
+      okType: 'danger',
+      cancelText: 'Cancel',
+      onOk: async () => {
+        try {
+          await deletePlan({
+            variables: {
+              id: plan.id,
+              gymId,
+            },
+          });
+        } catch (error) {
+          console.error('Delete failed:', error);
+        }
       },
     });
   };

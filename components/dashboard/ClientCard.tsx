@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { Client } from '@/lib/types';
+import { Client, Plan } from '@/lib/types';
 import Button from '@/components/shared/Button';
-import { FaEdit, FaTrash, FaEnvelope, FaPhone, FaCreditCard, FaCalendarAlt, FaDownload, FaIdCard } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaEnvelope, FaPhone, FaCreditCard, FaCalendarAlt, FaDownload, FaIdCard, FaRedo } from 'react-icons/fa';
 
 interface ClientCardProps {
   client: Client;
@@ -11,14 +11,18 @@ interface ClientCardProps {
   onDelete?: (client: Client) => void;
   onDownloadContract?: (client: Client) => void;
   onDownloadIDCard?: (client: Client) => void;
+  onRenew?: (client: Client) => void;
+  plans?: Plan[];
 }
 
-export default function ClientCard({ 
-  client, 
-  onEdit, 
+export default function ClientCard({
+  client,
+  onEdit,
   onDelete,
   onDownloadContract,
-  onDownloadIDCard
+  onDownloadIDCard,
+  onRenew,
+  plans
 }: ClientCardProps) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -86,7 +90,7 @@ export default function ClientCard({
             </div>
           </div>
         </div>
-        
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)', marginBottom: 'var(--spacing-md)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
             <FaEnvelope style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)', flexShrink: 0 }} />
@@ -112,6 +116,14 @@ export default function ClientCard({
               Joined: {formatDate(client.joinDate)}
             </span>
           </div>
+          {client.subscriptionEndDate && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+              <FaCalendarAlt style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)', flexShrink: 0 }} />
+              <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-primary)' }}>
+                Expires: {formatDate(client.subscriptionEndDate)}
+              </span>
+            </div>
+          )}
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)', marginBottom: 'var(--spacing-md)' }}>
@@ -183,7 +195,22 @@ export default function ClientCard({
           )}
         </div>
 
-        <div className="dashboard-trainer-card-actions">
+
+        {onRenew && plans && plans.some(p => p.name === client.membershipType) && (
+          <div style={{ marginBottom: 'var(--spacing-md)' }}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => onRenew(client)}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--spacing-xs)' }}
+            >
+              <FaRedo />
+              Renew Membership
+            </Button>
+          </div>
+        )}
+
+        <div className="dashboard-trainer-card-actions" style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
           {onEdit && (
             <Button
               variant="outline"
@@ -200,7 +227,14 @@ export default function ClientCard({
               variant="outline"
               size="sm"
               onClick={() => onDelete(client)}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'var(--spacing-sm)' }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 'var(--spacing-sm)',
+                borderColor: 'var(--color-danger)',
+                color: 'var(--color-danger)'
+              }}
               title="Delete"
             >
               <FaTrash />
@@ -209,6 +243,6 @@ export default function ClientCard({
         </div>
       </div>
     </div>
+
   );
 }
-

@@ -3,15 +3,15 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation } from '@apollo/client/react';
 import Link from 'next/link';
-import { Select, Input as AntdInput, Skeleton, Alert, message } from 'antd';
-import { Client } from '@/lib/types';
+import { Select, Input as AntdInput, Skeleton, Alert, message, Modal } from 'antd';
+import { Client, Plan } from '@/lib/types';
 import DataTable from '@/components/dashboard/DataTable';
 import ClientCard from '@/components/dashboard/ClientCard';
 import ClientForm from '@/components/dashboard/ClientForm';
 import Button from '@/components/shared/Button';
 import { FaUsers, FaDownload, FaIdCard, FaTable, FaTh, FaSearch, FaFilter, FaSort } from 'react-icons/fa';
 import { useAuth } from '@/hooks/useAuth';
-import { GET_CLIENTS, CREATE_CLIENT, UPDATE_CLIENT, DELETE_CLIENT } from '@/graphql/queries/admin';
+import { GET_CLIENTS, CREATE_CLIENT, UPDATE_CLIENT, DELETE_CLIENT, GET_PLANS } from '@/graphql/queries/admin';
 
 const { Search } = AntdInput;
 
@@ -22,13 +22,18 @@ type SortDirection = 'asc' | 'desc';
 export default function ClientsPage() {
   const { user } = useAuth();
   const gymId = user?.gymId;
-  
-  const { data, loading, error, refetch } = useQuery(GET_CLIENTS, {
+
+  const { data, loading, error, refetch } = useQuery<{ clients: Client[] }>(GET_CLIENTS, {
     variables: { gymId },
     skip: !gymId,
     fetchPolicy: 'network-only',
   });
-  
+
+  const { data: plansData } = useQuery<{ plans: Plan[] }>(GET_PLANS, {
+    variables: { gymId },
+    skip: !gymId,
+  });
+
   const [createClient] = useMutation(CREATE_CLIENT, {
     onCompleted: () => {
       message.success('Client created successfully!');
@@ -38,7 +43,7 @@ export default function ClientsPage() {
       message.error(`Failed to create client: ${error.message}`);
     },
   });
-  
+
   const [updateClient] = useMutation(UPDATE_CLIENT, {
     onCompleted: () => {
       message.success('Client updated successfully!');
@@ -48,7 +53,7 @@ export default function ClientsPage() {
       message.error(`Failed to update client: ${error.message}`);
     },
   });
-  
+
   const [deleteClient] = useMutation(DELETE_CLIENT, {
     onCompleted: () => {
       message.success('Client deleted successfully!');
@@ -58,13 +63,16 @@ export default function ClientsPage() {
       message.error(`Failed to delete client: ${error.message}`);
     },
   });
-  
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
-  
+
+
+
   const clients = data?.clients || [];
-  
+  const plans = plansData?.plans || [];
+
   // Filter and sort states
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
@@ -204,7 +212,7 @@ Generated on: ${new Date().toLocaleDateString()}
     canvas.width = 800;
     canvas.height = 500;
     const ctx = canvas.getContext('2d');
-    
+
     if (!ctx) {
       document.body.removeChild(qrContainer);
       return;
@@ -235,13 +243,13 @@ Generated on: ${new Date().toLocaleDateString()}
 
     // Generate QR code using external API
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(clientData)}`;
-    
+
     const qrImg = new Image();
     qrImg.crossOrigin = 'anonymous';
     qrImg.onload = () => {
       // Draw QR code on canvas
       ctx.drawImage(qrImg, canvas.width - 250, 100, 200, 200);
-      
+
       // QR Code label
       ctx.fillStyle = '#666666';
       ctx.font = '16px Arial';
@@ -272,14 +280,14 @@ Generated on: ${new Date().toLocaleDateString()}
 
   const columns = [
     { key: 'id', label: 'No', render: (_: any, row: any, index?: number) => (index ?? 0) + 1 },
-    { 
-      key: 'image', 
-      label: 'Image', 
+    {
+      key: 'image',
+      label: 'Image',
       render: (value: string) => (
         value ? (
-          <img 
-            src={value} 
-            alt="Client" 
+          <img
+            src={value}
+            alt="Client"
             style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
           />
         ) : (
@@ -287,14 +295,14 @@ Generated on: ${new Date().toLocaleDateString()}
         )
       )
     },
-    { 
-      key: 'name', 
+    {
+      key: 'name',
       label: 'Name',
       render: (value: string, row: Client) => (
         <Link
           href={`/dashboard/clients/${row.id}`}
-          style={{ 
-            color: 'var(--color-primary)', 
+          style={{
+            color: 'var(--color-primary)',
             textDecoration: 'none',
             fontWeight: 'var(--font-weight-medium)'
           }}
@@ -312,13 +320,13 @@ Generated on: ${new Date().toLocaleDateString()}
     { key: 'email', label: 'Email' },
     { key: 'phone', label: 'Phone' },
     { key: 'membershipType', label: 'Membership Type' },
-    { 
-      key: 'joinDate', 
+    {
+      key: 'joinDate',
       label: 'Join Date',
       render: (value: string) => formatDate(value)
     },
-    { 
-      key: 'status', 
+    {
+      key: 'status',
       label: 'Status',
       render: (value: string) => (
         <span style={{
@@ -405,22 +413,33 @@ Generated on: ${new Date().toLocaleDateString()}
     setIsFormOpen(true);
   };
 
-  const handleDelete = async (client: Client) => {
+  const handleDelete = (client: Client) => {
     if (!gymId) return;
-    
-    if (confirm(`Are you sure you want to delete "${client.name}"?`)) {
-      await deleteClient({
-        variables: {
-          id: client.id,
-          gymId,
-        },
-      });
-    }
+
+    Modal.confirm({
+      title: 'Delete Client',
+      content: `Are you sure you want to delete "${client.name}"? This action cannot be undone.`,
+      okText: 'Yes, Delete',
+      okType: 'danger',
+      cancelText: 'Cancel',
+      onOk: async () => {
+        try {
+          await deleteClient({
+            variables: {
+              id: client.id,
+              gymId,
+            },
+          });
+        } catch (error) {
+          console.error('Delete failed:', error);
+        }
+      },
+    });
   };
 
   const handleSubmit = async (clientData: Omit<Client, 'id'>) => {
     if (!gymId) return;
-    
+
     // Prepare variables with proper date handling
     const variables: any = {
       gymId,
@@ -435,7 +454,7 @@ Generated on: ${new Date().toLocaleDateString()}
       contractStartDate: clientData.contractStartDate,
       contractEndDate: clientData.contractEndDate,
     };
-    
+
     if (editingClient) {
       variables.id = editingClient.id;
       await updateClient({ variables });
@@ -445,7 +464,48 @@ Generated on: ${new Date().toLocaleDateString()}
     setIsFormOpen(false);
     setEditingClient(null);
   };
-  
+
+  const handleRenew = async (client: Client) => {
+    if (!gymId) return;
+
+    // Find the plan corresponding to the client's membership type
+    const plan = plans.find((p: any) => p.name === client.membershipType);
+
+    if (!plan) {
+      message.error(`Cannot renew: Plan "${client.membershipType}" not found.`);
+      return;
+    }
+
+    // Determine the start date for renewal (either current subscription end date or today if expired)
+    let startDate = new Date();
+    if (client.subscriptionEndDate) {
+      const currentEndDate = new Date(client.subscriptionEndDate);
+      if (currentEndDate > new Date()) {
+        startDate = currentEndDate;
+      }
+    }
+
+    // Calculate new end date
+    const newEndDate = new Date(startDate);
+    newEndDate.setMonth(newEndDate.getMonth() + plan.durationMonths);
+
+    // Update client
+    await updateClient({
+      variables: {
+        id: client.id,
+        gymId,
+        subscriptionEndDate: newEndDate.toISOString().split('T')[0],
+      },
+      onCompleted: () => {
+        message.success(`Membership renewed until ${newEndDate.toLocaleDateString()}`);
+      },
+      onError: (err) => {
+        message.error(`Renewal failed: ${err.message}`);
+      }
+    });
+
+  };
+
   if (!gymId) {
     return (
       <div>
@@ -458,7 +518,7 @@ Generated on: ${new Date().toLocaleDateString()}
       </div>
     );
   }
-  
+
   if (loading) {
     return (
       <div>
@@ -474,7 +534,7 @@ Generated on: ${new Date().toLocaleDateString()}
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <div>
@@ -549,10 +609,10 @@ Generated on: ${new Date().toLocaleDateString()}
       </div>
 
       {/* Toolbar for Sort and Filter */}
-      <div style={{ 
-        background: 'var(--color-white)', 
-        padding: 'var(--spacing-lg)', 
-        borderRadius: 'var(--radius-lg)', 
+      <div style={{
+        background: 'var(--color-white)',
+        padding: 'var(--spacing-lg)',
+        borderRadius: 'var(--radius-lg)',
         boxShadow: 'var(--shadow-md)',
         marginBottom: 'var(--spacing-xl)'
       }}>
@@ -570,10 +630,10 @@ Generated on: ${new Date().toLocaleDateString()}
 
           {/* Status Filter */}
           <div style={{ minWidth: '150px' }}>
-            <label style={{ 
-              display: 'block', 
-              fontSize: 'var(--font-size-sm)', 
-              color: 'var(--color-text-secondary)', 
+            <label style={{
+              display: 'block',
+              fontSize: 'var(--font-size-sm)',
+              color: 'var(--color-text-secondary)',
               marginBottom: 'var(--spacing-xs)',
               fontWeight: 'var(--font-weight-medium)'
             }}>
@@ -594,10 +654,10 @@ Generated on: ${new Date().toLocaleDateString()}
 
           {/* Membership Type Filter */}
           <div style={{ minWidth: '150px' }}>
-            <label style={{ 
-              display: 'block', 
-              fontSize: 'var(--font-size-sm)', 
-              color: 'var(--color-text-secondary)', 
+            <label style={{
+              display: 'block',
+              fontSize: 'var(--font-size-sm)',
+              color: 'var(--color-text-secondary)',
               marginBottom: 'var(--spacing-xs)',
               fontWeight: 'var(--font-weight-medium)'
             }}>
@@ -616,10 +676,10 @@ Generated on: ${new Date().toLocaleDateString()}
 
           {/* Sort Field */}
           <div style={{ minWidth: '150px' }}>
-            <label style={{ 
-              display: 'block', 
-              fontSize: 'var(--font-size-sm)', 
-              color: 'var(--color-text-secondary)', 
+            <label style={{
+              display: 'block',
+              fontSize: 'var(--font-size-sm)',
+              color: 'var(--color-text-secondary)',
               marginBottom: 'var(--spacing-xs)',
               fontWeight: 'var(--font-weight-medium)'
             }}>
@@ -641,10 +701,10 @@ Generated on: ${new Date().toLocaleDateString()}
 
           {/* Sort Direction */}
           <div style={{ minWidth: '120px' }}>
-            <label style={{ 
-              display: 'block', 
-              fontSize: 'var(--font-size-sm)', 
-              color: 'var(--color-text-secondary)', 
+            <label style={{
+              display: 'block',
+              fontSize: 'var(--font-size-sm)',
+              color: 'var(--color-text-secondary)',
               marginBottom: 'var(--spacing-xs)',
               fontWeight: 'var(--font-weight-medium)'
             }}>
@@ -695,14 +755,16 @@ Generated on: ${new Date().toLocaleDateString()}
               onDelete={handleDelete}
               onDownloadContract={handleDownloadContract}
               onDownloadIDCard={handleDownloadIDCard}
+              onRenew={handleRenew}
+              plans={plans}
             />
           ))}
         </div>
       )}
       {filteredAndSortedClients.length === 0 && (
-        <div style={{ 
-          textAlign: 'center', 
-          padding: 'var(--spacing-2xl)', 
+        <div style={{
+          textAlign: 'center',
+          padding: 'var(--spacing-2xl)',
           color: 'var(--color-text-secondary)',
           background: 'var(--color-white)',
           borderRadius: 'var(--radius-lg)',

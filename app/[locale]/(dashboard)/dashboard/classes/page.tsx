@@ -8,7 +8,7 @@ import DataTable from '@/components/dashboard/DataTable';
 import ClassForm from '@/components/dashboard/ClassForm';
 import Button from '@/components/shared/Button';
 import { FaCalendarAlt } from 'react-icons/fa';
-import { Skeleton, Alert, message } from 'antd';
+import { Skeleton, Alert, message, Modal } from 'antd';
 import { useAuth } from '@/hooks/useAuth';
 import { GET_CLASSES, CREATE_CLASS, UPDATE_CLASS, DELETE_CLASS } from '@/graphql/queries/admin';
 import { FaTable, FaTh } from 'react-icons/fa';
@@ -88,13 +88,26 @@ export default function ClassesPage() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = async (classItem: Class) => {
+  const handleDelete = (classItem: Class) => {
     if (!gymId) return;
 
-    await deleteClass({
-      variables: {
-        id: classItem.id,
-        gymId,
+    Modal.confirm({
+      title: 'Delete Class',
+      content: `Are you sure you want to delete "${classItem.name}"? This action cannot be undone.`,
+      okText: 'Yes, Delete',
+      okType: 'danger',
+      cancelText: 'Cancel',
+      onOk: async () => {
+        try {
+          await deleteClass({
+            variables: {
+              id: classItem.id,
+              gymId,
+            },
+          });
+        } catch (error) {
+          console.error('Delete failed:', error);
+        }
       },
     });
   };

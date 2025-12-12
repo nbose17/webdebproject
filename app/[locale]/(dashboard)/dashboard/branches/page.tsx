@@ -8,7 +8,7 @@ import BranchCard from '@/components/dashboard/BranchCard';
 import BranchForm from '@/components/dashboard/BranchForm';
 import Button from '@/components/shared/Button';
 import { FaCodeBranch, FaTable, FaTh } from 'react-icons/fa';
-import { Skeleton, Alert, message } from 'antd';
+import { Skeleton, Alert, message, Modal } from 'antd';
 import { useAuth } from '@/hooks/useAuth';
 import { GET_BRANCHES, CREATE_BRANCH, UPDATE_BRANCH, DELETE_BRANCH } from '@/graphql/queries/admin';
 
@@ -17,13 +17,13 @@ type ViewMode = 'table' | 'card';
 export default function BranchesPage() {
   const { user } = useAuth();
   const gymId = user?.gymId;
-  
-  const { data, loading, error, refetch } = useQuery(GET_BRANCHES, {
+
+  const { data, loading, error, refetch } = useQuery<{ branches: Branch[] }>(GET_BRANCHES, {
     variables: { gymId },
     skip: !gymId,
     fetchPolicy: 'network-only',
   });
-  
+
   const [createBranch] = useMutation(CREATE_BRANCH, {
     onCompleted: () => {
       message.success('Branch created successfully!');
@@ -33,7 +33,7 @@ export default function BranchesPage() {
       message.error(`Failed to create branch: ${error.message}`);
     },
   });
-  
+
   const [updateBranch] = useMutation(UPDATE_BRANCH, {
     onCompleted: () => {
       message.success('Branch updated successfully!');
@@ -43,7 +43,7 @@ export default function BranchesPage() {
       message.error(`Failed to update branch: ${error.message}`);
     },
   });
-  
+
   const [deleteBranch] = useMutation(DELETE_BRANCH, {
     onCompleted: () => {
       message.success('Branch deleted successfully!');
@@ -53,11 +53,11 @@ export default function BranchesPage() {
       message.error(`Failed to delete branch: ${error.message}`);
     },
   });
-  
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
-  
+
   const branches = data?.branches || [];
 
   const columns = [
@@ -66,13 +66,13 @@ export default function BranchesPage() {
     { key: 'address', label: 'Address' },
     { key: 'phone', label: 'Phone' },
     { key: 'email', label: 'Email' },
-    { 
-      key: 'manager', 
+    {
+      key: 'manager',
       label: 'Manager',
       render: (_: any, row: any) => row.manager?.name || 'Not assigned'
     },
-    { 
-      key: 'status', 
+    {
+      key: 'status',
       label: 'Status',
       render: (value: string) => (
         <span style={{
@@ -99,22 +99,33 @@ export default function BranchesPage() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = async (branch: Branch) => {
+  const handleDelete = (branch: Branch) => {
     if (!gymId) return;
-    
-    if (confirm(`Are you sure you want to delete "${branch.name}"?`)) {
-      await deleteBranch({
-        variables: {
-          id: branch.id,
-          gymId,
-        },
-      });
-    }
+
+    Modal.confirm({
+      title: 'Delete Branch',
+      content: `Are you sure you want to delete "${branch.name}"? This action cannot be undone.`,
+      okText: 'Yes, Delete',
+      okType: 'danger',
+      cancelText: 'Cancel',
+      onOk: async () => {
+        try {
+          await deleteBranch({
+            variables: {
+              id: branch.id,
+              gymId,
+            },
+          });
+        } catch (error) {
+          console.error('Delete failed:', error);
+        }
+      },
+    });
   };
 
   const handleSubmit = async (branchData: any) => {
     if (!gymId) return;
-    
+
     const variables: any = {
       gymId,
       name: branchData.name,
@@ -124,7 +135,7 @@ export default function BranchesPage() {
       status: branchData.status || 'active',
       managerId: branchData.managerId || null,
     };
-    
+
     if (editingBranch) {
       variables.id = editingBranch.id;
       await updateBranch({ variables });
@@ -134,7 +145,7 @@ export default function BranchesPage() {
     setIsFormOpen(false);
     setEditingBranch(null);
   };
-  
+
   if (!gymId) {
     return (
       <div>
@@ -147,7 +158,7 @@ export default function BranchesPage() {
       </div>
     );
   }
-  
+
   if (loading) {
     return (
       <div>
@@ -163,7 +174,7 @@ export default function BranchesPage() {
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <div>
