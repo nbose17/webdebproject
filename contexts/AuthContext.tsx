@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       apolloClient.cache.gc();
 
       // Verify session with API
-      const { data, errors } = await apolloClient.query({
+      const result = await apolloClient.query<{ me: any }>({
         query: GET_ME,
         fetchPolicy: 'network-only',
         errorPolicy: 'all',
@@ -70,12 +70,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       });
 
+      const { data } = result;
+      const errors = 'errors' in result ? result.errors : undefined;
+
       console.log('📥 GET_ME response:', {
         data: data ? { me: data.me ? { ...data.me, gymId: data.me.gymId } : null } : null,
         errors
       });
 
-      if (errors && errors.length > 0) {
+      if (errors && Array.isArray(errors) && errors.length > 0) {
         // GraphQL errors (likely authentication failure)
         console.error('❌ Session validation errors:', errors);
         logout();
@@ -237,7 +240,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string): Promise<{ success: boolean; message?: string }> => {
     try {
-      const { data } = await apolloClient.mutate({
+      const { data } = await apolloClient.mutate<{ login: { success: boolean; token?: string; user?: any; message?: string } }>({
         mutation: LOGIN_MUTATION,
         variables: { email, password },
       });

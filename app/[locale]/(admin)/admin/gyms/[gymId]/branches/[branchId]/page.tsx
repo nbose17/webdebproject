@@ -4,15 +4,15 @@ import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
 import { useQuery, useMutation } from '@apollo/client/react';
-import { 
-  Card, 
-  Row, 
-  Col, 
-  Button, 
-  Tag, 
-  Descriptions, 
-  Table, 
-  Typography, 
+import {
+  Card,
+  Row,
+  Col,
+  Button,
+  Tag,
+  Descriptions,
+  Table,
+  Typography,
   Space,
   Statistic,
   Tabs,
@@ -21,7 +21,7 @@ import {
   message,
   Modal
 } from 'antd';
-import { 
+import {
   FaArrowLeft,
   FaBuilding,
   FaUsers,
@@ -35,6 +35,7 @@ import {
   FaExclamationTriangle
 } from 'react-icons/fa';
 import AdminProtectedRoute from '@/components/shared/AdminProtectedRoute';
+import { Branch } from '@/lib/types';
 import { GET_BRANCH, DELETE_BRANCH, DELETE_USER } from '@/graphql/queries/admin';
 
 const { Title, Text } = Typography;
@@ -48,30 +49,16 @@ export default function BranchDetailsPage({ params }: PageProps) {
   const router = useRouter();
   const routeParams = useParams();
   const locale = routeParams.locale as string;
-  
+
   // Fetch branch data from GraphQL
-  const { data, loading, error, refetch } = useQuery(GET_BRANCH, {
+  const { data, loading, error, refetch } = useQuery<{ branch: Branch }>(GET_BRANCH, {
     variables: { id: branchId, gymId },
     fetchPolicy: 'cache-and-network',
-    onError: (err) => {
-      console.error('Error fetching branch:', err);
-      message.error('Failed to load branch details. Please try again.');
-    },
   });
 
-  const [deleteBranchMutation] = useMutation(DELETE_BRANCH, {
-    onError: (err) => {
-      console.error('Error deleting branch:', err);
-      message.error(err.message || 'Failed to delete branch');
-    },
-  });
+  const [deleteBranchMutation] = useMutation<{ deleteBranch: boolean }>(DELETE_BRANCH);
 
-  const [deleteUserMutation] = useMutation(DELETE_USER, {
-    onError: (err) => {
-      console.error('Error deleting staff:', err);
-      message.error(err.message || 'Failed to delete staff member');
-    },
-  });
+  const [deleteUserMutation] = useMutation<{ deleteUser: boolean }>(DELETE_USER);
 
   const branch = data?.branch;
 
@@ -128,8 +115,8 @@ export default function BranchDetailsPage({ params }: PageProps) {
         <div>
           <div className="dashboard-page-header">
             <div style={{ flex: 1 }}>
-              <Button 
-                icon={<FaArrowLeft />} 
+              <Button
+                icon={<FaArrowLeft />}
                 onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/branches`)}
               >
                 Back
@@ -236,17 +223,17 @@ export default function BranchDetailsPage({ params }: PageProps) {
       key: 'actions',
       render: (staff: any) => (
         <Space>
-          <Button 
-            type="text" 
-            size="small" 
+          <Button
+            type="text"
+            size="small"
             icon={<FaEdit />}
             onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/branches/${branchId}/staff/${staff.id}/edit`)}
           >
             Edit
           </Button>
-          <Button 
-            type="text" 
-            size="small" 
+          <Button
+            type="text"
+            size="small"
             icon={<FaTrash />}
             danger
             onClick={() => handleDeleteStaff(staff.id, staff.name)}
@@ -364,7 +351,7 @@ export default function BranchDetailsPage({ params }: PageProps) {
                 </Descriptions>
               </Card>
             </Col>
-            
+
             <Col xs={24} lg={8}>
               <Row gutter={[16, 16]}>
                 <Col span={24}>
@@ -407,14 +394,14 @@ export default function BranchDetailsPage({ params }: PageProps) {
       label: `Staff (${totalStaff})`,
       children: (
         <div>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '16px' 
+            marginBottom: '16px'
           }}>
             <Title level={4} style={{ margin: 0 }}>Branch Staff</Title>
-            <Button 
+            <Button
               type="primary"
               icon={<FaUser />}
               onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/branches/${branchId}/staff/new`)}
@@ -422,7 +409,7 @@ export default function BranchDetailsPage({ params }: PageProps) {
               Add Staff
             </Button>
           </div>
-          
+
           {totalStaff === 0 ? (
             <Card>
               <div style={{ textAlign: 'center', padding: '40px' }}>
@@ -445,14 +432,14 @@ export default function BranchDetailsPage({ params }: PageProps) {
       label: `Clients (${totalClients})`,
       children: (
         <div>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '16px' 
+            marginBottom: '16px'
           }}>
             <Title level={4} style={{ margin: 0 }}>Branch Clients</Title>
-            <Button 
+            <Button
               type="primary"
               icon={<FaUser />}
               onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/branches/${branchId}/clients/new`)}
@@ -460,7 +447,7 @@ export default function BranchDetailsPage({ params }: PageProps) {
               Add Client
             </Button>
           </div>
-          
+
           {totalClients === 0 ? (
             <Card>
               <div style={{ textAlign: 'center', padding: '40px' }}>
@@ -486,8 +473,8 @@ export default function BranchDetailsPage({ params }: PageProps) {
         <div className="dashboard-page-header">
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-              <Button 
-                icon={<FaArrowLeft />} 
+              <Button
+                icon={<FaArrowLeft />}
                 onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/branches`)}
               >
                 Back
@@ -505,13 +492,13 @@ export default function BranchDetailsPage({ params }: PageProps) {
           </div>
           <div>
             <Space>
-              <Button 
+              <Button
                 icon={<FaEdit />}
                 onClick={handleEditBranch}
               >
                 Edit Branch
               </Button>
-              <Button 
+              <Button
                 danger
                 icon={<FaTrash />}
                 onClick={handleDeleteBranch}

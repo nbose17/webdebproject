@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { 
-  Card, 
-  Tree, 
-  Button, 
-  Typography, 
+import {
+  Card,
+  Tree,
+  Button,
+  Typography,
   Space,
   Row,
   Col,
@@ -23,7 +23,7 @@ import {
   Tooltip,
   Divider
 } from 'antd';
-import { 
+import {
   FaBuilding,
   FaPlus,
   FaEdit,
@@ -276,7 +276,7 @@ export default function OrganizationPage() {
   // Build tree structure for departments
   const buildDepartmentTree = () => {
     const departmentMap = new Map();
-    
+
     // Create nodes
     departments.forEach(dept => {
       departmentMap.set(dept.id, {
@@ -285,23 +285,23 @@ export default function OrganizationPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <FaBuilding style={{ color: dept.isActive ? '#4CAF50' : '#8c8c8c' }} />
               <span style={{ fontWeight: '500' }}>{dept.name}</span>
-              <Tag size="small" color={dept.isActive ? 'success' : 'default'}>
+              <Tag color={dept.isActive ? 'success' : 'default'}>
                 {dept.employeeCount} employees
               </Tag>
             </div>
             <Space>
-              <Button 
-                type="text" 
-                size="small" 
+              <Button
+                type="text"
+                size="small"
                 icon={<FaEdit />}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleEditDepartment(dept);
                 }}
               />
-              <Button 
-                type="text" 
-                size="small" 
+              <Button
+                type="text"
+                size="small"
                 icon={<FaTrash />}
                 danger
                 onClick={(e) => {
@@ -360,7 +360,7 @@ export default function OrganizationPage() {
 
   const handleSaveDepartment = async (values: any) => {
     if (editingDept) {
-      setDepartments(prev => prev.map(d => 
+      setDepartments(prev => prev.map(d =>
         d.id === editingDept.id ? { ...d, ...values } : d
       ));
       message.success('Department updated successfully');
@@ -392,7 +392,7 @@ export default function OrganizationPage() {
 
   const handleSaveEmployee = async (values: any) => {
     if (editingEmp) {
-      setEmployees(prev => prev.map(e => 
+      setEmployees(prev => prev.map(e =>
         e.id === editingEmp.id ? { ...e, ...values } : e
       ));
       message.success('Employee updated successfully');
@@ -472,8 +472,8 @@ export default function OrganizationPage() {
       key: 'actions',
       render: (emp: OrganizationEmployee) => (
         <Space>
-          <Button 
-            type="text" 
+          <Button
+            type="text"
             size="small"
             icon={<FaEdit />}
             onClick={() => handleEditEmployee(emp)}
@@ -510,7 +510,7 @@ export default function OrganizationPage() {
                 <Text style={{ fontSize: '16px', color: '#595959', lineHeight: '1.6' }}>
                   {companyInfo.description}
                 </Text>
-                
+
                 <Row gutter={[32, 16]} style={{ marginTop: '24px' }}>
                   <Col span={8}>
                     <Statistic
@@ -536,8 +536,8 @@ export default function OrganizationPage() {
                 </Row>
               </Col>
               <Col span={6} style={{ textAlign: 'center' }}>
-                <img 
-                  src={companyInfo.logo} 
+                <img
+                  src={companyInfo.logo}
                   alt="Company Logo"
                   style={{ maxWidth: '100%', maxHeight: '120px' }}
                   onError={(e) => {
@@ -546,7 +546,7 @@ export default function OrganizationPage() {
                   }}
                 />
                 <div style={{ marginTop: '16px' }}>
-                  <Button 
+                  <Button
                     icon={<FaEdit />}
                     onClick={() => {
                       companyForm.setFieldsValue(companyInfo);
@@ -614,10 +614,10 @@ export default function OrganizationPage() {
         <div>
           <Row gutter={16}>
             <Col span={12}>
-              <Card 
+              <Card
                 title="Department Hierarchy"
                 extra={
-                  <Button 
+                  <Button
                     type="primary"
                     icon={<FaPlus />}
                     onClick={handleAddDepartment}
@@ -645,9 +645,9 @@ export default function OrganizationPage() {
                       <div>
                         <Title level={4}>{dept.name}</Title>
                         <Text style={{ color: '#8c8c8c' }}>{dept.description}</Text>
-                        
+
                         <Divider />
-                        
+
                         <Row gutter={16}>
                           <Col span={12}>
                             <div style={{ marginBottom: '12px' }}>
@@ -662,7 +662,7 @@ export default function OrganizationPage() {
                             </div>
                           </Col>
                         </Row>
-                        
+
                         <Row gutter={16}>
                           <Col span={12}>
                             <div style={{ marginBottom: '12px' }}>
@@ -677,14 +677,14 @@ export default function OrganizationPage() {
                             </div>
                           </Col>
                         </Row>
-                        
+
                         <Divider />
-                        
+
                         <Space>
                           <Button icon={<FaEdit />} onClick={() => handleEditDepartment(dept)}>
                             Edit Department
                           </Button>
-                          <Button 
+                          <Button
                             icon={<FaUsers />}
                             onClick={() => {
                               // Switch to employees tab with department filter
@@ -717,9 +717,9 @@ export default function OrganizationPage() {
       ),
       children: (
         <div>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: '16px'
           }}>
@@ -736,8 +736,8 @@ export default function OrganizationPage() {
                 ))}
               </Select>
             </div>
-            
-            <Button 
+
+            <Button
               type="primary"
               icon={<FaPlus />}
               onClick={handleAddEmployee}
@@ -778,7 +778,7 @@ export default function OrganizationPage() {
 
         {/* Main Content */}
         <Card>
-          <Tabs 
+          <Tabs
             defaultActiveKey="overview"
             items={tabItems}
             size="large"
@@ -804,14 +804,14 @@ export default function OrganizationPage() {
             >
               <Input />
             </Form.Item>
-            
+
             <Form.Item
               name="description"
               label="Description"
             >
               <Input.TextArea rows={3} />
             </Form.Item>
-            
+
             <Row gutter={16}>
               <Col span={12}>
                 <Form.Item
@@ -834,7 +834,7 @@ export default function OrganizationPage() {
                 </Form.Item>
               </Col>
             </Row>
-            
+
             <Form.Item
               name="budget"
               label="Annual Budget (USD)"
@@ -877,7 +877,7 @@ export default function OrganizationPage() {
                 </Form.Item>
               </Col>
             </Row>
-            
+
             <Row gutter={16}>
               <Col span={12}>
                 <Form.Item
@@ -902,7 +902,7 @@ export default function OrganizationPage() {
                 </Form.Item>
               </Col>
             </Row>
-            
+
             <Row gutter={16}>
               <Col span={12}>
                 <Form.Item
@@ -922,7 +922,7 @@ export default function OrganizationPage() {
                 </Form.Item>
               </Col>
             </Row>
-            
+
             <Form.Item
               name="manager"
               label="Manager"
@@ -965,7 +965,7 @@ export default function OrganizationPage() {
                 </Form.Item>
               </Col>
             </Row>
-            
+
             <Row gutter={16}>
               <Col span={12}>
                 <Form.Item name="headquarters" label="Headquarters" rules={[{ required: true }]}>
@@ -978,11 +978,11 @@ export default function OrganizationPage() {
                 </Form.Item>
               </Col>
             </Row>
-            
+
             <Form.Item name="description" label="Description">
               <Input.TextArea rows={4} />
             </Form.Item>
-            
+
             <Form.Item name="logo" label="Logo URL">
               <Input placeholder="https://..." />
             </Form.Item>

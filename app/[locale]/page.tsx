@@ -17,12 +17,12 @@ export default function PublicGymListingPage() {
   const [userLocation, setUserLocation] = useState<string>('Your Location');
 
   // Fetch all gyms with active subscription
-  const { 
-    data: gymsData, 
-    loading: gymsLoading, 
+  const {
+    data: gymsData,
+    loading: gymsLoading,
     error: gymsError,
     refetch: refetchGyms
-  } = useQuery(GET_GYMS, {
+  } = useQuery<{ gyms: any[] }>(GET_GYMS, {
     variables: {
       subscriptionStatus: 'active' // Only show active gyms on public page
     },
@@ -32,7 +32,7 @@ export default function PublicGymListingPage() {
 
   const allGyms = gymsData?.gyms || [];
   const featuredGyms = allGyms.filter((gym: any) => gym.featured);
-  
+
   console.log('🏋️ Public page gym data:', {
     totalGyms: allGyms.length,
     featuredCount: featuredGyms.length,
@@ -100,27 +100,27 @@ export default function PublicGymListingPage() {
   // For now, we'll use location-based filtering on the gym location field
   const popularGymsAtLocation = allGyms.filter((gym: any) => {
     if (!gym.location) return false;
-    
+
     // Simple location matching - in production, you'd use geospatial queries
     const gymLocation = gym.location.toLowerCase();
     const userLoc = userLocation.toLowerCase();
-    
+
     // Check if user location matches gym location (city/state matching)
     if (userLoc.includes('your') || userLoc.includes('area')) {
       // Fallback: show first few gyms if location is generic
       return allGyms.indexOf(gym) < 4;
     }
-    
+
     // Check if gym location contains parts of user location
     const locationParts = userLoc.split(',').map(part => part.trim());
-    return locationParts.some(part => 
+    return locationParts.some(part =>
       part.length > 2 && gymLocation.includes(part)
     );
   }).slice(0, 4);
 
   // If no location matches, show first 4 gyms
-  const finalPopularGyms = popularGymsAtLocation.length > 0 
-    ? popularGymsAtLocation 
+  const finalPopularGyms = popularGymsAtLocation.length > 0
+    ? popularGymsAtLocation
     : allGyms.slice(0, 4);
 
   const handleLoadMore = () => {
@@ -135,9 +135,9 @@ export default function PublicGymListingPage() {
         <main className="public-main">
           <div className="container">
             <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-              <Spin 
-                indicator={<LoadingOutlined style={{ fontSize: 48, color: '#4CAF50' }} spin />} 
-                size="large" 
+              <Spin
+                indicator={<LoadingOutlined style={{ fontSize: 48, color: '#4CAF50' }} spin />}
+                size="large"
               />
               <div style={{ marginTop: 24, fontSize: 18, color: '#666' }}>
                 Loading gyms in your area...
@@ -164,9 +164,9 @@ export default function PublicGymListingPage() {
                 type="error"
                 showIcon
                 action={
-                  <Button 
-                    variant="primary" 
-                    size="sm" 
+                  <Button
+                    variant="primary"
+                    size="sm"
                     onClick={() => refetchGyms()}
                   >
                     Try Again
@@ -193,14 +193,14 @@ export default function PublicGymListingPage() {
               <div className="gym-grid">
                 {Array(4).fill(0).map((_, index) => (
                   <div key={index} style={{ marginBottom: 24 }}>
-                    <Skeleton.Image 
-                      style={{ width: '100%', height: 200 }} 
-                      active 
+                    <Skeleton.Image
+                      style={{ width: '100%', height: 200 }}
+                      active
                     />
-                    <Skeleton 
-                      active 
-                      title={{ width: '80%' }} 
-                      paragraph={{ rows: 2, width: ['60%', '40%'] }} 
+                    <Skeleton
+                      active
+                      title={{ width: '80%' }}
+                      paragraph={{ rows: 2, width: ['60%', '40%'] }}
                     />
                   </div>
                 ))}
@@ -226,14 +226,14 @@ export default function PublicGymListingPage() {
               <div className="gym-grid">
                 {Array(4).fill(0).map((_, index) => (
                   <div key={index} style={{ marginBottom: 24 }}>
-                    <Skeleton.Image 
-                      style={{ width: '100%', height: 200 }} 
-                      active 
+                    <Skeleton.Image
+                      style={{ width: '100%', height: 200 }}
+                      active
                     />
-                    <Skeleton 
-                      active 
-                      title={{ width: '80%' }} 
-                      paragraph={{ rows: 2, width: ['60%', '40%'] }} 
+                    <Skeleton
+                      active
+                      title={{ width: '80%' }}
+                      paragraph={{ rows: 2, width: ['60%', '40%'] }}
                     />
                   </div>
                 ))}
@@ -259,14 +259,14 @@ export default function PublicGymListingPage() {
               <div className="gym-grid">
                 {Array(displayCount).fill(0).map((_, index) => (
                   <div key={index} style={{ marginBottom: 24 }}>
-                    <Skeleton.Image 
-                      style={{ width: '100%', height: 200 }} 
-                      active 
+                    <Skeleton.Image
+                      style={{ width: '100%', height: 200 }}
+                      active
                     />
-                    <Skeleton 
-                      active 
-                      title={{ width: '80%' }} 
-                      paragraph={{ rows: 2, width: ['60%', '40%'] }} 
+                    <Skeleton
+                      active
+                      title={{ width: '80%' }}
+                      paragraph={{ rows: 2, width: ['60%', '40%'] }}
                     />
                   </div>
                 ))}
@@ -280,8 +280,8 @@ export default function PublicGymListingPage() {
                 </div>
                 {displayCount < allGyms.length && (
                   <div className="load-more-container">
-                    <button 
-                      className="btn" 
+                    <button
+                      className="btn"
                       onClick={handleLoadMore}
                       type="button"
                     >

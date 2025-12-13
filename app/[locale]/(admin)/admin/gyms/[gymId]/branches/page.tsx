@@ -4,16 +4,16 @@ import { useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
 import { useQuery, useMutation } from '@apollo/client/react';
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Tag, 
-  Space, 
-  Modal, 
-  Form, 
-  Input, 
-  Select, 
+import {
+  Card,
+  Table,
+  Button,
+  Tag,
+  Space,
+  Modal,
+  Form,
+  Input,
+  Select,
   Typography,
   Row,
   Col,
@@ -22,7 +22,7 @@ import {
   Alert,
   message
 } from 'antd';
-import { 
+import {
   FaArrowLeft,
   FaBuilding,
   FaPlus,
@@ -34,6 +34,7 @@ import {
   FaEnvelope,
   FaMapMarker
 } from 'react-icons/fa';
+import { Branch, Gym } from '@/lib/types';
 import AdminProtectedRoute from '@/components/shared/AdminProtectedRoute';
 import { GET_GYM, GET_BRANCHES, CREATE_BRANCH, UPDATE_BRANCH, DELETE_BRANCH } from '@/graphql/queries/admin';
 
@@ -54,43 +55,22 @@ export default function BranchManagementPage({ params }: PageProps) {
   const locale = routeParams.locale as string;
 
   // Fetch gym data
-  const { data: gymData, loading: gymLoading, error: gymError } = useQuery(GET_GYM, {
+  const { data: gymData, loading: gymLoading, error: gymError } = useQuery<{ gym: Gym }>(GET_GYM, {
     variables: { id: gymId },
     fetchPolicy: 'cache-and-network',
-    onError: (err) => {
-      console.error('Error fetching gym:', err);
-    },
   });
 
   // Fetch branches
-  const { data: branchesData, loading: branchesLoading, error: branchesError, refetch: refetchBranches } = useQuery(GET_BRANCHES, {
+  const { data: branchesData, loading: branchesLoading, error: branchesError, refetch: refetchBranches } = useQuery<{ branches: Branch[] }>(GET_BRANCHES, {
     variables: { gymId },
     fetchPolicy: 'cache-and-network',
-    onError: (err) => {
-      console.error('Error fetching branches:', err);
-    },
   });
 
-  const [createBranchMutation] = useMutation(CREATE_BRANCH, {
-    onError: (err) => {
-      console.error('Error creating branch:', err);
-      message.error(err.message || 'Failed to create branch');
-    },
-  });
+  const [createBranchMutation] = useMutation<{ createBranch: Branch }>(CREATE_BRANCH);
 
-  const [updateBranchMutation] = useMutation(UPDATE_BRANCH, {
-    onError: (err) => {
-      console.error('Error updating branch:', err);
-      message.error(err.message || 'Failed to update branch');
-    },
-  });
+  const [updateBranchMutation] = useMutation<{ updateBranch: Branch }>(UPDATE_BRANCH);
 
-  const [deleteBranchMutation] = useMutation(DELETE_BRANCH, {
-    onError: (err) => {
-      console.error('Error deleting branch:', err);
-      message.error(err.message || 'Failed to delete branch');
-    },
-  });
+  const [deleteBranchMutation] = useMutation<{ deleteBranch: boolean }>(DELETE_BRANCH);
 
   const gym = gymData?.gym;
   const branches = branchesData?.branches || [];
@@ -132,8 +112,8 @@ export default function BranchManagementPage({ params }: PageProps) {
         <div>
           <div className="dashboard-page-header">
             <div style={{ flex: 1 }}>
-              <Button 
-                icon={<FaArrowLeft />} 
+              <Button
+                icon={<FaArrowLeft />}
                 onClick={() => router.push(`/${locale}/admin/gyms`)}
               >
                 Back
@@ -220,7 +200,7 @@ export default function BranchManagementPage({ params }: PageProps) {
         });
         message.success('Branch created successfully');
       }
-      
+
       setIsModalVisible(false);
       form.resetFields();
       await refetchBranches();
@@ -297,25 +277,25 @@ export default function BranchManagementPage({ params }: PageProps) {
       key: 'actions',
       render: (branch: any) => (
         <Space>
-          <Button 
-            type="text" 
-            size="small" 
+          <Button
+            type="text"
+            size="small"
             icon={<FaEye />}
             onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/branches/${branch.id}`)}
           >
             View
           </Button>
-          <Button 
-            type="text" 
-            size="small" 
+          <Button
+            type="text"
+            size="small"
             icon={<FaEdit />}
             onClick={() => handleEditBranch(branch)}
           >
             Edit
           </Button>
-          <Button 
-            type="text" 
-            size="small" 
+          <Button
+            type="text"
+            size="small"
             icon={<FaTrash />}
             danger
             onClick={() => handleDeleteBranch(branch.id)}
@@ -336,8 +316,8 @@ export default function BranchManagementPage({ params }: PageProps) {
         <div className="dashboard-page-header">
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-              <Button 
-                icon={<FaArrowLeft />} 
+              <Button
+                icon={<FaArrowLeft />}
                 onClick={() => router.push(`/${locale}/admin/gyms/${gymId}`)}
               >
                 Back
@@ -398,10 +378,10 @@ export default function BranchManagementPage({ params }: PageProps) {
         </Row>
 
         {/* Branch List */}
-        <Card 
+        <Card
           title="Branch List"
           extra={
-            <Button 
+            <Button
               type="primary"
               icon={<FaPlus />}
               onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/branches/new`)}
@@ -416,7 +396,7 @@ export default function BranchManagementPage({ params }: PageProps) {
             <div style={{ textAlign: 'center', padding: '40px' }}>
               <Text type="secondary">No branches found for this gym.</Text>
               <div style={{ marginTop: '16px' }}>
-                <Button 
+                <Button
                   type="primary"
                   icon={<FaPlus />}
                   onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/branches/new`)}
@@ -434,7 +414,7 @@ export default function BranchManagementPage({ params }: PageProps) {
                 pageSize: 10,
                 showSizeChanger: true,
                 showQuickJumper: true,
-                showTotal: (total, range) => 
+                showTotal: (total, range) =>
                   `${range[0]}-${range[1]} of ${total} branches`,
               }}
             />

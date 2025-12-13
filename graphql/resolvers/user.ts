@@ -173,7 +173,7 @@ export const userResolvers = {
         users = [...users, ...gymUsers];
       }
 
-      return users.map(user => ({
+      return users.map((user: any) => ({
         ...user,
         id: user._id.toString(),
         role: dbRoleToGraphQL(user.role) as any, // Convert to GraphQL enum format

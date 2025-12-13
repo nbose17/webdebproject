@@ -9,21 +9,21 @@ import { getGymModels } from './db-models';
 export async function initializeGymDatabase(gymId: string): Promise<void> {
   try {
     console.log(`🔄 Initializing gym database for gym: ${gymId}`);
-    
+
     // Get gym models - this will automatically create the database and collections if they don't exist
     const GymModels = await getGymModels(gymId);
-    
+
     // Ensure all indexes are created
     await Promise.all([
-      GymModels.User.createIndexes().catch(() => {}),
-      GymModels.Client.createIndexes().catch(() => {}),
-      GymModels.Branch.createIndexes().catch(() => {}),
-      GymModels.CMS.createIndexes().catch(() => {}),
-      GymModels.Plan.createIndexes().catch(() => {}),
-      GymModels.Class.createIndexes().catch(() => {}),
-      GymModels.Trainer.createIndexes().catch(() => {}),
+      GymModels.User.createIndexes().catch(() => { }),
+      GymModels.Client.createIndexes().catch(() => { }),
+      GymModels.Branch.createIndexes().catch(() => { }),
+      GymModels.CMS.createIndexes().catch(() => { }),
+      GymModels.Plan.createIndexes().catch(() => { }),
+      GymModels.Class.createIndexes().catch(() => { }),
+      GymModels.Trainer.createIndexes().catch(() => { }),
     ]);
-    
+
     console.log(`✅ Gym database initialized: fc_gym_${gymId}`);
   } catch (error) {
     console.error(`❌ Failed to initialize gym database for ${gymId}:`, error);
@@ -40,7 +40,7 @@ export async function verifyGymDatabase(gymId: string): Promise<boolean> {
     await connectGymDB(gymId);
     const GymModels = await getGymModels(gymId);
     // Try to access a collection to verify the database exists
-    await GymModels.User.db.db.listCollections().toArray();
+    await GymModels.User.db.db?.listCollections().toArray();
     return true;
   } catch (error) {
     return false;
@@ -54,7 +54,7 @@ export async function verifyGymDatabase(gymId: string): Promise<boolean> {
 export async function syncGymDatabases(): Promise<{ created: string[]; existing: string[]; errors: string[] }> {
   const { getAdminModels } = await import('./db-models');
   const AdminModels = await getAdminModels();
-  
+
   const gyms = await AdminModels.Gym.find({}).lean();
   const result = {
     created: [] as string[],

@@ -1,11 +1,11 @@
 'use client';
 
 import { Card, Row, Col, Statistic, Progress, List, Tag, Button } from 'antd';
-import { 
+import {
   FaHome,
-  FaDumbbell, 
-  FaUsers, 
-  FaCreditCard, 
+  FaDumbbell,
+  FaUsers,
+  FaCreditCard,
   FaChartLine,
   FaExclamationTriangle,
   FaBell,
@@ -14,18 +14,17 @@ import {
   FaClock
 } from 'react-icons/fa';
 import { usePermissions } from '@/hooks/usePermissions';
-import { mockAdminGyms, mockGymUsers } from '@/lib/constants';
 
 export default function AdminDashboard() {
   const { currentUser, isAdmin } = usePermissions();
 
-  // Calculate statistics from mock data
-  const totalGyms = mockAdminGyms.length;
-  const activeGyms = mockAdminGyms.filter(gym => gym.subscriptionStatus === 'active').length;
-  const totalUsers = mockGymUsers.length;
-  const activeUsers = mockGymUsers.filter(user => user.isActive).length;
-  const totalRevenue = 45280; // Mock revenue
-  const monthlyGrowth = 12.5; // Mock growth percentage
+  // TODO: Fetch real statistics from GraphQL API instead of using mock data
+  const totalGyms = 0;
+  const activeGyms = 0;
+  const totalUsers = 0;
+  const activeUsers = 0;
+  const totalRevenue = 0;
+  const monthlyGrowth = 0;
 
   // Recent activities (mock data)
   const recentActivities = [
@@ -38,7 +37,7 @@ export default function AdminDashboard() {
       icon: <FaCheckCircle style={{ color: '#52c41a' }} />
     },
     {
-      id: '2', 
+      id: '2',
       action: 'Payment overdue',
       details: 'FITNESS GYM - Uptown payment is 3 days overdue',
       time: '5 hours ago',
@@ -49,7 +48,7 @@ export default function AdminDashboard() {
       id: '3',
       action: 'User created',
       details: 'New trainer added to FITNESS GYM - Downtown',
-      time: '1 day ago', 
+      time: '1 day ago',
       type: 'info',
       icon: <FaUsers style={{ color: '#4CAF50' }} />
     },
@@ -73,7 +72,7 @@ export default function AdminDashboard() {
       priority: 'medium'
     },
     {
-      id: '2', 
+      id: '2',
       title: 'Payment gateway update',
       message: 'New payment features will be deployed next week',
       type: 'success',
@@ -118,7 +117,7 @@ export default function AdminDashboard() {
             />
           </Card>
         </Col>
-        
+
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
@@ -133,7 +132,7 @@ export default function AdminDashboard() {
             />
           </Card>
         </Col>
-        
+
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
@@ -149,16 +148,16 @@ export default function AdminDashboard() {
             />
           </Card>
         </Col>
-        
+
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
               <FaChartLine style={{ color: '#722ed1', marginRight: '8px' }} />
               <span style={{ fontWeight: '500' }}>System Health</span>
             </div>
-            <Progress 
-              percent={95} 
-              size="small" 
+            <Progress
+              percent={95}
+              size="small"
               status="active"
               strokeColor="#52c41a"
             />
@@ -172,7 +171,7 @@ export default function AdminDashboard() {
       <Row gutter={[16, 16]}>
         {/* Recent Activities */}
         <Col xs={24} lg={12}>
-          <Card 
+          <Card
             title={
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <FaBell style={{ marginRight: '8px', color: '#4CAF50' }} />
@@ -204,7 +203,7 @@ export default function AdminDashboard() {
 
         {/* System Alerts */}
         <Col xs={24} lg={12}>
-          <Card 
+          <Card
             title={
               <div style={{ display: 'flex', alignItems: 'center' }}>
                 <FaExclamationTriangle style={{ marginRight: '8px', color: '#faad14' }} />
@@ -221,17 +220,17 @@ export default function AdminDashboard() {
                 <List.Item>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div style={{ flex: 1 }}>
-                      <div style={{ 
-                        fontWeight: '500', 
+                      <div style={{
+                        fontWeight: '500',
                         marginBottom: '4px',
                         display: 'flex',
                         alignItems: 'center'
                       }}>
                         {alert.title}
-                        <Tag 
+                        <Tag
                           color={
-                            alert.priority === 'high' ? 'red' : 
-                            alert.priority === 'medium' ? 'orange' : 'blue'
+                            alert.priority === 'high' ? 'red' :
+                              alert.priority === 'medium' ? 'orange' : 'blue'
                           }
                           style={{ marginLeft: '8px' }}
                         >
@@ -251,15 +250,15 @@ export default function AdminDashboard() {
       </Row>
 
       {/* Quick Actions */}
-      <Card 
-        title="Quick Actions" 
+      <Card
+        title="Quick Actions"
         style={{ marginTop: 'var(--spacing-2xl)' }}
       >
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={8} md={6}>
-            <Button 
-              type="primary" 
-              block 
+            <Button
+              type="primary"
+              block
               size="large"
               icon={<FaDumbbell />}
               onClick={() => window.location.href = `/admin/gyms`}
@@ -268,8 +267,8 @@ export default function AdminDashboard() {
             </Button>
           </Col>
           <Col xs={24} sm={8} md={6}>
-            <Button 
-              block 
+            <Button
+              block
               size="large"
               icon={<FaCreditCard />}
               onClick={() => window.location.href = `/admin/payments`}
@@ -278,8 +277,8 @@ export default function AdminDashboard() {
             </Button>
           </Col>
           <Col xs={24} sm={8} md={6}>
-            <Button 
-              block 
+            <Button
+              block
               size="large"
               icon={<FaChartLine />}
               onClick={() => window.location.href = `/admin/analytics`}

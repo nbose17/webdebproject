@@ -5,23 +5,23 @@ import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery } from '@apollo/client/react';
-import { 
-  Card, 
-  Form, 
-  Input, 
-  Button, 
-  Select, 
-  Switch, 
-  Upload, 
-  message, 
-  Row, 
+import {
+  Card,
+  Form,
+  Input,
+  Button,
+  Select,
+  Switch,
+  Upload,
+  message,
+  Row,
   Col,
   Typography,
   Space,
   Skeleton,
   Alert
 } from 'antd';
-import { 
+import {
   FaArrowLeft,
   FaDumbbell,
   FaSave,
@@ -30,6 +30,7 @@ import {
 } from 'react-icons/fa';
 import { UploadOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
+import { AdminGym, User } from '@/lib/types';
 import AdminProtectedRoute from '@/components/shared/AdminProtectedRoute';
 import { UPDATE_GYM, GET_GYM, GET_USERS } from '@/graphql/queries/admin';
 
@@ -52,31 +53,18 @@ export default function EditGymPage({ params }: PageProps) {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   // Fetch gym data
-  const { data: gymData, loading: gymLoading, error: gymError } = useQuery(GET_GYM, {
+  const { data: gymData, loading: gymLoading, error: gymError } = useQuery<{ gym: AdminGym }>(GET_GYM, {
     variables: { id: gymId },
     fetchPolicy: 'cache-and-network',
-    onError: (err) => {
-      console.error('Error fetching gym:', err);
-      message.error('Failed to load gym details. Please try again.');
-    },
   });
 
   // Fetch gym owners for the owner select
-  const { data: usersData, loading: usersLoading } = useQuery(GET_USERS, {
+  const { data: usersData, loading: usersLoading } = useQuery<{ users: User[] }>(GET_USERS, {
     variables: { role: 'GYM_OWNER' },
     fetchPolicy: 'cache-and-network',
-    onError: (err) => {
-      console.error('Error fetching gym owners:', err);
-    },
   });
 
-  const [updateGymMutation] = useMutation(UPDATE_GYM, {
-    onError: (err) => {
-      console.error('Error updating gym:', err);
-      message.error(err.message || 'Failed to update gym. Please try again.');
-      setLoading(false);
-    },
-  });
+  const [updateGymMutation] = useMutation<{ updateGym: AdminGym }>(UPDATE_GYM);
 
   // Populate form when gym data loads
   useEffect(() => {
@@ -100,7 +88,7 @@ export default function EditGymPage({ params }: PageProps) {
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
-      
+
       const variables: any = {
         id: gymId,
         name: values.name,
@@ -185,8 +173,8 @@ export default function EditGymPage({ params }: PageProps) {
         <div>
           <div className="dashboard-page-header">
             <div style={{ flex: 1 }}>
-              <Button 
-                icon={<FaArrowLeft />} 
+              <Button
+                icon={<FaArrowLeft />}
                 onClick={() => router.push(`/${locale}/admin/gyms`)}
               >
                 Back
@@ -217,8 +205,8 @@ export default function EditGymPage({ params }: PageProps) {
         <div className="dashboard-page-header">
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-              <Button 
-                icon={<FaArrowLeft />} 
+              <Button
+                icon={<FaArrowLeft />}
                 onClick={() => router.push(`/${locale}/admin/gyms/${gymId}`)}
               >
                 Back
@@ -256,8 +244,8 @@ export default function EditGymPage({ params }: PageProps) {
                     { min: 3, message: 'Gym name must be at least 3 characters' },
                   ]}
                 >
-                  <Input 
-                    placeholder="e.g., FITNESS GYM - Downtown" 
+                  <Input
+                    placeholder="e.g., FITNESS GYM - Downtown"
                     size="large"
                   />
                 </Form.Item>
@@ -269,8 +257,8 @@ export default function EditGymPage({ params }: PageProps) {
                     { required: true, message: 'Please enter gym location' },
                   ]}
                 >
-                  <Input 
-                    placeholder="e.g., 123 Main Street, Downtown, City" 
+                  <Input
+                    placeholder="e.g., 123 Main Street, Downtown, City"
                     size="large"
                   />
                 </Form.Item>
@@ -319,7 +307,7 @@ export default function EditGymPage({ params }: PageProps) {
                     { max: 1000, message: 'Description must be less than 1000 characters' },
                   ]}
                 >
-                  <TextArea 
+                  <TextArea
                     rows={6}
                     placeholder="Enter a detailed description of the gym, its facilities, and services..."
                     showCount
@@ -332,7 +320,7 @@ export default function EditGymPage({ params }: PageProps) {
                   name="image"
                   extra="Enter a URL or upload an image below"
                 >
-                  <Input 
+                  <Input
                     placeholder="https://example.com/gym-image.jpg"
                     size="large"
                     onChange={(e) => setImageUrl(e.target.value)}
@@ -359,9 +347,9 @@ export default function EditGymPage({ params }: PageProps) {
                   </Upload>
                   {imageUrl && (
                     <div style={{ marginTop: 16 }}>
-                      <img 
-                        src={imageUrl} 
-                        alt="Preview" 
+                      <img
+                        src={imageUrl}
+                        alt="Preview"
                         style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px' }}
                       />
                     </div>

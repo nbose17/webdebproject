@@ -4,26 +4,27 @@ import { useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery } from '@apollo/client/react';
-import { 
-  Card, 
-  Form, 
-  Input, 
-  Button, 
-  Select, 
-  message, 
-  Row, 
+import {
+  Card,
+  Form,
+  Input,
+  Button,
+  Select,
+  message,
+  Row,
   Col,
   Typography,
   Space,
   Skeleton,
   Alert
 } from 'antd';
-import { 
+import {
   FaArrowLeft,
   FaBuilding,
   FaSave,
   FaUser
 } from 'react-icons/fa';
+import { Branch, Gym, User } from '@/lib/types';
 import AdminProtectedRoute from '@/components/shared/AdminProtectedRoute';
 import { CREATE_BRANCH, GET_GYM, GET_USERS } from '@/graphql/queries/admin';
 
@@ -43,40 +44,28 @@ export default function AddBranchPage({ params }: PageProps) {
   const [loading, setLoading] = useState(false);
 
   // Fetch gym data to display gym name
-  const { data: gymData, loading: gymLoading, error: gymError } = useQuery(GET_GYM, {
+  const { data: gymData, loading: gymLoading, error: gymError } = useQuery<{ gym: Gym }>(GET_GYM, {
     variables: { id: gymId },
     fetchPolicy: 'cache-and-network',
-    onError: (err) => {
-      console.error('Error fetching gym:', err);
-    },
   });
 
   // Fetch gym managers for manager select
-  const { data: usersData, loading: usersLoading } = useQuery(GET_USERS, {
-    variables: { 
+  const { data: usersData, loading: usersLoading } = useQuery<{ users: User[] }>(GET_USERS, {
+    variables: {
       role: 'GYM_MANAGER',
       gymId: gymId,
-      isActive: true 
+      isActive: true
     },
     fetchPolicy: 'cache-and-network',
-    onError: (err) => {
-      console.error('Error fetching managers:', err);
-    },
   });
 
-  const [createBranchMutation] = useMutation(CREATE_BRANCH, {
-    onError: (err) => {
-      console.error('Error creating branch:', err);
-      message.error(err.message || 'Failed to create branch. Please try again.');
-      setLoading(false);
-    },
-  });
+  const [createBranchMutation] = useMutation<{ createBranch: Branch }>(CREATE_BRANCH);
 
   // Handle form submission
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
-      
+
       const variables = {
         name: values.name,
         address: values.address,
@@ -139,8 +128,8 @@ export default function AddBranchPage({ params }: PageProps) {
         <div>
           <div className="dashboard-page-header">
             <div style={{ flex: 1 }}>
-              <Button 
-                icon={<FaArrowLeft />} 
+              <Button
+                icon={<FaArrowLeft />}
                 onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/branches`)}
               >
                 Back
@@ -171,8 +160,8 @@ export default function AddBranchPage({ params }: PageProps) {
         <div className="dashboard-page-header">
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-              <Button 
-                icon={<FaArrowLeft />} 
+              <Button
+                icon={<FaArrowLeft />}
                 onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/branches`)}
               >
                 Back
@@ -207,8 +196,8 @@ export default function AddBranchPage({ params }: PageProps) {
                     { min: 3, message: 'Branch name must be at least 3 characters' },
                   ]}
                 >
-                  <Input 
-                    placeholder="e.g., Downtown Main Branch" 
+                  <Input
+                    placeholder="e.g., Downtown Main Branch"
                     size="large"
                   />
                 </Form.Item>
@@ -220,7 +209,7 @@ export default function AddBranchPage({ params }: PageProps) {
                     { required: true, message: 'Please enter branch address' },
                   ]}
                 >
-                  <Input.TextArea 
+                  <Input.TextArea
                     rows={3}
                     placeholder="Full branch address including street, city, state, zip"
                     size="large"
@@ -236,8 +225,8 @@ export default function AddBranchPage({ params }: PageProps) {
                         { required: true, message: 'Please enter phone number' },
                       ]}
                     >
-                      <Input 
-                        placeholder="+1 (555) 123-4567" 
+                      <Input
+                        placeholder="+1 (555) 123-4567"
                         size="large"
                       />
                     </Form.Item>
@@ -251,8 +240,8 @@ export default function AddBranchPage({ params }: PageProps) {
                         { type: 'email', message: 'Please enter a valid email address' },
                       ]}
                     >
-                      <Input 
-                        placeholder="branch@gym.com" 
+                      <Input
+                        placeholder="branch@gym.com"
                         size="large"
                       />
                     </Form.Item>

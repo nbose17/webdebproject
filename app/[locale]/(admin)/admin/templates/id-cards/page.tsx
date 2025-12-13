@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Tag, 
-  Space, 
+import {
+  Card,
+  Table,
+  Button,
+  Tag,
+  Space,
   Typography,
   Row,
   Col,
@@ -16,7 +16,7 @@ import {
   Popconfirm,
   message
 } from 'antd';
-import { 
+import {
   FaIdCard,
   FaPlus,
   FaEdit,
@@ -244,14 +244,14 @@ export default function IDCardTemplatesPage() {
   // Apply search filter
   const applyFilters = () => {
     let filtered = templates;
-    
+
     if (searchTerm.trim()) {
       filtered = filtered.filter(template =>
         template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         template.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     setFilteredTemplates(filtered);
   };
 
@@ -273,7 +273,7 @@ export default function IDCardTemplatesPage() {
   const handleSaveTemplate = (template: IDCardTemplate) => {
     if (editingTemplate) {
       // Update existing template
-      setTemplates(prev => prev.map(t => 
+      setTemplates(prev => prev.map(t =>
         t.id === editingTemplate.id ? template : t
       ));
       message.success('Template updated successfully');
@@ -282,7 +282,7 @@ export default function IDCardTemplatesPage() {
       setTemplates(prev => [...prev, template]);
       message.success('Template created successfully');
     }
-    
+
     setIsDesignerVisible(false);
     applyFilters();
   };
@@ -301,7 +301,7 @@ export default function IDCardTemplatesPage() {
       createdAt: new Date().toISOString(),
       lastModified: new Date().toISOString()
     };
-    
+
     setTemplates(prev => [...prev, duplicated]);
     message.success('Template duplicated successfully');
     applyFilters();
@@ -313,7 +313,7 @@ export default function IDCardTemplatesPage() {
   };
 
   const handleToggleStatus = (templateId: string) => {
-    setTemplates(prev => prev.map(t => 
+    setTemplates(prev => prev.map(t =>
       t.id === templateId ? { ...t, isActive: !t.isActive } : t
     ));
     applyFilters();
@@ -332,7 +332,7 @@ export default function IDCardTemplatesPage() {
             {template.description}
           </div>
           <div style={{ marginTop: '4px' }}>
-            <Tag color={template.isActive ? 'success' : 'default'} size="small">
+            <Tag color={template.isActive ? 'success' : 'default'}>
               {template.isActive ? 'Active' : 'Inactive'}
             </Tag>
           </div>
@@ -389,32 +389,32 @@ export default function IDCardTemplatesPage() {
       key: 'actions',
       render: (template: IDCardTemplate) => (
         <Space>
-          <Button 
-            type="text" 
+          <Button
+            type="text"
             size="small"
             icon={<FaEye />}
             onClick={() => handlePreviewTemplate(template)}
           >
             Preview
           </Button>
-          <Button 
-            type="text" 
+          <Button
+            type="text"
             size="small"
             icon={<FaEdit />}
             onClick={() => handleEditTemplate(template)}
           >
             Edit
           </Button>
-          <Button 
-            type="text" 
+          <Button
+            type="text"
             size="small"
             icon={<FaCopy />}
             onClick={() => handleDuplicateTemplate(template)}
           >
             Duplicate
           </Button>
-          <Button 
-            type="text" 
+          <Button
+            type="text"
             size="small"
             onClick={() => handleToggleStatus(template.id)}
           >
@@ -425,8 +425,8 @@ export default function IDCardTemplatesPage() {
             description="Are you sure you want to delete this template?"
             onConfirm={() => handleDeleteTemplate(template.id)}
           >
-            <Button 
-              type="text" 
+            <Button
+              type="text"
               size="small"
               icon={<FaTrash />}
               danger
@@ -515,9 +515,9 @@ export default function IDCardTemplatesPage() {
 
         {/* Templates Management */}
         <Card>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: '16px'
           }}>
@@ -530,9 +530,9 @@ export default function IDCardTemplatesPage() {
                 enterButton={<FaSearch />}
               />
             </div>
-            
-            <Button 
-              type="primary" 
+
+            <Button
+              type="primary"
               icon={<FaPlus />}
               onClick={handleCreateTemplate}
             >
@@ -548,7 +548,7 @@ export default function IDCardTemplatesPage() {
               pageSize: 10,
               showSizeChanger: true,
               showQuickJumper: true,
-              showTotal: (total, range) => 
+              showTotal: (total, range) =>
                 `${range[0]}-${range[1]} of ${total} templates`,
             }}
           />
@@ -563,7 +563,7 @@ export default function IDCardTemplatesPage() {
           width={800}
         >
           {previewTemplate && (
-            <IDCardPreview 
+            <IDCardPreview
               template={previewTemplate}
               showControls={true}
             />

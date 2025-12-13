@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Card, 
-  Button, 
-  Input, 
-  Select, 
-  Row, 
-  Col, 
+import {
+  Card,
+  Button,
+  Input,
+  Select,
+  Row,
+  Col,
   Typography,
   Divider,
   Tag,
@@ -19,7 +19,7 @@ import {
   Popover,
   Alert
 } from 'antd';
-import { 
+import {
   FaSave,
   FaEye,
   FaCode,
@@ -52,7 +52,7 @@ interface ContractEditorProps {
 }
 
 export default function ContractEditor({ template, onSave, onCancel }: ContractEditorProps) {
-  const [templateData, setTemplateData] = useState<ContractTemplate>(() => 
+  const [templateData, setTemplateData] = useState<ContractTemplate>(() =>
     template || {
       id: '',
       name: '',
@@ -67,7 +67,7 @@ export default function ContractEditor({ template, onSave, onCancel }: ContractE
       version: 1
     }
   );
-  
+
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
   const [isVariableModalVisible, setIsVariableModalVisible] = useState(false);
   const [editingVariable, setEditingVariable] = useState<TemplateVariable | null>(null);
@@ -99,7 +99,7 @@ export default function ContractEditor({ template, onSave, onCancel }: ContractE
 
   const insertVariable = (variable: TemplateVariable) => {
     const placeholder = `{{${variable.key}}}`;
-    
+
     if (editorMode === 'wysiwyg' && editorRef.current) {
       // Insert at cursor position
       const selection = window.getSelection();
@@ -174,7 +174,7 @@ export default function ContractEditor({ template, onSave, onCancel }: ContractE
       // Update existing variable
       setTemplateData(prev => ({
         ...prev,
-        variables: prev.variables.map(v => 
+        variables: prev.variables.map(v =>
           v.key === editingVariable.key ? variable : v
         )
       }));
@@ -230,7 +230,7 @@ export default function ContractEditor({ template, onSave, onCancel }: ContractE
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <Card size="small" style={{ marginBottom: '16px' }}>
+      <Card style={{ marginBottom: '16px' }}>
         <Row gutter={16}>
           <Col span={8}>
             <Input
@@ -254,14 +254,14 @@ export default function ContractEditor({ template, onSave, onCancel }: ContractE
           </Col>
           <Col span={8}>
             <Space>
-              <Button 
+              <Button
                 icon={<FaEye />}
                 onClick={() => setIsPreviewVisible(true)}
               >
                 Preview
               </Button>
-              <Button 
-                type="primary" 
+              <Button
+                type="primary"
                 icon={<FaSave />}
                 onClick={handleSave}
                 disabled={!templateData.name.trim() || !templateData.content.trim()}
@@ -274,7 +274,7 @@ export default function ContractEditor({ template, onSave, onCancel }: ContractE
             </Space>
           </Col>
         </Row>
-        
+
         <div style={{ marginTop: '12px' }}>
           <Input
             placeholder="Template Description"
@@ -287,21 +287,21 @@ export default function ContractEditor({ template, onSave, onCancel }: ContractE
       <Row gutter={16} style={{ flex: 1 }}>
         {/* Editor */}
         <Col span={16}>
-          <Card 
+          <Card
             title="Contract Template Editor"
-            size="small"
+
             extra={
               <Space>
                 <Button
                   type={editorMode === 'wysiwyg' ? 'primary' : 'default'}
-                  size="small"
+
                   onClick={() => setEditorMode('wysiwyg')}
                 >
                   Visual
                 </Button>
                 <Button
                   type={editorMode === 'html' ? 'primary' : 'default'}
-                  size="small"
+
                   icon={<FaCode />}
                   onClick={() => setEditorMode('html')}
                 >
@@ -319,15 +319,17 @@ export default function ContractEditor({ template, onSave, onCancel }: ContractE
                     if (button.type === 'divider') {
                       return <Divider key={index} type="vertical" />;
                     }
-                    
+
                     const IconComponent = button.icon;
+                    if (!IconComponent || !button.command) return null;
+
                     return (
                       <Tooltip key={button.command} title={button.tooltip}>
                         <Button
                           type="text"
-                          size="small"
+
                           icon={<IconComponent />}
-                          onClick={() => formatText(button.command)}
+                          onClick={() => formatText(button.command!)}
                         />
                       </Tooltip>
                     );
@@ -335,7 +337,7 @@ export default function ContractEditor({ template, onSave, onCancel }: ContractE
                 </Space>
               </div>
             )}
-            
+
             {editorMode === 'wysiwyg' ? (
               <div
                 ref={editorRef}
@@ -366,13 +368,13 @@ export default function ContractEditor({ template, onSave, onCancel }: ContractE
 
         {/* Variables Panel */}
         <Col span={8}>
-          <Card 
+          <Card
             title="Template Variables"
-            size="small"
+
             extra={
               <Button
                 type="primary"
-                size="small"
+
                 icon={<FaPlus />}
                 onClick={handleAddCustomVariable}
               >
@@ -408,7 +410,7 @@ export default function ContractEditor({ template, onSave, onCancel }: ContractE
                 <Text style={{ color: '#8c8c8c' }}>No variables added yet</Text>
               ) : (
                 <List
-                  size="small"
+
                   dataSource={templateData.variables}
                   renderItem={(variable) => (
                     <List.Item
@@ -416,14 +418,14 @@ export default function ContractEditor({ template, onSave, onCancel }: ContractE
                         <Button
                           key="edit"
                           type="text"
-                          size="small"
+
                           icon={<FaEdit />}
                           onClick={() => handleEditVariable(variable)}
                         />,
                         <Button
                           key="delete"
                           type="text"
-                          size="small"
+
                           icon={<FaTrash />}
                           danger
                           onClick={() => handleDeleteVariable(variable.key)}
@@ -434,7 +436,7 @@ export default function ContractEditor({ template, onSave, onCancel }: ContractE
                         title={
                           <div>
                             <Text strong>{variable.label}</Text>
-                            {variable.required && <Tag color="red" size="small">Required</Tag>}
+                            {variable.required && <Tag color="red">Required</Tag>}
                           </div>
                         }
                         description={
@@ -470,10 +472,10 @@ export default function ContractEditor({ template, onSave, onCancel }: ContractE
           type="info"
           style={{ marginBottom: '16px' }}
         />
-        <div 
-          style={{ 
-            border: '1px solid #d9d9d9', 
-            borderRadius: '6px', 
+        <div
+          style={{
+            border: '1px solid #d9d9d9',
+            borderRadius: '6px',
             padding: '16px',
             backgroundColor: 'white',
             minHeight: '400px'
@@ -501,7 +503,7 @@ export default function ContractEditor({ template, onSave, onCancel }: ContractE
           >
             <Input placeholder="e.g., client.membershipId" />
           </Form.Item>
-          
+
           <Form.Item
             name="label"
             label="Display Label"
@@ -509,7 +511,7 @@ export default function ContractEditor({ template, onSave, onCancel }: ContractE
           >
             <Input placeholder="e.g., Membership ID" />
           </Form.Item>
-          
+
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
@@ -538,7 +540,7 @@ export default function ContractEditor({ template, onSave, onCancel }: ContractE
               </Form.Item>
             </Col>
           </Row>
-          
+
           <Form.Item
             name="description"
             label="Description"

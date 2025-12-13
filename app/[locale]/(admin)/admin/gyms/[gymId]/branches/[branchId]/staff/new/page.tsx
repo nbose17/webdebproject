@@ -4,25 +4,26 @@ import { useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery } from '@apollo/client/react';
-import { 
-  Card, 
-  Form, 
-  Input, 
-  Button, 
-  Select, 
-  message, 
-  Row, 
+import {
+  Card,
+  Form,
+  Input,
+  Button,
+  Select,
+  message,
+  Row,
   Col,
   Typography,
   Space,
   Skeleton,
   Alert
 } from 'antd';
-import { 
+import {
   FaArrowLeft,
   FaUser,
   FaSave
 } from 'react-icons/fa';
+import { Branch, Gym, User } from '@/lib/types';
 import AdminProtectedRoute from '@/components/shared/AdminProtectedRoute';
 import { CREATE_USER, GET_BRANCH, GET_GYM } from '@/graphql/queries/admin';
 
@@ -42,34 +43,25 @@ export default function AddStaffPage({ params }: PageProps) {
   const [loading, setLoading] = useState(false);
 
   // Fetch branch data
-  const { data: branchData, loading: branchLoading, error: branchError } = useQuery(GET_BRANCH, {
+  const { data: branchData, loading: branchLoading, error: branchError } = useQuery<{ branch: Branch }>(GET_BRANCH, {
     variables: { id: branchId, gymId },
     fetchPolicy: 'cache-and-network',
-    onError: (err) => {
-      console.error('Error fetching branch:', err);
-    },
   });
 
   // Fetch gym data
-  const { data: gymData, loading: gymLoading } = useQuery(GET_GYM, {
+  const { data: gymData, loading: gymLoading } = useQuery<{ gym: Gym }>(GET_GYM, {
     variables: { id: gymId },
     fetchPolicy: 'cache-and-network',
     skip: !gymId,
   });
 
-  const [createUserMutation] = useMutation(CREATE_USER, {
-    onError: (err) => {
-      console.error('Error creating staff:', err);
-      message.error(err.message || 'Failed to create staff member. Please try again.');
-      setLoading(false);
-    },
-  });
+  const [createUserMutation] = useMutation<{ createUser: User }>(CREATE_USER);
 
   // Handle form submission
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
-      
+
       const variables = {
         email: values.email,
         name: values.name,
@@ -132,8 +124,8 @@ export default function AddStaffPage({ params }: PageProps) {
         <div>
           <div className="dashboard-page-header">
             <div style={{ flex: 1 }}>
-              <Button 
-                icon={<FaArrowLeft />} 
+              <Button
+                icon={<FaArrowLeft />}
                 onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/branches/${branchId}`)}
               >
                 Back
@@ -164,8 +156,8 @@ export default function AddStaffPage({ params }: PageProps) {
         <div className="dashboard-page-header">
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-              <Button 
-                icon={<FaArrowLeft />} 
+              <Button
+                icon={<FaArrowLeft />}
                 onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/branches/${branchId}`)}
               >
                 Back
@@ -201,8 +193,8 @@ export default function AddStaffPage({ params }: PageProps) {
                         { min: 2, message: 'Name must be at least 2 characters' },
                       ]}
                     >
-                      <Input 
-                        placeholder="John Doe" 
+                      <Input
+                        placeholder="John Doe"
                         size="large"
                       />
                     </Form.Item>
@@ -216,8 +208,8 @@ export default function AddStaffPage({ params }: PageProps) {
                         { type: 'email', message: 'Please enter a valid email address' },
                       ]}
                     >
-                      <Input 
-                        placeholder="john@example.com" 
+                      <Input
+                        placeholder="john@example.com"
                         size="large"
                       />
                     </Form.Item>
@@ -234,8 +226,8 @@ export default function AddStaffPage({ params }: PageProps) {
                         { min: 6, message: 'Password must be at least 6 characters' },
                       ]}
                     >
-                      <Input.Password 
-                        placeholder="Enter password" 
+                      <Input.Password
+                        placeholder="Enter password"
                         size="large"
                       />
                     </Form.Item>
@@ -246,7 +238,7 @@ export default function AddStaffPage({ params }: PageProps) {
                       name="role"
                       rules={[{ required: true, message: 'Please select a role' }]}
                     >
-                      <Select 
+                      <Select
                         placeholder="Select role"
                         size="large"
                       >

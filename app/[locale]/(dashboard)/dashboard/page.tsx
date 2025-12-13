@@ -13,10 +13,13 @@ export default function DashboardPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
 
-  // Only fetch if associated with a gym
-  const shouldFetch = !!user?.gymId;
+  const gymId = user?.gymId;
 
-  const { data, loading, error } = useQuery(GET_DASHBOARD_STATS, {
+  // Only fetch if associated with a gym
+  const shouldFetch = !!gymId;
+
+  const { data, loading, error } = useQuery<{ dashboardStats: any }>(GET_DASHBOARD_STATS, {
+    variables: { gymId },
     skip: !shouldFetch,
     fetchPolicy: 'network-only' // Ensure fresh data on navigation
   });

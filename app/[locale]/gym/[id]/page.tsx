@@ -19,55 +19,55 @@ interface PageProps {
 
 export default function GymPage({ params }: PageProps) {
   const { id } = use(params);
-  
+
   console.log('🏋️ GymPage loading for ID:', id);
-  
+
   // Fetch gym data
-  const { data: gymData, loading: gymLoading, error: gymError } = useQuery(GET_GYM, {
+  const { data: gymData, loading: gymLoading, error: gymError } = useQuery<{ gym: any }>(GET_GYM, {
     variables: { id },
     errorPolicy: 'all'
   });
-  
-  console.log('🏋️ Gym query result:', { 
-    data: gymData?.gym ? { id: gymData.gym.id, name: gymData.gym.name } : null, 
-    loading: gymLoading, 
+
+  console.log('🏋️ Gym query result:', {
+    data: gymData?.gym ? { id: gymData.gym.id, name: gymData.gym.name } : null,
+    loading: gymLoading,
     hasError: !!gymError,
-    errorMessage: gymError?.message 
+    errorMessage: gymError?.message
   });
-  
+
   // Fetch CMS data
-  const { data: cmsData, loading: cmsLoading, error: cmsError } = useQuery(GET_CMS, {
+  const { data: cmsData, loading: cmsLoading, error: cmsError } = useQuery<{ cms: any }>(GET_CMS, {
     variables: { gymId: id },
     errorPolicy: 'all'
   });
-  
+
   // Fetch plans data
-  const { data: plansData, loading: plansLoading, error: plansError } = useQuery(GET_PLANS, {
+  const { data: plansData, loading: plansLoading, error: plansError } = useQuery<{ plans: any[] }>(GET_PLANS, {
     variables: { gymId: id },
     errorPolicy: 'all'
   });
-  
+
   // Fetch classes data
-  const { data: classesData, loading: classesLoading, error: classesError } = useQuery(GET_CLASSES, {
+  const { data: classesData, loading: classesLoading, error: classesError } = useQuery<{ classes: any[] }>(GET_CLASSES, {
     variables: { gymId: id },
     errorPolicy: 'all'
   });
-  
+
   // Fetch trainers data
-  const { data: trainersData, loading: trainersLoading, error: trainersError } = useQuery(GET_TRAINERS, {
+  const { data: trainersData, loading: trainersLoading, error: trainersError } = useQuery<{ trainers: any[] }>(GET_TRAINERS, {
     variables: { gymId: id },
     errorPolicy: 'all'
   });
-  
+
   // Fetch available gyms for debugging/fallback
-  const { data: allGymsData } = useQuery(GET_GYMS, {
+  const { data: allGymsData } = useQuery<{ gyms: any[] }>(GET_GYMS, {
     variables: { subscriptionStatus: 'active' },
     errorPolicy: 'all'
   });
-  
+
   const loading = gymLoading || cmsLoading || plansLoading || classesLoading || trainersLoading;
   const error = gymError || cmsError || plansError || classesError || trainersError;
-  
+
   // Show loading for main gym data only
   if (gymLoading && !gymData) {
     return (
@@ -82,7 +82,7 @@ export default function GymPage({ params }: PageProps) {
       </div>
     );
   }
-  
+
   // Show error if main gym data fails
   if (gymError && !gymData) {
     return (
@@ -94,8 +94,8 @@ export default function GymPage({ params }: PageProps) {
             type="error"
             showIcon
             action={
-              <button 
-                className="btn" 
+              <button
+                className="btn"
                 onClick={() => window.location.reload()}
                 style={{ marginTop: '16px' }}
               >
@@ -107,10 +107,10 @@ export default function GymPage({ params }: PageProps) {
       </div>
     );
   }
-  
+
   const gym = gymData?.gym;
   const cms = cmsData?.cms;
-  
+
   if (!gym) {
     return (
       <div className="public-page">
@@ -141,13 +141,13 @@ export default function GymPage({ params }: PageProps) {
             style={{ marginBottom: '32px' }}
             action={
               <div style={{ marginTop: '16px', display: 'flex', gap: '12px', justifyContent: 'center' }}>
-                <button 
+                <button
                   className="btn"
                   onClick={() => window.history.back()}
                 >
                   Go Back
                 </button>
-                <button 
+                <button
                   className="btn"
                   onClick={() => window.location.href = '/en'}
                 >
@@ -156,8 +156,8 @@ export default function GymPage({ params }: PageProps) {
               </div>
             }
           />
-          
-          <div style={{ 
+
+          <div style={{
             background: 'linear-gradient(135deg, #f8faf8 0%, #e8f5e9 100%)',
             padding: '32px',
             borderRadius: '12px',
@@ -169,10 +169,10 @@ export default function GymPage({ params }: PageProps) {
             <p style={{ color: '#666', marginBottom: '24px' }}>
               Here are some gyms you might be interested in:
             </p>
-            
+
             {allGymsData?.gyms && allGymsData.gyms.length > 0 ? (
-              <div style={{ 
-                display: 'grid', 
+              <div style={{
+                display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
                 gap: '16px',
                 marginBottom: '24px'
@@ -206,10 +206,10 @@ export default function GymPage({ params }: PageProps) {
                 Loading available gyms...
               </p>
             )}
-            
-            <button 
+
+            <button
               className="btn"
-              style={{ 
+              style={{
                 background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)',
                 color: 'white',
                 border: 'none',
@@ -225,7 +225,7 @@ export default function GymPage({ params }: PageProps) {
       </div>
     );
   }
-  
+
   // Use CMS data if available, otherwise fallback to defaults
   const gymInfo = {
     name: gym.name,

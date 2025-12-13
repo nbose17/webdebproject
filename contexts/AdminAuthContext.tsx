@@ -28,12 +28,12 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const validateSession = async () => {
     const token = localStorage.getItem('adminToken');
     const storedSession = localStorage.getItem('adminSession');
-    
+
     console.log('🔐 validateSession called:', {
       hasToken: !!token,
       hasStoredSession: !!storedSession
     });
-    
+
     if (!token || !storedSession) {
       console.log('🔐 No token or session, setting loading false');
       setIsLoading(false);
@@ -43,15 +43,18 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('🔐 Calling GET_ME query for admin validation...');
       // Verify session with API
-      const { data, errors } = await apolloClient.query({
+      const result = await apolloClient.query<{ me: any }>({
         query: GET_ME,
         fetchPolicy: 'network-only', // Always fetch fresh data
         errorPolicy: 'all', // Return both data and errors
       });
 
+      const { data } = result;
+      const errors = 'errors' in result ? result.errors : undefined;
+
       console.log('🔐 GET_ME response:', {
         hasData: !!data?.me,
-        hasErrors: !!(errors && errors.length > 0),
+        hasErrors: !!(errors && Array.isArray(errors) && errors.length > 0),
         userData: data?.me ? {
           id: data.me.id,
           email: data.me.email,
@@ -59,7 +62,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         } : null
       });
 
-      if (errors && errors.length > 0) {
+      if (errors && Array.isArray(errors) && errors.length > 0) {
         // GraphQL errors (likely authentication failure)
         console.error('🔐 Session validation errors:', errors);
         logoutAdmin();
@@ -71,20 +74,20 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
         const user = data.me;
         // Convert GraphQL role (uppercase) to database format (lowercase) for role checking
         const dbRole = graphQLRoleToDb(user.role);
-        
+
         console.log('🔐 Role validation:', {
           originalRole: user.role,
           dbRole,
-          isAdminRole: dbRole === UserRole.FITCONNECT_ADMIN || 
-                      dbRole.toLowerCase() === 'fitconnect_admin' ||
-                      user.role?.toUpperCase() === 'FITCONNECT_ADMIN'
+          isAdminRole: dbRole === UserRole.FITCONNECT_ADMIN ||
+            dbRole.toLowerCase() === 'fitconnect_admin' ||
+            user.role?.toUpperCase() === 'FITCONNECT_ADMIN'
         });
-        
+
         // Check if role is admin (handle both formats)
-        const isAdminRole = dbRole === UserRole.FITCONNECT_ADMIN || 
-                           dbRole.toLowerCase() === 'fitconnect_admin' ||
-                           user.role?.toUpperCase() === 'FITCONNECT_ADMIN';
-        
+        const isAdminRole = dbRole === UserRole.FITCONNECT_ADMIN ||
+          dbRole.toLowerCase() === 'fitconnect_admin' ||
+          user.role?.toUpperCase() === 'FITCONNECT_ADMIN';
+
         if (isAdminRole) {
           console.log('🔐 Admin role validated, creating session');
           // Normalize to UserRole enum format
@@ -101,7 +104,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
             permissions,
             isAdmin: true,
           };
-          
+
           console.log('🔐 Setting validated admin session');
           setAdminSession(session);
           localStorage.setItem('adminSession', JSON.stringify(session));
@@ -127,7 +130,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
           try {
             const session = JSON.parse(storedSession);
             // Ensure role is in database format for checking
-            const dbRole = typeof session.user?.role === 'string' 
+            const dbRole = typeof session.user?.role === 'string'
               ? (session.user.role.includes('FITCONNECT') ? UserRole.FITCONNECT_ADMIN : session.user.role)
               : session.user?.role;
             if (session.user && canAccessAdminPanel(dbRole as UserRole)) {
@@ -157,16 +160,16 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initializeAdminAuth = async () => {
       console.log('🔐 AdminAuth initialization...');
-      
+
       // Check if we have a stored session first (for faster initial render)
       const storedSession = localStorage.getItem('adminSession');
       const token = localStorage.getItem('adminToken');
-      
+
       console.log('🔐 Stored data check:', {
         hasSession: !!storedSession,
         hasToken: !!token
       });
-      
+
       if (storedSession && token) {
         try {
           const session = JSON.parse(storedSession);
@@ -175,14 +178,14 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
             role: session.user?.role,
             isAdmin: session.isAdmin
           });
-          
+
           // Ensure role is in correct format
           const role = session.user?.role || '';
           // Handle both GraphQL format (FITCONNECT_ADMIN) and DB format (fitconnect_admin)
           const dbRole = role.toLowerCase() === 'fitconnect_admin' || role === UserRole.FITCONNECT_ADMIN
             ? UserRole.FITCONNECT_ADMIN
             : role;
-          
+
           if (session.user && canAccessAdminPanel(dbRole as UserRole)) {
             console.log('🔐 Valid cached session found, setting state');
             // Normalize session role
@@ -193,7 +196,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
             setTimeout(() => {
               setIsLoading(false);
             }, 50);
-            
+
             // Then validate in background (but don't block)
             console.log('🔐 Starting background validation...');
             validateSession().catch(err => {
@@ -208,39 +211,39 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
           console.error('Error parsing stored session:', e);
         }
       }
-      
+
       // No valid stored session, validate with API
       console.log('🔐 No valid cached session, validating with API...');
       await validateSession();
     };
-    
+
     initializeAdminAuth();
   }, []);
 
   const loginAsAdmin = async (email: string, password: string): Promise<{ success: boolean; message?: string }> => {
     console.log('🔐 Admin login attempt:', { email });
     try {
-      const { data } = await apolloClient.mutate({
+      const { data } = await apolloClient.mutate<{ login: { success: boolean; token?: string; user?: any; message?: string } }>({
         mutation: LOGIN_MUTATION,
         variables: { email, password },
       });
 
-      console.log('🔐 Login mutation response:', { 
-        success: data?.login?.success, 
-        hasUser: !!data?.login?.user, 
-        hasToken: !!data?.login?.token 
+      console.log('🔐 Login mutation response:', {
+        success: data?.login?.success,
+        hasUser: !!data?.login?.user,
+        hasToken: !!data?.login?.token
       });
 
       if (data?.login?.success && data?.login?.user) {
         const { token, user } = data.login;
-        
+
         console.log('🔐 Processing login success:', {
           userId: user.id,
           email: user.email,
           role: user.role,
           hasToken: !!token
         });
-        
+
         // Store token
         if (token) {
           localStorage.setItem('adminToken', token);
@@ -253,18 +256,18 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
         // Convert GraphQL role (uppercase) to database format (lowercase) for role checking
         const dbRole = graphQLRoleToDb(user.role);
-        
-        console.log('🔐 Role conversion:', { 
-          originalRole: user.role, 
-          dbRole, 
+
+        console.log('🔐 Role conversion:', {
+          originalRole: user.role,
+          dbRole,
           isAdmin: dbRole === 'fitconnect_admin' || dbRole.toLowerCase() === 'fitconnect_admin'
         });
-        
+
         // Normalize to UserRole enum format
         const normalizedRole = dbRole === 'fitconnect_admin' || dbRole.toLowerCase() === 'fitconnect_admin'
           ? UserRole.FITCONNECT_ADMIN
           : dbRole as UserRole;
-        
+
         const permissions = user.permissions || getRolePermissions(normalizedRole);
         const session: AdminSession = {
           user: {
@@ -277,39 +280,39 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
           permissions,
           isAdmin: true, // We know it's admin if login succeeded
         };
-        
+
         console.log('🔐 Setting admin session:', {
           userId: session.user.id,
           role: session.user.role,
           isAdmin: session.isAdmin,
           permissionsCount: session.permissions.length
         });
-        
+
         setAdminSession(session);
         localStorage.setItem('adminSession', JSON.stringify(session));
-        
+
         console.log('🔐 Admin session stored, waiting for state update...');
         // Wait longer to ensure state is fully updated
         await new Promise(resolve => setTimeout(resolve, 500));
-        
+
         console.log('🔐 Login successful, ready for redirect');
         return { success: true };
       }
-      
-      return { 
-        success: false, 
-        message: data?.login?.message || 'Invalid email or password' 
+
+      return {
+        success: false,
+        message: data?.login?.message || 'Invalid email or password'
       };
     } catch (error: any) {
       console.error('🔐 Login error:', error);
-      const errorMessage = error?.graphQLErrors?.[0]?.message || 
-                          error?.networkError?.message ||
-                          error?.message ||
-                          'An error occurred during login. Please try again.';
-      
-      return { 
-        success: false, 
-        message: errorMessage 
+      const errorMessage = error?.graphQLErrors?.[0]?.message ||
+        error?.networkError?.message ||
+        error?.message ||
+        'An error occurred during login. Please try again.';
+
+      return {
+        success: false,
+        message: errorMessage
       };
     }
   };
@@ -326,7 +329,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
 
   const canAccess = (resource: string, action: string): boolean => {
     if (!adminSession) return false;
-    
+
     return adminSession.permissions.some(
       permission =>
         permission.resource === resource &&

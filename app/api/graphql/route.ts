@@ -25,44 +25,34 @@ const handler = startServerAndCreateNextHandler<NextRequest, ResolverContext>(
       // Connect to admin database
       await connectAdminDB();
 
-      // Extract token from Authorization header
-      const authHeader = req.headers.get('authorization');
-      let user = null;
+      const token = req.headers.get('authorization')?.replace('Bearer ', '');
 
-      console.log('🔐 GraphQL Context:', {
-        hasAuthHeader: !!authHeader,
-        authHeaderPreview: authHeader ? authHeader.substring(0, 30) + '...' : 'none'
-      });
-
-      if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.substring(7);
-        try {
-          const decoded = jwt.verify(token, JWT_SECRET) as any;
-          user = {
-            userId: decoded.userId,
-            email: decoded.email,
-            role: decoded.role,
-            gymId: decoded.gymId || null,
-            branchId: decoded.branchId || null,
-          };
-          
-          console.log('🔐 Token decoded successfully:', {
-            userId: decoded.userId,
-            email: decoded.email,
-            role: decoded.role,
-            hasGymId: !!decoded.gymId
-          });
-        } catch (error) {
-          console.log('🔐 Token verification failed:', error);
-          // Invalid token, continue without user
-        }
-      } else {
-        console.log('🔐 No valid authorization header found');
+      if (!token) {
+        return { user: undefined };
       }
 
-      return {
-        user,
-      };
+      try {
+        const decoded = jwt.verify(token, JWT_SECRET) as {
+          userId: string;
+          email: string;
+          role: string;
+          gymId?: string;
+          branchId?: string;
+        };
+
+        return {
+          user: {
+            userId: decoded.userId,
+            email: decoded.email,
+            role: decoded.role,
+            gymId: decoded.gymId,
+            branchId: decoded.branchId,
+          },
+        };
+      } catch (error) {
+        console.error('JWT verification failed:', error);
+        return { user: undefined };
+      }
     },
   }
 );
@@ -74,5 +64,3 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   return handler(req);
 }
-
-

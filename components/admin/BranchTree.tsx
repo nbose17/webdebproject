@@ -1,10 +1,10 @@
 'use client';
 
 import { Tree, Typography, Tag, Button } from 'antd';
-import { 
-  FaBuilding, 
-  FaUsers, 
-  FaUserTie, 
+import {
+  FaBuilding,
+  FaUsers,
+  FaUserTie,
   FaEye,
   FaChevronRight,
   FaChevronDown
@@ -20,11 +20,11 @@ interface BranchTreeProps {
   onUserSelect?: (userId: string, branchId: string) => void;
 }
 
-export default function BranchTree({ 
-  gym, 
-  branches, 
+export default function BranchTree({
+  gym,
+  branches,
   onBranchSelect,
-  onUserSelect 
+  onUserSelect
 }: BranchTreeProps) {
 
   // Transform branches into tree structure
@@ -34,7 +34,7 @@ export default function BranchTree({
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <FaBuilding style={{ color: '#4CAF50' }} />
           <span style={{ fontWeight: '600' }}>{gym.name}</span>
-          <Tag color="blue" size="small">Gym</Tag>
+          <Tag color="blue">Gym</Tag>
         </div>
       ),
       key: gym.id,
@@ -45,9 +45,9 @@ export default function BranchTree({
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ fontWeight: '500' }}>{branch.name}</span>
-                <Tag 
-                  color={branch.status === 'active' ? 'success' : 'error'} 
-                  size="small"
+                <Tag
+                  color={branch.status === 'active' ? 'success' : 'error'}
+
                 >
                   {branch.status}
                 </Tag>
@@ -56,9 +56,9 @@ export default function BranchTree({
                 {branch.staff.length} staff, {branch.clients.length} clients
               </div>
             </div>
-            <Button 
-              type="text" 
-              size="small" 
+            <Button
+              type="text"
+
               icon={<FaEye />}
               onClick={(e) => {
                 e.stopPropagation();
@@ -87,9 +87,9 @@ export default function BranchTree({
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ fontSize: '13px' }}>{staff.name}</span>
-                      <Tag 
-                        color={staff.isActive ? 'success' : 'default'} 
-                        size="small"
+                      <Tag
+                        color={staff.isActive ? 'success' : 'default'}
+
                       >
                         {staff.role.replace('gym_', '').replace('_', ' ')}
                       </Tag>
@@ -98,9 +98,9 @@ export default function BranchTree({
                       {staff.email}
                     </div>
                   </div>
-                  <Button 
-                    type="text" 
-                    size="small" 
+                  <Button
+                    type="text"
+
                     icon={<FaEye />}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -110,9 +110,9 @@ export default function BranchTree({
                 </div>
               ),
               key: `${branch.id}-staff-${staff.id}`,
-              icon: <FaUserTie style={{ 
-                color: staff.role === 'gym_manager' ? '#fa8c16' : 
-                       staff.role === 'gym_trainer' ? '#52c41a' : '#8c8c8c' 
+              icon: <FaUserTie style={{
+                color: staff.role === 'gym_manager' ? '#fa8c16' :
+                  staff.role === 'gym_trainer' ? '#52c41a' : '#8c8c8c'
               }} />,
               isLeaf: true,
             })),
@@ -156,7 +156,7 @@ export default function BranchTree({
                 icon: <div style={{ width: '12px', height: '2px', backgroundColor: '#d9d9d9' }} />,
                 isLeaf: true,
                 selectable: false,
-              }] : []
+              }] as any[] : []
             ),
           },
         ],
@@ -171,18 +171,18 @@ export default function BranchTree({
           Click on branch or user names to view details
         </Text>
       </div>
-      
+
       <Tree
         showIcon
         defaultExpandAll
         treeData={treeData}
-        style={{ 
+        style={{
           background: 'transparent',
           fontSize: '14px'
         }}
-        switcherIcon={({ expanded }) => 
-          expanded ? 
-            <FaChevronDown style={{ fontSize: '10px', color: '#8c8c8c' }} /> : 
+        switcherIcon={({ expanded }) =>
+          expanded ?
+            <FaChevronDown style={{ fontSize: '10px', color: '#8c8c8c' }} /> :
             <FaChevronRight style={{ fontSize: '10px', color: '#8c8c8c' }} />
         }
       />

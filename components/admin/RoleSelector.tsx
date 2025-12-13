@@ -92,7 +92,7 @@ export default function RoleSelector({
           marginBottom: '2px'
         }}>
           <span style={{ fontWeight: '500' }}>{option.label}</span>
-          <Tag color={getRoleColor(option.value)} size="small">
+          <Tag color={getRoleColor(option.value)}>
             {getRoleDisplayName(option.value)}
           </Tag>
         </div>
@@ -122,7 +122,7 @@ export default function RoleSelector({
       }}>
         {getRoleIcon(val)}
         <span>{option.label}</span>
-        <Tag color={getRoleColor(val)} size="small">
+        <Tag color={getRoleColor(val)}>
           {getRoleDisplayName(val)}
         </Tag>
       </div>

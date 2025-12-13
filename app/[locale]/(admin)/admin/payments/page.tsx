@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Tag, 
-  Space, 
+import {
+  Card,
+  Table,
+  Button,
+  Tag,
+  Space,
   Typography,
   Row,
   Col,
@@ -23,7 +23,7 @@ import {
   message,
   Tooltip
 } from 'antd';
-import { 
+import {
   FaCreditCard,
   FaPaypal,
   FaStripe,
@@ -276,18 +276,18 @@ export default function PaymentGatewaysPage() {
     try {
       if (editingGateway) {
         // Update existing gateway
-        setGateways(prev => prev.map(g => 
-          g.id === editingGateway.id 
-            ? { 
-                ...g, 
-                ...values,
-                configuration: {
-                  apiKey: values.apiKey,
-                  secretKey: values.secretKey,
-                  webhookUrl: values.webhookUrl,
-                  sandboxMode: values.sandboxMode || false
-                }
+        setGateways(prev => prev.map(g =>
+          g.id === editingGateway.id
+            ? {
+              ...g,
+              ...values,
+              configuration: {
+                apiKey: values.apiKey,
+                secretKey: values.secretKey,
+                webhookUrl: values.webhookUrl,
+                sandboxMode: values.sandboxMode || false
               }
+            }
             : g
         ));
         message.success('Gateway updated successfully');
@@ -311,7 +311,7 @@ export default function PaymentGatewaysPage() {
         setGateways(prev => [...prev, newGateway]);
         message.success('Gateway added successfully');
       }
-      
+
       setIsGatewayModalVisible(false);
       gatewayForm.resetFields();
     } catch (error) {
@@ -320,8 +320,8 @@ export default function PaymentGatewaysPage() {
   };
 
   const handleToggleGateway = (gatewayId: string) => {
-    setGateways(prev => prev.map(g => 
-      g.id === gatewayId 
+    setGateways(prev => prev.map(g =>
+      g.id === gatewayId
         ? { ...g, status: g.status === 'active' ? 'inactive' : 'active' }
         : g
     ));
@@ -347,7 +347,7 @@ export default function PaymentGatewaysPage() {
           <div>
             <div style={{ fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
               {gateway.name}
-              {gateway.isDefault && <Tag color="blue" size="small">DEFAULT</Tag>}
+              {gateway.isDefault && <Tag color="blue">DEFAULT</Tag>}
             </div>
             <div style={{ fontSize: '12px', color: '#8c8c8c' }}>
               {gateway.type.charAt(0).toUpperCase() + gateway.type.slice(1)}
@@ -384,8 +384,8 @@ export default function PaymentGatewaysPage() {
       key: 'successRate',
       render: (gateway: PaymentGateway) => (
         <div>
-          <Progress 
-            percent={gateway.successRate} 
+          <Progress
+            percent={gateway.successRate}
             size="small"
             strokeColor={gateway.successRate >= 95 ? '#52c41a' : gateway.successRate >= 90 ? '#faad14' : '#ff4d4f'}
           />
@@ -420,26 +420,26 @@ export default function PaymentGatewaysPage() {
       render: (gateway: PaymentGateway) => (
         <Space>
           <Tooltip title="Edit Gateway">
-            <Button 
-              type="text" 
+            <Button
+              type="text"
               size="small"
               icon={<FaEdit />}
               onClick={() => handleEditGateway(gateway)}
             />
           </Tooltip>
-          
+
           <Tooltip title="Sync Data">
-            <Button 
-              type="text" 
+            <Button
+              type="text"
               size="small"
               icon={<FaSync />}
               onClick={() => message.success('Gateway data synced')}
             />
           </Tooltip>
-          
+
           <Tooltip title={gateway.isDefault ? "Cannot disable default gateway" : "Set as Default"}>
-            <Button 
-              type="text" 
+            <Button
+              type="text"
               size="small"
               disabled={gateway.isDefault}
               onClick={() => handleSetDefault(gateway.id)}
@@ -447,10 +447,10 @@ export default function PaymentGatewaysPage() {
               {gateway.isDefault ? 'Default' : 'Set Default'}
             </Button>
           </Tooltip>
-          
+
           <Tooltip title={gateway.status === 'active' ? 'Disable' : 'Enable'}>
-            <Button 
-              type="text" 
+            <Button
+              type="text"
               size="small"
               disabled={gateway.isDefault && gateway.status === 'active'}
               onClick={() => handleToggleGateway(gateway.id)}
@@ -507,7 +507,7 @@ export default function PaymentGatewaysPage() {
       title: 'Method',
       key: 'method',
       render: (txn: Transaction) => (
-        <Tag size="small">{txn.method.replace('_', ' ').toUpperCase()}</Tag>
+        <Tag>{txn.method.replace('_', ' ').toUpperCase()}</Tag>
       ),
     },
     {
@@ -542,14 +542,14 @@ export default function PaymentGatewaysPage() {
       label: 'Payment Gateways',
       children: (
         <div>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: '16px'
           }}>
             <Title level={4} style={{ margin: 0 }}>Configured Gateways</Title>
-            <Button 
+            <Button
               type="primary"
               icon={<FaPlus />}
               onClick={handleAddGateway}
@@ -572,9 +572,9 @@ export default function PaymentGatewaysPage() {
       label: 'Recent Transactions',
       children: (
         <div>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: '16px'
           }}>
@@ -587,7 +587,7 @@ export default function PaymentGatewaysPage() {
                 <Option value="pending">Pending</Option>
               </Select>
             </div>
-            
+
             <Button icon={<FaDownload />}>
               Export
             </Button>
@@ -662,8 +662,8 @@ export default function PaymentGatewaysPage() {
                 value={avgSuccessRate}
                 precision={1}
                 suffix="%"
-                valueStyle={{ 
-                  color: avgSuccessRate >= 95 ? '#52c41a' : avgSuccessRate >= 90 ? '#faad14' : '#ff4d4f' 
+                valueStyle={{
+                  color: avgSuccessRate >= 95 ? '#52c41a' : avgSuccessRate >= 90 ? '#faad14' : '#ff4d4f'
                 }}
               />
             </Card>
@@ -672,7 +672,7 @@ export default function PaymentGatewaysPage() {
 
         {/* Main Content */}
         <Card>
-          <Tabs 
+          <Tabs
             defaultActiveKey="gateways"
             items={tabItems}
             size="large"
@@ -694,7 +694,7 @@ export default function PaymentGatewaysPage() {
             showIcon
             style={{ marginBottom: '24px' }}
           />
-          
+
           <Form
             form={gatewayForm}
             layout="vertical"
@@ -726,7 +726,7 @@ export default function PaymentGatewaysPage() {
                 </Form.Item>
               </Col>
             </Row>
-            
+
             <Row gutter={16}>
               <Col span={12}>
                 <Form.Item
@@ -747,7 +747,7 @@ export default function PaymentGatewaysPage() {
                 </Form.Item>
               </Col>
             </Row>
-            
+
             <Form.Item
               name="webhookUrl"
               label="Webhook URL"
@@ -755,7 +755,7 @@ export default function PaymentGatewaysPage() {
             >
               <Input placeholder="https://api.fitconnect.com/webhooks/stripe" />
             </Form.Item>
-            
+
             <Row gutter={16}>
               <Col span={12}>
                 <Form.Item

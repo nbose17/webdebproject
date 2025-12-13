@@ -2,26 +2,26 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@apollo/client/react';
-import { 
-  Card, 
-  Form, 
-  Input, 
-  Button, 
-  Row, 
-  Col, 
-  Typography, 
-  Tabs, 
-  Upload, 
+import {
+  Card,
+  Form,
+  Input,
+  Button,
+  Row,
+  Col,
+  Typography,
+  Tabs,
+  Upload,
   Space,
   Divider,
   message,
   Skeleton,
   Alert
 } from 'antd';
-import { 
-  FaPalette, 
-  FaImage, 
-  FaEdit, 
+import {
+  FaPalette,
+  FaImage,
+  FaEdit,
   FaUpload,
   FaMapMarkerAlt,
   FaPhone,
@@ -48,12 +48,12 @@ interface CMSData {
   heroBackgroundImage: string;
   heroButton1Text: string;
   heroButton2Text: string;
-  
+
   // Feature Section
   featureHeading: string;
   featureSubHeading: string;
   featureBannerContent: string;
-  
+
   // Section Headings
   classesHeading: string;
   classesSubHeading: string;
@@ -61,12 +61,12 @@ interface CMSData {
   plansSubHeading: string;
   trainersHeading: string;
   trainersSubHeading: string;
-  
+
   // Newsletter Section
   newsletterHeading: string;
   newsletterSubHeading: string;
   newsletterButtonText: string;
-  
+
   // Branding & Contact
   gymLogo: string;
   address: string;
@@ -82,13 +82,13 @@ export default function CMSPage() {
   const [form] = Form.useForm();
   const { user } = useAuth();
   const gymId = user?.gymId;
-  
-  const { data, loading: queryLoading, error: queryError, refetch } = useQuery(GET_CMS, {
+
+  const { data, loading: queryLoading, error: queryError, refetch } = useQuery<{ cms: any }>(GET_CMS, {
     variables: { gymId },
     skip: !gymId,
     fetchPolicy: 'network-only',
   });
-  
+
   const [updateCMS, { loading: mutationLoading }] = useMutation(UPDATE_CMS, {
     onCompleted: () => {
       message.success('CMS content saved successfully!');
@@ -98,15 +98,13 @@ export default function CMSPage() {
       message.error(`Failed to save CMS content: ${error.message}`);
     },
   });
-  
-  const loading = queryLoading || mutationLoading;
-  
+
   useEffect(() => {
     if (data?.cms) {
       form.setFieldsValue(data.cms);
     }
   }, [data, form]);
-  
+
   if (!gymId) {
     return (
       <div>
@@ -119,7 +117,7 @@ export default function CMSPage() {
       </div>
     );
   }
-  
+
   if (queryError) {
     return (
       <div>
@@ -132,7 +130,7 @@ export default function CMSPage() {
       </div>
     );
   }
-  
+
   // Default values while loading
   const initialValues: CMSData = {
     heroSubHeading: 'STAY HEALTHY, STAY FIT',
@@ -165,7 +163,7 @@ export default function CMSPage() {
 
   const handleSubmit = async (values: CMSData) => {
     if (!gymId) return;
-    
+
     await updateCMS({
       variables: {
         gymId,
@@ -179,7 +177,6 @@ export default function CMSPage() {
     const reader = new FileReader();
     reader.onload = (e) => {
       const imageUrl = e.target?.result as string;
-      setPreviewImage(imageUrl);
       form.setFieldValue('heroBackgroundImage', imageUrl);
     };
     reader.readAsDataURL(file);
@@ -216,7 +213,7 @@ export default function CMSPage() {
       </div>
     );
   }
-  
+
   return (
     <div>
       <div className="dashboard-page-header">
@@ -271,8 +268,8 @@ export default function CMSPage() {
                         name="heroDescription"
                         rules={[{ required: true, message: 'Please enter description' }]}
                       >
-                        <TextArea 
-                          rows={3} 
+                        <TextArea
+                          rows={3}
                           placeholder="Brief description for the hero section"
                           size="large"
                         />
@@ -353,8 +350,8 @@ export default function CMSPage() {
                       name="featureSubHeading"
                       rules={[{ required: true }]}
                     >
-                      <TextArea 
-                        rows={2} 
+                      <TextArea
+                        rows={2}
                         placeholder="Feature section description"
                         size="large"
                       />
@@ -365,8 +362,8 @@ export default function CMSPage() {
                       name="featureBannerContent"
                       rules={[{ required: true }]}
                     >
-                      <TextArea 
-                        rows={3} 
+                      <TextArea
+                        rows={3}
                         placeholder="Banner content text"
                         size="large"
                       />
@@ -523,8 +520,8 @@ export default function CMSPage() {
                       name="address"
                       rules={[{ required: true, message: 'Please enter address' }]}
                     >
-                      <TextArea 
-                        rows={2} 
+                      <TextArea
+                        rows={2}
                         placeholder="Full gym address"
                         size="large"
                       />
@@ -574,8 +571,8 @@ export default function CMSPage() {
                       name="businessHours"
                       rules={[{ required: true, message: 'Please enter business hours' }]}
                     >
-                      <TextArea 
-                        rows={3} 
+                      <TextArea
+                        rows={3}
                         placeholder="Monday - Saturday&#10;6:00 AM - 10:00 PM"
                         size="large"
                       />
@@ -629,10 +626,10 @@ export default function CMSPage() {
           ]}
         />
 
-        <div style={{ 
-          marginTop: '32px', 
-          padding: '24px', 
-          background: '#fff', 
+        <div style={{
+          marginTop: '32px',
+          padding: '24px',
+          background: '#fff',
           borderRadius: '8px',
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
           display: 'flex',
@@ -646,11 +643,11 @@ export default function CMSPage() {
             <Button size="large" onClick={() => form.resetFields()}>
               Reset
             </Button>
-            <Button 
-              type="primary" 
-              size="large" 
+            <Button
+              type="primary"
+              size="large"
               htmlType="submit"
-              loading={loading}
+              loading={mutationLoading}
               icon={<FaEdit />}
             >
               Save All Changes

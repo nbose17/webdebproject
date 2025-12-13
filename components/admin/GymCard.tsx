@@ -1,9 +1,9 @@
 'use client';
 
 import { Card, Tag, Button, Space, Dropdown, Typography, Progress } from 'antd';
-import { 
+import {
   FaBuilding,
-  FaUsers, 
+  FaUsers,
   FaEye,
   FaEdit,
   FaTrash,
@@ -26,17 +26,17 @@ interface AdminGymCardProps {
   showActions?: boolean;
 }
 
-export default function AdminGymCard({ 
-  gym, 
-  onView, 
-  onEdit, 
+export default function AdminGymCard({
+  gym,
+  onView,
+  onEdit,
   onDelete,
-  showActions = true 
+  showActions = true
 }: AdminGymCardProps) {
 
-  const totalStaff = gym.branches.reduce((sum, branch) => sum + branch.staff.length, 0);
-  const totalClients = gym.branches.reduce((sum, branch) => sum + branch.clients.length, 0);
-  const activeBranches = gym.branches.filter(branch => branch.status === 'active').length;
+  const totalStaff = gym.branches?.reduce((sum, branch) => sum + branch.staff.length, 0) || 0;
+  const totalClients = gym.branches?.reduce((sum, branch) => sum + branch.clients.length, 0) || 0;
+  const activeBranches = gym.branches?.filter(branch => branch.status === 'active').length || 0;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -88,25 +88,25 @@ export default function AdminGymCard({
         body: { padding: '20px' }
       }}
       actions={showActions ? [
-        <Button 
+        <Button
           key="view"
-          type="text" 
+          type="text"
           icon={<FaEye />}
           onClick={() => onView(gym.id)}
         >
           View
         </Button>,
-        <Button 
+        <Button
           key="edit"
-          type="text" 
+          type="text"
           icon={<FaEdit />}
           onClick={() => onEdit(gym.id)}
         >
           Edit
         </Button>,
-        <Dropdown 
+        <Dropdown
           key="more"
-          menu={{ items: menuItems }} 
+          menu={{ items: menuItems as any }}
           trigger={['click']}
         >
           <Button type="text" icon={<FaEllipsisV />} />
@@ -127,14 +127,14 @@ export default function AdminGymCard({
             <Text style={{ color: '#8c8c8c' }}>{gym.location}</Text>
           </div>
         </div>
-        
-        <img 
-          src={gym.image} 
+
+        <img
+          src={gym.image}
           alt={gym.name}
-          style={{ 
-            width: '60px', 
-            height: '60px', 
-            borderRadius: '8px', 
+          style={{
+            width: '60px',
+            height: '60px',
+            borderRadius: '8px',
             objectFit: 'cover',
             border: '2px solid #f0f0f0'
           }}
@@ -160,7 +160,7 @@ export default function AdminGymCard({
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '20px', fontWeight: '600', color: '#4CAF50' }}>
-            {gym.branches.length}
+            {gym.branches?.length || 0}
           </div>
           <div style={{ fontSize: '12px', color: '#8c8c8c' }}>
             Branches
@@ -169,7 +169,7 @@ export default function AdminGymCard({
             ({activeBranches} active)
           </div>
         </div>
-        
+
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '20px', fontWeight: '600', color: '#52c41a' }}>
             {totalStaff}
@@ -185,12 +185,12 @@ export default function AdminGymCard({
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
           <Text style={{ fontSize: '12px', color: '#8c8c8c' }}>Branch Activity</Text>
           <Text style={{ fontSize: '12px', color: '#8c8c8c' }}>
-            {activeBranches}/{gym.branches.length}
+            {activeBranches}/{gym.branches?.length || 0}
           </Text>
         </div>
-        <Progress 
-          percent={Math.round((activeBranches / gym.branches.length) * 100)} 
-          size="small"
+        <Progress
+          percent={Math.round((activeBranches / (gym.branches?.length || 1)) * 100)}
+
           strokeColor="#52c41a"
           trailColor="#f0f0f0"
         />
@@ -214,7 +214,7 @@ export default function AdminGymCard({
 
       {/* Alert for issues */}
       {gym.paymentStatus === 'overdue' && (
-        <div style={{ 
+        <div style={{
           padding: '8px 12px',
           backgroundColor: '#fff2f0',
           border: '1px solid #ffccc7',
@@ -232,14 +232,14 @@ export default function AdminGymCard({
 
       {/* Description */}
       {gym.description && (
-        <Text 
-          style={{ 
-            fontSize: '13px', 
-            color: '#595959', 
+        <Text
+          style={{
+            fontSize: '13px',
+            color: '#595959',
             lineHeight: '1.4',
             display: 'block'
           }}
-          ellipsis={{ rows: 2, tooltip: gym.description }}
+          ellipsis={{ tooltip: gym.description }}
         >
           {gym.description}
         </Text>

@@ -150,20 +150,20 @@ export const COMMON_VARIABLES: TemplateVariable[] = [
 
 // Template processing functions
 export class TemplateEngine {
-  
+
   /**
    * Process template content by replacing variables with actual values
    */
   static processTemplate(
-    template: ContractTemplate, 
+    template: ContractTemplate,
     variables: Record<string, any>
   ): string {
     let processedContent = template.content;
-    
+
     // Replace each variable in the template
     template.variables.forEach(variable => {
       const value = variables[variable.key];
-      
+
       if (value !== undefined) {
         const formattedValue = this.formatValue(value, variable);
         // Replace {{variable.key}} with actual value
@@ -173,27 +173,27 @@ export class TemplateEngine {
         // Keep placeholder for required missing variables
         const regex = new RegExp(`{{\\s*${this.escapeRegExp(variable.key)}\\s*}}`, 'g');
         processedContent = processedContent.replace(
-          regex, 
+          regex,
           `<span class="missing-variable" style="background-color: #fff2f0; color: #ff4d4f; padding: 2px 6px; border-radius: 4px;">[${variable.label} - Required]</span>`
         );
       }
     });
-    
+
     // Handle default values for missing optional variables
     template.variables.forEach(variable => {
       if (variable.defaultValue && variables[variable.key] === undefined) {
         let defaultValue = variable.defaultValue;
-        
+
         // Handle special default values
         if (defaultValue === 'current_date') {
           defaultValue = this.formatDate(new Date(), variable.format || 'DD/MM/YYYY');
         }
-        
+
         const regex = new RegExp(`{{\\s*${this.escapeRegExp(variable.key)}\\s*}}`, 'g');
         processedContent = processedContent.replace(regex, defaultValue);
       }
     });
-    
+
     return processedContent;
   }
 
@@ -202,16 +202,16 @@ export class TemplateEngine {
    */
   static extractVariables(content: string): string[] {
     const regex = /{{(.*?)}}/g;
-    const matches = [];
+    const matches: string[] = [];
     let match;
-    
+
     while ((match = regex.exec(content)) !== null) {
       const variableKey = match[1].trim();
       if (!matches.includes(variableKey)) {
         matches.push(variableKey);
       }
     }
-    
+
     return matches;
   }
 
@@ -219,19 +219,19 @@ export class TemplateEngine {
    * Validate template variables against available data
    */
   static validateTemplate(
-    template: ContractTemplate, 
+    template: ContractTemplate,
     variables: Record<string, any>
   ): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
-    
+
     template.variables.forEach(variable => {
       if (variable.required && !variables[variable.key]) {
         errors.push(`Missing required variable: ${variable.label}`);
       }
-      
+
       if (variables[variable.key]) {
         const validationError = this.validateVariableValue(
-          variables[variable.key], 
+          variables[variable.key],
           variable
         );
         if (validationError) {
@@ -239,7 +239,7 @@ export class TemplateEngine {
         }
       }
     });
-    
+
     return {
       isValid: errors.length === 0,
       errors
@@ -268,7 +268,7 @@ export class TemplateEngine {
    * Validate individual variable value
    */
   private static validateVariableValue(
-    value: any, 
+    value: any,
     variable: TemplateVariable
   ): string | null {
     switch (variable.type) {
@@ -310,7 +310,7 @@ export class TemplateEngine {
     const day = date.getDate().toString().padStart(2, '0');
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear().toString();
-    
+
     return format
       .replace('DD', day)
       .replace('MM', month)
@@ -341,7 +341,7 @@ export class TemplateEngine {
    */
   static generatePreview(template: ContractTemplate): string {
     const sampleData: Record<string, any> = {};
-    
+
     template.variables.forEach(variable => {
       switch (variable.type) {
         case 'text':
@@ -367,7 +367,7 @@ export class TemplateEngine {
           break;
       }
     });
-    
+
     return this.processTemplate(template, sampleData);
   }
 }

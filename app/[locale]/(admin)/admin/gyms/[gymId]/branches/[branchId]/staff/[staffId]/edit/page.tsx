@@ -4,27 +4,28 @@ import { useState, use, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery } from '@apollo/client/react';
-import { 
-  Card, 
-  Form, 
-  Input, 
-  Button, 
-  Select, 
+import {
+  Card,
+  Form,
+  Input,
+  Button,
+  Select,
   Switch,
-  message, 
-  Row, 
+  message,
+  Row,
   Col,
   Typography,
   Space,
   Skeleton,
   Alert
 } from 'antd';
-import { 
+import {
   FaArrowLeft,
   FaUser,
   FaSave
 } from 'react-icons/fa';
 import AdminProtectedRoute from '@/components/shared/AdminProtectedRoute';
+import { Branch, Gym, User } from '@/lib/types';
 import { UPDATE_USER, GET_USER, GET_BRANCH, GET_GYM } from '@/graphql/queries/admin';
 
 const { Title, Text } = Typography;
@@ -44,35 +45,26 @@ export default function EditStaffPage({ params }: PageProps) {
   const [passwordRequired, setPasswordRequired] = useState(false);
 
   // Fetch staff/user data
-  const { data: userData, loading: userLoading, error: userError } = useQuery(GET_USER, {
+  const { data: userData, loading: userLoading, error: userError } = useQuery<{ user: User }>(GET_USER, {
     variables: { id: staffId },
     fetchPolicy: 'cache-and-network',
-    onError: (err) => {
-      console.error('Error fetching staff:', err);
-    },
   });
 
   // Fetch branch data
-  const { data: branchData, loading: branchLoading } = useQuery(GET_BRANCH, {
+  const { data: branchData, loading: branchLoading } = useQuery<{ branch: Branch }>(GET_BRANCH, {
     variables: { id: branchId, gymId },
     fetchPolicy: 'cache-and-network',
     skip: !branchId || !gymId,
   });
 
   // Fetch gym data
-  const { data: gymData, loading: gymLoading } = useQuery(GET_GYM, {
+  const { data: gymData, loading: gymLoading } = useQuery<{ gym: Gym }>(GET_GYM, {
     variables: { id: gymId },
     fetchPolicy: 'cache-and-network',
     skip: !gymId,
   });
 
-  const [updateUserMutation] = useMutation(UPDATE_USER, {
-    onError: (err) => {
-      console.error('Error updating staff:', err);
-      message.error(err.message || 'Failed to update staff member. Please try again.');
-      setLoading(false);
-    },
-  });
+  const [updateUserMutation] = useMutation<{ updateUser: User }>(UPDATE_USER);
 
   // Pre-populate form when user data is loaded
   useEffect(() => {
@@ -91,7 +83,7 @@ export default function EditStaffPage({ params }: PageProps) {
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
-      
+
       const variables: any = {
         id: staffId,
         name: values.name,
@@ -162,8 +154,8 @@ export default function EditStaffPage({ params }: PageProps) {
         <div>
           <div className="dashboard-page-header">
             <div style={{ flex: 1 }}>
-              <Button 
-                icon={<FaArrowLeft />} 
+              <Button
+                icon={<FaArrowLeft />}
                 onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/branches/${branchId}`)}
               >
                 Back
@@ -194,8 +186,8 @@ export default function EditStaffPage({ params }: PageProps) {
         <div className="dashboard-page-header">
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-              <Button 
-                icon={<FaArrowLeft />} 
+              <Button
+                icon={<FaArrowLeft />}
                 onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/branches/${branchId}`)}
               >
                 Back
@@ -234,8 +226,8 @@ export default function EditStaffPage({ params }: PageProps) {
                         { min: 2, message: 'Name must be at least 2 characters' },
                       ]}
                     >
-                      <Input 
-                        placeholder="John Doe" 
+                      <Input
+                        placeholder="John Doe"
                         size="large"
                       />
                     </Form.Item>
@@ -249,8 +241,8 @@ export default function EditStaffPage({ params }: PageProps) {
                         { type: 'email', message: 'Please enter a valid email address' },
                       ]}
                     >
-                      <Input 
-                        placeholder="john@example.com" 
+                      <Input
+                        placeholder="john@example.com"
                         size="large"
                       />
                     </Form.Item>
@@ -264,8 +256,8 @@ export default function EditStaffPage({ params }: PageProps) {
                       name="password"
                       extra="Leave blank to keep current password"
                     >
-                      <Input.Password 
-                        placeholder="Enter new password" 
+                      <Input.Password
+                        placeholder="Enter new password"
                         size="large"
                       />
                     </Form.Item>
@@ -276,7 +268,7 @@ export default function EditStaffPage({ params }: PageProps) {
                       name="role"
                       rules={[{ required: true, message: 'Please select a role' }]}
                     >
-                      <Select 
+                      <Select
                         placeholder="Select role"
                         size="large"
                       >
@@ -293,8 +285,8 @@ export default function EditStaffPage({ params }: PageProps) {
                   name="isActive"
                   valuePropName="checked"
                 >
-                  <Switch 
-                    checkedChildren="Active" 
+                  <Switch
+                    checkedChildren="Active"
                     unCheckedChildren="Inactive"
                   />
                 </Form.Item>

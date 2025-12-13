@@ -4,22 +4,22 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery } from '@apollo/client/react';
-import { 
-  Card, 
-  Form, 
-  Input, 
-  Button, 
-  Select, 
-  Switch, 
-  Upload, 
-  message, 
-  Row, 
+import {
+  Card,
+  Form,
+  Input,
+  Button,
+  Select,
+  Switch,
+  Upload,
+  message,
+  Row,
   Col,
   Typography,
   Space,
   Skeleton
 } from 'antd';
-import { 
+import {
   FaArrowLeft,
   FaDumbbell,
   FaSave,
@@ -28,6 +28,7 @@ import {
 } from 'react-icons/fa';
 import { UploadOutlined } from '@ant-design/icons';
 import type { UploadFile } from 'antd';
+import { User } from '@/lib/types';
 import AdminProtectedRoute from '@/components/shared/AdminProtectedRoute';
 import { CREATE_GYM, GET_USERS } from '@/graphql/queries/admin';
 
@@ -45,27 +46,18 @@ export default function AddGymPage() {
   const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   // Fetch gym owners for the owner select
-  const { data: usersData, loading: usersLoading } = useQuery(GET_USERS, {
+  const { data: usersData, loading: usersLoading } = useQuery<{ users: User[] }>(GET_USERS, {
     variables: { role: 'GYM_OWNER' },
     fetchPolicy: 'cache-and-network',
-    onError: (err) => {
-      console.error('Error fetching gym owners:', err);
-    },
   });
 
-  const [createGymMutation] = useMutation(CREATE_GYM, {
-    onError: (err) => {
-      console.error('Error creating gym:', err);
-      message.error(err.message || 'Failed to create gym. Please try again.');
-      setLoading(false);
-    },
-  });
+  const [createGymMutation] = useMutation<{ createGym: any }>(CREATE_GYM);
 
   // Handle form submission
   const handleSubmit = async (values: any) => {
     try {
       setLoading(true);
-      
+
       const variables = {
         name: values.name,
         location: values.location,
@@ -120,8 +112,8 @@ export default function AddGymPage() {
         <div className="dashboard-page-header">
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-              <Button 
-                icon={<FaArrowLeft />} 
+              <Button
+                icon={<FaArrowLeft />}
                 onClick={() => router.push(`/${locale}/admin/gyms`)}
               >
                 Back
@@ -159,8 +151,8 @@ export default function AddGymPage() {
                     { min: 3, message: 'Gym name must be at least 3 characters' },
                   ]}
                 >
-                  <Input 
-                    placeholder="e.g., FITNESS GYM - Downtown" 
+                  <Input
+                    placeholder="e.g., FITNESS GYM - Downtown"
                     size="large"
                   />
                 </Form.Item>
@@ -172,8 +164,8 @@ export default function AddGymPage() {
                     { required: true, message: 'Please enter gym location' },
                   ]}
                 >
-                  <Input 
-                    placeholder="e.g., 123 Main Street, Downtown, City" 
+                  <Input
+                    placeholder="e.g., 123 Main Street, Downtown, City"
                     size="large"
                   />
                 </Form.Item>
@@ -222,7 +214,7 @@ export default function AddGymPage() {
                     { max: 1000, message: 'Description must be less than 1000 characters' },
                   ]}
                 >
-                  <TextArea 
+                  <TextArea
                     rows={6}
                     placeholder="Enter a detailed description of the gym, its facilities, and services..."
                     showCount
@@ -235,7 +227,7 @@ export default function AddGymPage() {
                   name="image"
                   extra="Enter a URL or upload an image below"
                 >
-                  <Input 
+                  <Input
                     placeholder="https://example.com/gym-image.jpg"
                     size="large"
                     onChange={(e) => setImageUrl(e.target.value)}
@@ -262,9 +254,9 @@ export default function AddGymPage() {
                   </Upload>
                   {imageUrl && (
                     <div style={{ marginTop: 16 }}>
-                      <img 
-                        src={imageUrl} 
-                        alt="Preview" 
+                      <img
+                        src={imageUrl}
+                        alt="Preview"
                         style={{ maxWidth: '100%', maxHeight: '200px', borderRadius: '8px' }}
                       />
                     </div>

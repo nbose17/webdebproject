@@ -4,15 +4,15 @@ import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
 import { useQuery, useMutation } from '@apollo/client/react';
-import { 
-  Card, 
-  Row, 
-  Col, 
-  Button, 
-  Tag, 
-  Descriptions, 
-  Table, 
-  Typography, 
+import {
+  Card,
+  Row,
+  Col,
+  Button,
+  Tag,
+  Descriptions,
+  Table,
+  Typography,
   Space,
   Statistic,
   Tabs,
@@ -22,7 +22,7 @@ import {
   message,
   Image as AntImage
 } from 'antd';
-import { 
+import {
   FaArrowLeft,
   FaDumbbell,
   FaBuilding,
@@ -39,6 +39,7 @@ import {
   FaEnvelope,
   FaPhone
 } from 'react-icons/fa';
+import { AdminGym } from '@/lib/types';
 import AdminProtectedRoute from '@/components/shared/AdminProtectedRoute';
 import { GET_GYM, DELETE_GYM } from '@/graphql/queries/admin';
 
@@ -53,18 +54,14 @@ export default function GymDetailsPage({ params }: PageProps) {
   const router = useRouter();
   const routeParams = useParams();
   const locale = routeParams.locale as string;
-  
+
   // Fetch gym data from GraphQL
-  const { data, loading, error, refetch } = useQuery(GET_GYM, {
+  const { data, loading, error, refetch } = useQuery<{ gym: AdminGym }>(GET_GYM, {
     variables: { id: gymId },
     fetchPolicy: 'cache-and-network',
-    onError: (err) => {
-      console.error('Error fetching gym:', err);
-      message.error('Failed to load gym details. Please try again.');
-    },
   });
 
-  const [deleteGymMutation] = useMutation(DELETE_GYM);
+  const [deleteGymMutation] = useMutation<{ deleteGym: boolean }>(DELETE_GYM);
 
   // Loading skeleton
   if (loading) {
@@ -153,7 +150,7 @@ export default function GymDetailsPage({ params }: PageProps) {
   const users = gym.users || [];
   const clients = gym.clients || [];
   const subscription = gym.subscription;
-  
+
   // Calculate statistics
   const totalStaff = users.length;
   const totalClients = clients.length;
@@ -249,9 +246,9 @@ export default function GymDetailsPage({ params }: PageProps) {
       key: 'actions',
       render: (branch: any) => (
         <Space>
-          <Button 
-            type="text" 
-            size="small" 
+          <Button
+            type="text"
+            size="small"
             icon={<FaEye />}
             onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/branches/${branch.id}`)}
           >
@@ -354,7 +351,7 @@ export default function GymDetailsPage({ params }: PageProps) {
                 </Descriptions>
               </Card>
             </Col>
-            
+
             <Col xs={24} lg={8}>
               <Row gutter={[16, 16]}>
                 <Col span={24}>
@@ -398,14 +395,14 @@ export default function GymDetailsPage({ params }: PageProps) {
       label: `Branches (${branches.length})`,
       children: (
         <div>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '16px' 
+            marginBottom: '16px'
           }}>
             <Title level={4} style={{ margin: 0 }}>Branch Management</Title>
-            <Button 
+            <Button
               type="primary"
               icon={<FaPlus />}
               onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/branches/new`)}
@@ -413,7 +410,7 @@ export default function GymDetailsPage({ params }: PageProps) {
               Add Branch
             </Button>
           </div>
-          
+
           {branches.length === 0 ? (
             <Card>
               <div style={{ textAlign: 'center', padding: '40px' }}>
@@ -436,14 +433,14 @@ export default function GymDetailsPage({ params }: PageProps) {
       label: `Users (${users.length})`,
       children: (
         <div>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '16px' 
+            marginBottom: '16px'
           }}>
             <Title level={4} style={{ margin: 0 }}>Gym Staff & Users</Title>
-            <Button 
+            <Button
               type="primary"
               icon={<FaPlus />}
               onClick={() => router.push(`/${locale}/admin/gyms/${gymId}/users/new`)}
@@ -451,7 +448,7 @@ export default function GymDetailsPage({ params }: PageProps) {
               Add User
             </Button>
           </div>
-          
+
           {users.length === 0 ? (
             <Card>
               <div style={{ textAlign: 'center', padding: '40px' }}>
@@ -478,8 +475,8 @@ export default function GymDetailsPage({ params }: PageProps) {
             <Col xs={24} md={12}>
               <Card title="Subscription Status">
                 <div style={{ marginBottom: '16px' }}>
-                  <Tag 
-                    color={getStatusColor(gym.subscriptionStatus?.toLowerCase() || '')} 
+                  <Tag
+                    color={getStatusColor(gym.subscriptionStatus?.toLowerCase() || '')}
                     style={{ fontSize: '14px', padding: '4px 12px' }}
                   >
                     {gym.subscriptionStatus?.toUpperCase() || 'N/A'}
@@ -507,11 +504,11 @@ export default function GymDetailsPage({ params }: PageProps) {
                 </Descriptions>
               </Card>
             </Col>
-            
+
             <Col xs={24} md={12}>
               <Card title="Payment Status">
                 <div style={{ marginBottom: '16px' }}>
-                  <Tag 
+                  <Tag
                     color={getPaymentColor(gym.paymentStatus?.toLowerCase() || '')}
                     style={{ fontSize: '14px', padding: '4px 12px' }}
                   >
@@ -540,8 +537,8 @@ export default function GymDetailsPage({ params }: PageProps) {
         <div className="dashboard-page-header">
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-              <Button 
-                icon={<FaArrowLeft />} 
+              <Button
+                icon={<FaArrowLeft />}
                 onClick={() => router.push(`/${locale}/admin/gyms`)}
                 style={{ marginRight: '8px' }}
               >
@@ -562,8 +559,8 @@ export default function GymDetailsPage({ params }: PageProps) {
               <Button icon={<FaEdit />} onClick={handleEditGym}>
                 Edit Gym
               </Button>
-              <Button 
-                icon={<FaTrash />} 
+              <Button
+                icon={<FaTrash />}
                 danger
                 onClick={() => handleDeleteGym(gym.id)}
               >
@@ -605,7 +602,7 @@ export default function GymDetailsPage({ params }: PageProps) {
         )}
 
         {/* Tabbed Content */}
-        <Tabs 
+        <Tabs
           defaultActiveKey="overview"
           items={tabItems}
           size="large"

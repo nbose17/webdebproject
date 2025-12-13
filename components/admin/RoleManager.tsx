@@ -154,7 +154,7 @@ export default function RoleManager() {
           <div style={{ fontWeight: '500', marginBottom: '4px' }}>
             {record.role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
           </div>
-          <Tag color="blue" size="small">SYSTEM ROLE</Tag>
+          <Tag color="blue">SYSTEM ROLE</Tag>
         </div>
       ),
     },
@@ -168,10 +168,10 @@ export default function RoleManager() {
           </Text>
           <div style={{ fontSize: '12px', color: '#8c8c8c', marginTop: '4px' }}>
             {record.permissions.slice(0, 3).map((p: Permission, i: number) => (
-              <Tag key={i} size="small">{p.resource}</Tag>
+              <Tag key={i}>{p.resource}</Tag>
             ))}
             {record.permissions.length > 3 && (
-              <Tag size="small">+{record.permissions.length - 3} more</Tag>
+              <Tag>+{record.permissions.length - 3} more</Tag>
             )}
           </div>
         </div>
@@ -183,7 +183,7 @@ export default function RoleManager() {
       render: (record: any) => (
         <Button 
           type="text" 
-          size="small"
+         
           icon={<FaEye />}
           onClick={() => handleViewRole(record.role)}
         >
@@ -218,10 +218,10 @@ export default function RoleManager() {
           </Text>
           <div style={{ fontSize: '12px', color: '#8c8c8c', marginTop: '4px' }}>
             {record.permissions.slice(0, 3).map((p, i) => (
-              <Tag key={i} size="small">{p.resource}</Tag>
+              <Tag key={i}>{p.resource}</Tag>
             ))}
             {record.permissions.length > 3 && (
-              <Tag size="small">+{record.permissions.length - 3} more</Tag>
+              <Tag>+{record.permissions.length - 3} more</Tag>
             )}
           </div>
         </div>
@@ -244,7 +244,7 @@ export default function RoleManager() {
         <Space>
           <Button 
             type="text" 
-            size="small"
+           
             icon={<FaEye />}
             onClick={() => handleViewRole(record)}
           >
@@ -252,7 +252,7 @@ export default function RoleManager() {
           </Button>
           <Button 
             type="text" 
-            size="small"
+           
             icon={<FaEdit />}
             onClick={() => handleEditRole(record)}
           >
@@ -260,7 +260,7 @@ export default function RoleManager() {
           </Button>
           <Button 
             type="text" 
-            size="small"
+           
             icon={<FaTrash />}
             danger
             onClick={() => handleDeleteRole(record.id)}
@@ -374,14 +374,14 @@ export default function RoleManager() {
               
               <div style={{ display: 'grid', gap: '12px' }}>
                 {getRolePermissions(viewingRole as UserRole).map((permission, index) => (
-                  <Card key={index} size="small">
-                    <div style={{ display: 'flex', justify: 'space-between', alignItems: 'center' }}>
+                  <Card key={index}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
                         <Text strong>{permission.resource.toUpperCase()}</Text>
                       </div>
                       <div>
                         {permission.actions.map(action => (
-                          <Tag key={action} color="blue" size="small">
+                          <Tag key={action} color="blue">
                             {action.toUpperCase()}
                           </Tag>
                         ))}
@@ -410,14 +410,14 @@ export default function RoleManager() {
               
               <div style={{ display: 'grid', gap: '12px' }}>
                 {viewingRole.permissions.map((permission, index) => (
-                  <Card key={index} size="small">
+                  <Card key={index}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
                         <Text strong>{permission.resource.toUpperCase()}</Text>
                       </div>
                       <div>
                         {permission.actions.map(action => (
-                          <Tag key={action} color="blue" size="small">
+                          <Tag key={action} color="blue">
                             {action.toUpperCase()}
                           </Tag>
                         ))}

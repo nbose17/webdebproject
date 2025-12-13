@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Tag, 
-  Space, 
+import {
+  Card,
+  Table,
+  Button,
+  Tag,
+  Space,
   Typography,
   Row,
   Col,
@@ -25,7 +25,7 @@ import {
   Tooltip,
   Popconfirm
 } from 'antd';
-import { 
+import {
   FaBell,
   FaSearch,
   FaFilter,
@@ -44,7 +44,6 @@ import {
   FaWhatsapp
 } from 'react-icons/fa';
 import AdminProtectedRoute from '@/components/shared/AdminProtectedRoute';
-import { mockAdminGyms } from '@/lib/constants';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -161,22 +160,22 @@ export default function SubscriptionsPage() {
   // Apply filters
   const applyFilters = () => {
     let filtered = subscriptions;
-    
+
     if (searchTerm.trim()) {
       filtered = filtered.filter(sub =>
         sub.gymName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         sub.plan.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     if (statusFilter !== 'all') {
       filtered = filtered.filter(sub => sub.status === statusFilter);
     }
-    
+
     if (paymentFilter !== 'all') {
       filtered = filtered.filter(sub => sub.paymentStatus === paymentFilter);
     }
-    
+
     setFilteredSubscriptions(filtered);
   };
 
@@ -186,7 +185,7 @@ export default function SubscriptionsPage() {
   };
 
   const handleStatusChange = (subId: string, newStatus: Subscription['status']) => {
-    setSubscriptions(prev => prev.map(sub => 
+    setSubscriptions(prev => prev.map(sub =>
       sub.id === subId ? { ...sub, status: newStatus } : sub
     ));
     applyFilters();
@@ -209,7 +208,7 @@ export default function SubscriptionsPage() {
       sentAt: new Date().toISOString(),
       sentBy: 'admin@fitconnect.com'
     };
-    
+
     setCommunications(prev => [newComm, ...prev]);
     setIsCommModalVisible(false);
     commForm.resetFields();
@@ -269,7 +268,7 @@ export default function SubscriptionsPage() {
             {sub.status.toUpperCase()}
           </Tag>
           <br />
-          <Tag color={getPaymentColor(sub.paymentStatus)} size="small">
+          <Tag color={getPaymentColor(sub.paymentStatus)}>
             {sub.paymentStatus.toUpperCase()}
           </Tag>
         </div>
@@ -282,15 +281,15 @@ export default function SubscriptionsPage() {
         const daysUntilBilling = Math.ceil(
           (new Date(sub.nextBilling).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
         );
-        
+
         return (
           <div>
             <div style={{ fontSize: '13px' }}>
               {new Date(sub.nextBilling).toLocaleDateString()}
             </div>
-            <div style={{ 
-              fontSize: '11px', 
-              color: daysUntilBilling <= 7 ? '#ff4d4f' : '#8c8c8c' 
+            <div style={{
+              fontSize: '11px',
+              color: daysUntilBilling <= 7 ? '#ff4d4f' : '#8c8c8c'
             }}>
               {daysUntilBilling > 0 ? `${daysUntilBilling} days` : 'Overdue'}
             </div>
@@ -320,11 +319,11 @@ export default function SubscriptionsPage() {
           <Tooltip title="View Details">
             <Button type="text" size="small" icon={<FaEye />} />
           </Tooltip>
-          
+
           <Tooltip title="Send Communication">
-            <Button 
-              type="text" 
-              size="small" 
+            <Button
+              type="text"
+              size="small"
               icon={<FaEnvelope />}
               onClick={() => {
                 setSelectedSubscription(sub);
@@ -332,29 +331,29 @@ export default function SubscriptionsPage() {
               }}
             />
           </Tooltip>
-          
+
           {sub.status === 'active' && (
             <Popconfirm
               title="Suspend subscription?"
               onConfirm={() => handleStatusChange(sub.id, 'suspended')}
             >
-              <Button 
-                type="text" 
-                size="small" 
+              <Button
+                type="text"
+                size="small"
                 icon={<FaPause />}
                 danger
               />
             </Popconfirm>
           )}
-          
+
           {sub.status === 'suspended' && (
             <Popconfirm
               title="Reactivate subscription?"
               onConfirm={() => handleStatusChange(sub.id, 'active')}
             >
-              <Button 
-                type="text" 
-                size="small" 
+              <Button
+                type="text"
+                size="small"
                 icon={<FaPlay />}
                 style={{ color: '#52c41a' }}
               />
@@ -379,9 +378,9 @@ export default function SubscriptionsPage() {
       label: 'Subscription Overview',
       children: (
         <div>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: '16px'
           }}>
@@ -393,7 +392,7 @@ export default function SubscriptionsPage() {
                 style={{ width: 250 }}
                 enterButton={<FaSearch />}
               />
-              
+
               <Select
                 style={{ width: 120 }}
                 value={statusFilter}
@@ -408,7 +407,7 @@ export default function SubscriptionsPage() {
                 <Option value="expired">Expired</Option>
                 <Option value="cancelled">Cancelled</Option>
               </Select>
-              
+
               <Select
                 style={{ width: 130 }}
                 value={paymentFilter}
@@ -433,7 +432,7 @@ export default function SubscriptionsPage() {
               pageSize: 10,
               showSizeChanger: true,
               showQuickJumper: true,
-              showTotal: (total, range) => 
+              showTotal: (total, range) =>
                 `${range[0]}-${range[1]} of ${total} subscriptions`,
             }}
           />
@@ -445,14 +444,14 @@ export default function SubscriptionsPage() {
       label: 'Communication Center',
       children: (
         <div>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: '16px'
           }}>
             <Title level={4} style={{ margin: 0 }}>Recent Communications</Title>
-            <Button 
+            <Button
               type="primary"
               icon={<FaEnvelope />}
               onClick={handleSendCommunication}
@@ -477,19 +476,19 @@ export default function SubscriptionsPage() {
               >
                 <List.Item.Meta
                   avatar={
-                    <Avatar 
+                    <Avatar
                       icon={
                         comm.type === 'email' ? <FaEnvelope /> :
-                        comm.type === 'sms' ? <FaSms /> :
-                        comm.type === 'whatsapp' ? <FaWhatsapp /> :
-                        <FaPhone />
+                          comm.type === 'sms' ? <FaSms /> :
+                            comm.type === 'whatsapp' ? <FaWhatsapp /> :
+                              <FaPhone />
                       }
-                      style={{ 
-                        backgroundColor: 
+                      style={{
+                        backgroundColor:
                           comm.type === 'email' ? '#4CAF50' :
-                          comm.type === 'sms' ? '#52c41a' :
-                          comm.type === 'whatsapp' ? '#25d366' :
-                          '#fa541c'
+                            comm.type === 'sms' ? '#52c41a' :
+                              comm.type === 'whatsapp' ? '#25d366' :
+                                '#fa541c'
                       }}
                     />
                   }
@@ -503,8 +502,8 @@ export default function SubscriptionsPage() {
                   }
                   description={
                     <Text style={{ fontSize: '13px' }}>
-                      {comm.content.length > 100 ? 
-                        `${comm.content.substring(0, 100)}...` : 
+                      {comm.content.length > 100 ?
+                        `${comm.content.substring(0, 100)}...` :
                         comm.content
                       }
                     </Text>
@@ -597,7 +596,7 @@ export default function SubscriptionsPage() {
 
         {/* Main Content */}
         <Card>
-          <Tabs 
+          <Tabs
             defaultActiveKey="overview"
             items={tabItems}
             size="large"
@@ -637,7 +636,7 @@ export default function SubscriptionsPage() {
                 </Option>
               </Select>
             </Form.Item>
-            
+
             <Form.Item
               name="subject"
               label="Subject"
@@ -645,20 +644,20 @@ export default function SubscriptionsPage() {
             >
               <Input placeholder="Communication subject" />
             </Form.Item>
-            
+
             <Form.Item
               name="content"
               label="Message"
               rules={[{ required: true, message: 'Please enter message' }]}
             >
-              <TextArea 
+              <TextArea
                 rows={5}
                 placeholder="Type your message here..."
                 maxLength={500}
                 showCount
               />
             </Form.Item>
-            
+
             {selectedSubscription && (
               <Alert
                 message={`Sending to: ${selectedSubscription.gymName}`}

@@ -46,7 +46,7 @@ export enum UserRole {
 
 export interface Permission {
   resource: string;
-  actions: ('create' | 'read' | 'update' | 'delete')[];
+  actions: readonly ('create' | 'read' | 'update' | 'delete')[];
 }
 
 export interface User {
@@ -56,7 +56,9 @@ export interface User {
   role: UserRole;
   permissions?: Permission[];
   gymId?: string; // For gym-specific users
+  branchId?: string; // For branch-specific users
   gym?: Gym;
+  isActive?: boolean;
   preferences?: {
     dashboardViewMode: 'table' | 'card';
   };
@@ -65,12 +67,17 @@ export interface User {
 // Admin-specific interfaces
 export interface AdminGym extends Gym {
   ownerId: string;
-  branches: Branch[];
-  subscriptionStatus: 'active' | 'suspended' | 'expired';
-  paymentStatus: 'current' | 'overdue';
   createdAt: string;
   lastActive?: string;
+  subscriptionStatus: 'active' | 'suspended' | 'expired';
+  paymentStatus: 'current' | 'overdue';
+  branches?: Branch[];
+  users?: User[];
+  clients?: any[]; // Simplified for now
+  subscription?: any; // Simplified
+  owner?: User;
 }
+
 
 export interface GymUser {
   id: string;
@@ -131,11 +138,13 @@ export interface Branch {
   phone: string;
   email: string;
   managerId?: string;
-  manager?: string;
+  manager?: User;
   status: 'active' | 'inactive';
   staff: GymUser[];
   clients: Client[];
   createdAt: string;
+  updatedAt?: string;
+  gym?: Gym;
 }
 
 export interface Client {

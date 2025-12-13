@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { 
-  Card, 
-  Tabs, 
-  Table, 
-  Button, 
-  Typography, 
+import {
+  Card,
+  Tabs,
+  Table,
+  Button,
+  Typography,
   Space,
   Row,
   Col,
@@ -23,7 +23,7 @@ import {
   Alert,
   Tooltip
 } from 'antd';
-import { 
+import {
   FaPalette,
   FaPlus,
   FaEdit,
@@ -37,7 +37,7 @@ import {
   FaMobile,
   FaDesktop,
   FaSave,
-  FaReset
+  FaUndo
 } from 'react-icons/fa';
 import AdminProtectedRoute from '@/components/shared/AdminProtectedRoute';
 import { CMSItem } from '@/lib/types';
@@ -258,7 +258,7 @@ export default function AdminBrandingPage() {
 
   const handleSaveTheme = async (values: any) => {
     if (editingTheme) {
-      setThemes(prev => prev.map(t => 
+      setThemes(prev => prev.map(t =>
         t.id === editingTheme.id ? { ...t, ...values, lastModified: new Date().toISOString() } : t
       ));
       message.success('Theme updated successfully');
@@ -297,7 +297,7 @@ export default function AdminBrandingPage() {
 
   const handleSaveAsset = async (values: any) => {
     if (editingAsset) {
-      setAssets(prev => prev.map(a => 
+      setAssets(prev => prev.map(a =>
         a.id === editingAsset.id ? { ...a, ...values } : a
       ));
       message.success('Asset updated successfully');
@@ -320,16 +320,16 @@ export default function AdminBrandingPage() {
       render: (theme: BrandingTheme) => (
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <div 
-              style={{ 
-                width: '16px', 
-                height: '16px', 
-                borderRadius: '50%', 
-                backgroundColor: theme.colors.primary 
-              }} 
+            <div
+              style={{
+                width: '16px',
+                height: '16px',
+                borderRadius: '50%',
+                backgroundColor: theme.colors.primary
+              }}
             />
             <span style={{ fontWeight: '500' }}>{theme.name}</span>
-            {theme.isActive && <Tag color="green" size="small">ACTIVE</Tag>}
+            {theme.isActive && <Tag color="green">ACTIVE</Tag>}
           </div>
           <div style={{ fontSize: '12px', color: '#8c8c8c' }}>
             {theme.description}
@@ -344,14 +344,14 @@ export default function AdminBrandingPage() {
         <div style={{ display: 'flex', gap: '4px' }}>
           {Object.entries(theme.colors).slice(0, 4).map(([key, color]) => (
             <Tooltip key={key} title={`${key}: ${color}`}>
-              <div 
-                style={{ 
-                  width: '20px', 
-                  height: '20px', 
-                  borderRadius: '4px', 
+              <div
+                style={{
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '4px',
                   backgroundColor: color,
                   border: '1px solid #d9d9d9'
-                }} 
+                }}
               />
             </Tooltip>
           ))}
@@ -382,15 +382,15 @@ export default function AdminBrandingPage() {
       key: 'actions',
       render: (theme: BrandingTheme) => (
         <Space>
-          <Button 
-            type="text" 
+          <Button
+            type="text"
             size="small"
             icon={<FaEye />}
           >
             Preview
           </Button>
-          <Button 
-            type="text" 
+          <Button
+            type="text"
             size="small"
             icon={<FaEdit />}
             onClick={() => handleEditTheme(theme)}
@@ -398,8 +398,8 @@ export default function AdminBrandingPage() {
             Edit
           </Button>
           {!theme.isActive && (
-            <Button 
-              type="text" 
+            <Button
+              type="text"
               size="small"
               onClick={() => handleActivateTheme(theme.id)}
             >
@@ -418,8 +418,8 @@ export default function AdminBrandingPage() {
       render: (asset: GlobalBrandAsset) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {asset.type === 'logo' || asset.type === 'icon' || asset.type === 'banner' ? (
-            <img 
-              src={asset.url} 
+            <img
+              src={asset.url}
               alt={asset.name}
               style={{ width: '40px', height: '40px', objectFit: 'contain' }}
               onError={(e) => {
@@ -428,9 +428,9 @@ export default function AdminBrandingPage() {
               }}
             />
           ) : (
-            <div style={{ 
-              width: '40px', 
-              height: '40px', 
+            <div style={{
+              width: '40px',
+              height: '40px',
               backgroundColor: '#f0f0f0',
               display: 'flex',
               alignItems: 'center',
@@ -456,7 +456,7 @@ export default function AdminBrandingPage() {
       render: (asset: GlobalBrandAsset) => (
         <div>
           {asset.usage.map(use => (
-            <Tag key={use} size="small">{use}</Tag>
+            <Tag key={use}>{use}</Tag>
           ))}
         </div>
       ),
@@ -484,16 +484,16 @@ export default function AdminBrandingPage() {
       key: 'actions',
       render: (asset: GlobalBrandAsset) => (
         <Space>
-          <Button 
-            type="text" 
+          <Button
+            type="text"
             size="small"
             icon={<FaEdit />}
             onClick={() => handleEditAsset(asset)}
           >
             Edit
           </Button>
-          <Button 
-            type="text" 
+          <Button
+            type="text"
             size="small"
             icon={<FaTrash />}
             danger
@@ -533,8 +533,8 @@ export default function AdminBrandingPage() {
       key: 'actions',
       render: (cms: CMSItem) => (
         <Space>
-          <Button 
-            type="text" 
+          <Button
+            type="text"
             size="small"
             icon={<FaEdit />}
             onClick={() => {
@@ -560,14 +560,14 @@ export default function AdminBrandingPage() {
       ),
       children: (
         <div>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: '16px'
           }}>
             <Title level={4} style={{ margin: 0 }}>Branding Themes</Title>
-            <Button 
+            <Button
               type="primary"
               icon={<FaPlus />}
               onClick={handleAddTheme}
@@ -594,14 +594,14 @@ export default function AdminBrandingPage() {
       ),
       children: (
         <div>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: '16px'
           }}>
             <Title level={4} style={{ margin: 0 }}>Brand Assets</Title>
-            <Button 
+            <Button
               type="primary"
               icon={<FaUpload />}
               onClick={handleAddAsset}
@@ -628,14 +628,14 @@ export default function AdminBrandingPage() {
       ),
       children: (
         <div>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: '16px'
           }}>
             <Title level={4} style={{ margin: 0 }}>Global CMS Content</Title>
-            <Button 
+            <Button
               type="primary"
               icon={<FaPlus />}
               onClick={() => {
@@ -676,7 +676,7 @@ export default function AdminBrandingPage() {
 
         {/* Main Content */}
         <Card>
-          <Tabs 
+          <Tabs
             defaultActiveKey="themes"
             items={tabItems}
             size="large"
@@ -715,7 +715,7 @@ export default function AdminBrandingPage() {
                 </Form.Item>
               </Col>
             </Row>
-            
+
             <Divider>Colors</Divider>
             <Row gutter={16}>
               <Col span={8}>
@@ -787,7 +787,7 @@ export default function AdminBrandingPage() {
             >
               <Input />
             </Form.Item>
-            
+
             <Form.Item
               name="type"
               label="Asset Type"
@@ -801,7 +801,7 @@ export default function AdminBrandingPage() {
                 <Option value="background">Background</Option>
               </Select>
             </Form.Item>
-            
+
             <Form.Item
               name="url"
               label="Asset URL"
@@ -809,7 +809,7 @@ export default function AdminBrandingPage() {
             >
               <Input />
             </Form.Item>
-            
+
             <Form.Item
               name="usage"
               label="Usage Areas"
@@ -837,7 +837,7 @@ export default function AdminBrandingPage() {
             layout="vertical"
             onFinish={(values) => {
               if (editingCms) {
-                setCmsContent(prev => prev.map(c => 
+                setCmsContent(prev => prev.map(c =>
                   c.id === editingCms.id ? { ...c, ...values } : c
                 ));
               } else {
@@ -854,7 +854,7 @@ export default function AdminBrandingPage() {
             >
               <Input />
             </Form.Item>
-            
+
             <Form.Item
               name="type"
               label="Content Type"
@@ -866,7 +866,7 @@ export default function AdminBrandingPage() {
                 <Option value="banner">Banner</Option>
               </Select>
             </Form.Item>
-            
+
             <Form.Item
               name="content"
               label="Content"

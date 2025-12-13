@@ -16,7 +16,7 @@ export default function QRCodeDisplay() {
   const locale = params.locale as string;
   const gymId = user?.gymId;
 
-  const { data, loading, error } = useQuery(GET_GYM, {
+  const { data, loading, error } = useQuery<{ gym: any }>(GET_GYM, {
     variables: { id: gymId },
     skip: !gymId,
     fetchPolicy: 'network-only',

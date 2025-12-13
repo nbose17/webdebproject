@@ -32,7 +32,7 @@ const DateScalar = new GraphQLScalarType({
 });
 
 export const resolvers: Resolvers = {
-  Date: DateScalar,
+  // Date: DateScalar, // Commented out - not in Resolvers type definition
   Query: {
     ...userResolvers.Query,
     ...gymResolvers.Query,
@@ -74,18 +74,20 @@ export const resolvers: Resolvers = {
   Subscription: {
     ...subscriptionResolvers.Subscription,
   },
-  CMS: {
-    ...cmsResolvers.CMS,
-  },
-  Plan: {
-    ...planResolvers.Plan,
-  },
-  Class: {
-    ...classResolvers.Class,
-  },
-  Trainer: {
-    ...trainerResolvers.Trainer,
-  },
+  // CMS: {
+  //   ...cmsResolvers.CMS,
+  // },
+  // Plan: {
+  //   ...planResolvers.Plan,
+  // },
+  // Class: {
+  //   ...classResolvers.Class,
+  // },
+  // Trainer: {
+  //   ...trainerResolvers.Trainer,
+  // },
+  ContractTemplate: {},
+  IDCardTemplate: {},
 };
 
 

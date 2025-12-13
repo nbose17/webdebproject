@@ -17,13 +17,13 @@ type ViewMode = 'table' | 'card';
 export default function TrainersPage() {
   const { user } = useAuth();
   const gymId = user?.gymId;
-  
-  const { data, loading, error, refetch } = useQuery(GET_TRAINERS, {
+
+  const { data, loading, error, refetch } = useQuery<{ trainers: any[] }>(GET_TRAINERS, {
     variables: { gymId },
     skip: !gymId,
     fetchPolicy: 'network-only',
   });
-  
+
   const [createTrainer] = useMutation(CREATE_TRAINER, {
     onCompleted: () => {
       message.success('Trainer created successfully!');
@@ -33,7 +33,7 @@ export default function TrainersPage() {
       message.error(`Failed to create trainer: ${error.message}`);
     },
   });
-  
+
   const [updateTrainer] = useMutation(UPDATE_TRAINER, {
     onCompleted: () => {
       message.success('Trainer updated successfully!');
@@ -43,7 +43,7 @@ export default function TrainersPage() {
       message.error(`Failed to update trainer: ${error.message}`);
     },
   });
-  
+
   const [deleteTrainer] = useMutation(DELETE_TRAINER, {
     onCompleted: () => {
       message.success('Trainer deleted successfully!');
@@ -53,23 +53,23 @@ export default function TrainersPage() {
       message.error(`Failed to delete trainer: ${error.message}`);
     },
   });
-  
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingTrainer, setEditingTrainer] = useState<Trainer | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('table');
-  
+
   const trainers = data?.trainers || [];
 
   const columns = [
     { key: 'id', label: 'No', render: (_: any, row: any, index?: number) => (index ?? 0) + 1 },
-    { 
-      key: 'image', 
-      label: 'Image', 
+    {
+      key: 'image',
+      label: 'Image',
       render: (value: string) => (
         value ? (
-          <img 
-            src={value} 
-            alt="Trainer" 
+          <img
+            src={value}
+            alt="Trainer"
             style={{ width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px' }}
           />
         ) : (
@@ -93,7 +93,7 @@ export default function TrainersPage() {
 
   const handleDelete = async (trainer: Trainer) => {
     if (!gymId) return;
-    
+
     await deleteTrainer({
       variables: {
         id: trainer.id,
@@ -104,7 +104,7 @@ export default function TrainersPage() {
 
   const handleSubmit = async (trainerData: Omit<Trainer, 'id'>) => {
     if (!gymId) return;
-    
+
     if (editingTrainer) {
       await updateTrainer({
         variables: {
@@ -124,7 +124,7 @@ export default function TrainersPage() {
     setIsFormOpen(false);
     setEditingTrainer(null);
   };
-  
+
   if (!gymId) {
     return (
       <div>
@@ -137,7 +137,7 @@ export default function TrainersPage() {
       </div>
     );
   }
-  
+
   if (loading) {
     return (
       <div>
@@ -153,7 +153,7 @@ export default function TrainersPage() {
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <div>

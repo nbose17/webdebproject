@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { 
-  Card, 
-  Table, 
-  Button, 
-  Tag, 
-  Space, 
+import {
+  Card,
+  Table,
+  Button,
+  Tag,
+  Space,
   Typography,
   Row,
   Col,
@@ -17,7 +17,7 @@ import {
   Popconfirm,
   message
 } from 'antd';
-import { 
+import {
   FaFileContract,
   FaPlus,
   FaEdit,
@@ -158,18 +158,18 @@ export default function ContractTemplatesPage() {
   // Apply filters
   const applyFilters = () => {
     let filtered = templates;
-    
+
     if (searchTerm.trim()) {
       filtered = filtered.filter(template =>
         template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         template.description.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     if (categoryFilter !== 'all') {
       filtered = filtered.filter(template => template.category === categoryFilter);
     }
-    
+
     setFilteredTemplates(filtered);
   };
 
@@ -196,7 +196,7 @@ export default function ContractTemplatesPage() {
   const handleSaveTemplate = (template: ContractTemplate) => {
     if (editingTemplate) {
       // Update existing template
-      setTemplates(prev => prev.map(t => 
+      setTemplates(prev => prev.map(t =>
         t.id === editingTemplate.id ? template : t
       ));
       message.success('Template updated successfully');
@@ -205,7 +205,7 @@ export default function ContractTemplatesPage() {
       setTemplates(prev => [...prev, template]);
       message.success('Template created successfully');
     }
-    
+
     setIsEditorVisible(false);
     applyFilters();
   };
@@ -225,7 +225,7 @@ export default function ContractTemplatesPage() {
       lastModified: new Date().toISOString(),
       version: 1
     };
-    
+
     setTemplates(prev => [...prev, duplicated]);
     message.success('Template duplicated successfully');
     applyFilters();
@@ -237,7 +237,7 @@ export default function ContractTemplatesPage() {
   };
 
   const handleToggleStatus = (templateId: string) => {
-    setTemplates(prev => prev.map(t => 
+    setTemplates(prev => prev.map(t =>
       t.id === templateId ? { ...t, isActive: !t.isActive } : t
     ));
     applyFilters();
@@ -271,10 +271,10 @@ export default function ContractTemplatesPage() {
             {template.description}
           </div>
           <div style={{ marginTop: '4px' }}>
-            <Tag color={getCategoryColor(template.category)} size="small">
+            <Tag color={getCategoryColor(template.category)}>
               {getCategoryLabel(template.category)}
             </Tag>
-            <Tag color={template.isActive ? 'success' : 'default'} size="small">
+            <Tag color={template.isActive ? 'success' : 'default'}>
               {template.isActive ? 'Active' : 'Inactive'}
             </Tag>
           </div>
@@ -322,32 +322,32 @@ export default function ContractTemplatesPage() {
       key: 'actions',
       render: (template: ContractTemplate) => (
         <Space>
-          <Button 
-            type="text" 
+          <Button
+            type="text"
             size="small"
             icon={<FaEye />}
             onClick={() => handlePreviewTemplate(template)}
           >
             Preview
           </Button>
-          <Button 
-            type="text" 
+          <Button
+            type="text"
             size="small"
             icon={<FaEdit />}
             onClick={() => handleEditTemplate(template)}
           >
             Edit
           </Button>
-          <Button 
-            type="text" 
+          <Button
+            type="text"
             size="small"
             icon={<FaCopy />}
             onClick={() => handleDuplicateTemplate(template)}
           >
             Duplicate
           </Button>
-          <Button 
-            type="text" 
+          <Button
+            type="text"
             size="small"
             onClick={() => handleToggleStatus(template.id)}
           >
@@ -358,8 +358,8 @@ export default function ContractTemplatesPage() {
             description="Are you sure you want to delete this template?"
             onConfirm={() => handleDeleteTemplate(template.id)}
           >
-            <Button 
-              type="text" 
+            <Button
+              type="text"
               size="small"
               icon={<FaTrash />}
               danger
@@ -452,9 +452,9 @@ export default function ContractTemplatesPage() {
 
         {/* Templates Management */}
         <Card>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: '16px'
           }}>
@@ -466,7 +466,7 @@ export default function ContractTemplatesPage() {
                 style={{ width: 250 }}
                 enterButton={<FaSearch />}
               />
-              
+
               <Select
                 style={{ width: 150 }}
                 placeholder="Category"
@@ -481,9 +481,9 @@ export default function ContractTemplatesPage() {
                 <Option value="custom">Custom</Option>
               </Select>
             </div>
-            
-            <Button 
-              type="primary" 
+
+            <Button
+              type="primary"
               icon={<FaPlus />}
               onClick={handleCreateTemplate}
             >
@@ -499,7 +499,7 @@ export default function ContractTemplatesPage() {
               pageSize: 10,
               showSizeChanger: true,
               showQuickJumper: true,
-              showTotal: (total, range) => 
+              showTotal: (total, range) =>
                 `${range[0]}-${range[1]} of ${total} templates`,
             }}
           />
@@ -514,17 +514,17 @@ export default function ContractTemplatesPage() {
           width={900}
         >
           {previewTemplate && (
-            <div 
-              style={{ 
-                border: '1px solid #d9d9d9', 
-                borderRadius: '6px', 
+            <div
+              style={{
+                border: '1px solid #d9d9d9',
+                borderRadius: '6px',
                 padding: '16px',
                 backgroundColor: 'white',
                 minHeight: '500px',
                 overflow: 'auto'
               }}
-              dangerouslySetInnerHTML={{ 
-                __html: TemplateEngine.generatePreview(previewTemplate) 
+              dangerouslySetInnerHTML={{
+                __html: TemplateEngine.generatePreview(previewTemplate)
               }}
             />
           )}

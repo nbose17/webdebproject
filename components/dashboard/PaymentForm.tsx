@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Input from '@/components/shared/Input';
 import Button from '@/components/shared/Button';
-import { mockPaymentMethods } from '@/lib/constants';
 
 export default function PaymentForm() {
   const [selectedMethod, setSelectedMethod] = useState('');
@@ -21,6 +20,12 @@ export default function PaymentForm() {
     rememberMe: false,
   });
 
+  // TODO: Fetch payment methods from API/database instead of using mock data
+  const paymentMethods = [
+    { id: '1', name: 'PayPal' },
+    { id: '2', name: 'Credit Card' },
+  ];
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle payment submission
@@ -32,7 +37,7 @@ export default function PaymentForm() {
       <div style={{ flex: '1', minWidth: '300px', background: 'var(--color-white)', padding: 'var(--spacing-xl)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)' }}>
         <h3 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-lg)', textTransform: 'uppercase' }}>PAYMENT METHODS</h3>
         <div style={{ display: 'flex', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-xl)', flexWrap: 'wrap' }}>
-          {mockPaymentMethods.map((method) => (
+          {paymentMethods.map((method) => (
             <div
               key={method.id}
               onClick={() => setSelectedMethod(method.id)}
@@ -82,7 +87,7 @@ export default function PaymentForm() {
             className="input"
           >
             <option value="">Select...</option>
-            {mockPaymentMethods.map((method) => (
+            {paymentMethods.map((method) => (
               <option key={method.id} value={method.id}>
                 {method.name}
               </option>
@@ -208,8 +213,3 @@ export default function PaymentForm() {
     </div>
   );
 }
-
-
-
-
-

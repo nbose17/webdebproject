@@ -11,7 +11,7 @@ export const gymResolvers = {
       if (args.paymentStatus) filter.paymentStatus = args.paymentStatus;
 
       const gyms = await AdminModels.Gym.find(filter).lean();
-      return gyms.map(gym => ({ ...gym, id: gym._id.toString() }));
+      return gyms.map((gym: any) => ({ ...gym, id: gym._id.toString() }));
     },
     gym: async (_: any, { id }: { id: string }) => {
       console.log('🔍 GET_GYM resolver called with ID:', id);
@@ -29,7 +29,7 @@ export const gymResolvers = {
         console.log('❌ Gym not found for ID:', id);
         // Let's also check all gyms to see what IDs we have
         const allGyms = await AdminModels.Gym.find({}).select('_id name').lean();
-        console.log('📋 Available gym IDs:', allGyms.map(g => ({ id: g._id.toString(), name: g.name })));
+        console.log('📋 Available gym IDs:', allGyms.map((g: any) => ({ id: g._id.toString(), name: g.name })));
         throw new Error(`Gym not found for ID: ${id}`);
       }
 
@@ -189,7 +189,7 @@ export const gymResolvers = {
     branches: async (parent: any) => {
       const AdminModels = await getAdminModels();
       const branches = await AdminModels.Branch.find({ gymId: parent.id }).lean();
-      return branches.map(branch => ({ ...branch, id: branch._id.toString() }));
+      return branches.map((branch: any) => ({ ...branch, id: branch._id.toString() }));
     },
     users: async (parent: any) => {
       // Get users from admin database (gym owner)
@@ -201,14 +201,14 @@ export const gymResolvers = {
         const GymModels = await getGymModels(parent.id);
         const gymUsers = await GymModels.User.find({ gymId: parent.id }).lean();
         const allUsers = [...adminUsers, ...gymUsers];
-        return allUsers.map(user => ({
+        return allUsers.map((user: any) => ({
           ...user,
           id: user._id.toString(),
           role: user.role ? user.role.toUpperCase().replace(/-/g, '_') : user.role, // Convert to GraphQL enum format
         }));
       } catch (error) {
         // Gym database might not exist yet, return only admin users
-        return adminUsers.map(user => ({
+        return adminUsers.map((user: any) => ({
           ...user,
           id: user._id.toString(),
           role: user.role ? user.role.toUpperCase().replace(/-/g, '_') : user.role, // Convert to GraphQL enum format

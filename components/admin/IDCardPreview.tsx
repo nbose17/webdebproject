@@ -361,9 +361,9 @@ export default function IDCardPreview({
   return (
     <div>
       {showControls && (
-        <Card size="small" style={{ marginBottom: '16px' }}>
+        <Card style={{ marginBottom: '16px' }}>
           <Title level={5}>Member Information</Title>
-          <Form form={form} layout="vertical" size="small">
+          <Form form={form} layout="vertical">
             <Row gutter={16}>
               <Col span={8}>
                 <Form.Item label="Full Name">

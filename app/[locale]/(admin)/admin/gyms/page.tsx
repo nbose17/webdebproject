@@ -5,12 +5,12 @@ import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation';
 import { useQuery, useMutation } from '@apollo/client/react';
 import { Card, Table, Tag, Button, Input, Space, Dropdown, Modal, Typography, Statistic, Row, Col, message, Skeleton } from 'antd';
-import { 
-  FaDumbbell, 
-  FaEye, 
-  FaEdit, 
-  FaTrash, 
-  FaPlus, 
+import {
+  FaDumbbell,
+  FaEye,
+  FaEdit,
+  FaTrash,
+  FaPlus,
   FaSearch,
   FaFilter,
   FaEllipsisV,
@@ -30,14 +30,10 @@ export default function GymsManagementPage() {
   const router = useRouter();
   const params = useParams();
   const locale = params.locale as string;
-  
+
   // Fetch gyms from GraphQL API
-  const { data, loading, error, refetch } = useQuery(GET_GYMS, {
+  const { data, loading, error, refetch } = useQuery<{ gyms: AdminGym[] }>(GET_GYMS, {
     fetchPolicy: 'cache-and-network',
-    onError: (err) => {
-      console.error('Error fetching gyms:', err);
-      message.error('Failed to load gyms. Please try again.');
-    },
   });
 
   const [deleteGymMutation] = useMutation(DELETE_GYM);
@@ -150,14 +146,14 @@ export default function GymsManagementPage() {
       key: 'details',
       render: (record: AdminGym) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <img 
-            src={record.image} 
+          <img
+            src={record.image}
             alt={record.name}
-            style={{ 
-              width: '48px', 
-              height: '48px', 
-              borderRadius: '8px', 
-              objectFit: 'cover' 
+            style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '8px',
+              objectFit: 'cover'
             }}
           />
           <div>
@@ -255,8 +251,8 @@ export default function GymsManagementPage() {
 
         return (
           <Dropdown menu={{ items }} trigger={['click']}>
-            <Button 
-              type="text" 
+            <Button
+              type="text"
               icon={<FaEllipsisV />}
               style={{ transform: 'rotate(90deg)' }}
             />
@@ -367,9 +363,9 @@ export default function GymsManagementPage() {
 
         {/* Gym Management Table */}
         <Card>
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
             alignItems: 'center',
             marginBottom: '16px'
           }}>
@@ -385,18 +381,18 @@ export default function GymsManagementPage() {
                 Filter
               </Button>
             </div>
-            
+
             <div style={{ display: 'flex', gap: '8px' }}>
               {selectedRowKeys.length > 0 && (
-                <Button 
+                <Button
                   danger
                   disabled={loading}
                 >
                   Delete Selected ({selectedRowKeys.length})
                 </Button>
               )}
-              <Button 
-                type="primary" 
+              <Button
+                type="primary"
                 icon={<FaPlus />}
                 onClick={() => router.push(`/${locale}/admin/gyms/new`)}
               >
@@ -418,7 +414,7 @@ export default function GymsManagementPage() {
                 pageSize: 10,
                 showSizeChanger: true,
                 showQuickJumper: true,
-                showTotal: (total, range) => 
+                showTotal: (total, range) =>
                   `${range[0]}-${range[1]} of ${total} gyms`,
               }}
               scroll={{ x: 1200 }}

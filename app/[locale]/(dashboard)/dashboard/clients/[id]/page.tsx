@@ -24,12 +24,12 @@ export default function ClientDetailPage({ params }: PageProps) {
   const [isSending, setIsSending] = useState(false);
   const [selectedChannel, setSelectedChannel] = useState<'email' | 'whatsapp' | 'telegram' | null>(null);
 
-  const { data, loading, error } = useQuery(GET_CLIENT, {
-    variables: { id, gymId },
+  const { data, loading, error } = useQuery<{ client: any }>(GET_CLIENT, {
+    variables: { id: id },
     skip: !gymId || !id,
     fetchPolicy: 'network-only',
   });
-  
+
   const client = data?.client;
 
   if (!gymId) {
@@ -44,7 +44,7 @@ export default function ClientDetailPage({ params }: PageProps) {
       </div>
     );
   }
-  
+
   if (loading) {
     return (
       <div>
@@ -55,7 +55,7 @@ export default function ClientDetailPage({ params }: PageProps) {
       </div>
     );
   }
-  
+
   if (error || !client) {
     return (
       <div>
@@ -263,86 +263,86 @@ Generated on: ${new Date().toLocaleDateString()}
 
           {/* Subscription & Contract Details Card */}
           <div style={{ background: 'var(--color-white)', padding: 'var(--spacing-xl)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-md)', flex: '1', minWidth: '400px' }}>
-          <h2 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-lg)' }}>Subscription & Contract</h2>
-          <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-            <label style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', display: 'block', marginBottom: 'var(--spacing-sm)' }}>
-              Contract Actions
-            </label>
-            <div style={{ display: 'flex', gap: 'var(--spacing-sm)', flexWrap: 'wrap' }}>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={handleDownloadContract} 
-                style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}
-              >
-                <FaFileContract />
-                Download
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => handleSendContract('email')} 
-                style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}
-              >
-                <FaEnvelope />
-                Send Email
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => handleSendContract('whatsapp')} 
-                style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}
-              >
-                <FaWhatsapp style={{ color: '#25D366' }} />
-                Send WhatsApp
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => handleSendContract('telegram')} 
-                style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}
-              >
-                <FaTelegram style={{ color: '#0088cc' }} />
-                Send Telegram
-              </Button>
-            </div>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--spacing-lg)' }}>
-            <div>
-              <label style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', display: 'block', marginBottom: 'var(--spacing-xs)' }}>
-                Subscription End Date
+            <h2 style={{ fontSize: 'var(--font-size-xl)', fontWeight: 'var(--font-weight-bold)', marginBottom: 'var(--spacing-lg)' }}>Subscription & Contract</h2>
+            <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+              <label style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', display: 'block', marginBottom: 'var(--spacing-sm)' }}>
+                Contract Actions
               </label>
-              <p style={{ fontSize: 'var(--font-size-base)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-text-primary)' }}>
-                {client.subscriptionEndDate ? formatDate(client.subscriptionEndDate) : 'Not set'}
-              </p>
-              {daysRemaining !== null && (
-                <p style={{
-                  fontSize: 'var(--font-size-sm)',
-                  color: daysRemaining <= 15 ? '#dc3545' : daysRemaining <= 30 ? '#ffc107' : 'var(--color-text-secondary)',
-                  marginTop: 'var(--spacing-xs)',
-                  fontWeight: 'var(--font-weight-medium)'
-                }}>
-                  {daysRemaining > 0 ? `${daysRemaining} days remaining` : daysRemaining === 0 ? 'Expires today' : 'Expired'}
+              <div style={{ display: 'flex', gap: 'var(--spacing-sm)', flexWrap: 'wrap' }}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDownloadContract}
+                  style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}
+                >
+                  <FaFileContract />
+                  Download
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSendContract('email')}
+                  style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}
+                >
+                  <FaEnvelope />
+                  Send Email
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSendContract('whatsapp')}
+                  style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}
+                >
+                  <FaWhatsapp style={{ color: '#25D366' }} />
+                  Send WhatsApp
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSendContract('telegram')}
+                  style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}
+                >
+                  <FaTelegram style={{ color: '#0088cc' }} />
+                  Send Telegram
+                </Button>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'var(--spacing-lg)' }}>
+              <div>
+                <label style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', display: 'block', marginBottom: 'var(--spacing-xs)' }}>
+                  Subscription End Date
+                </label>
+                <p style={{ fontSize: 'var(--font-size-base)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-text-primary)' }}>
+                  {client.subscriptionEndDate ? formatDate(client.subscriptionEndDate) : 'Not set'}
                 </p>
-              )}
+                {daysRemaining !== null && (
+                  <p style={{
+                    fontSize: 'var(--font-size-sm)',
+                    color: daysRemaining <= 15 ? '#dc3545' : daysRemaining <= 30 ? '#ffc107' : 'var(--color-text-secondary)',
+                    marginTop: 'var(--spacing-xs)',
+                    fontWeight: 'var(--font-weight-medium)'
+                  }}>
+                    {daysRemaining > 0 ? `${daysRemaining} days remaining` : daysRemaining === 0 ? 'Expires today' : 'Expired'}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', display: 'block', marginBottom: 'var(--spacing-xs)' }}>
+                  Contract Start Date
+                </label>
+                <p style={{ fontSize: 'var(--font-size-base)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-text-primary)' }}>
+                  {client.contractStartDate ? formatDate(client.contractStartDate) : 'Not set'}
+                </p>
+              </div>
+              <div>
+                <label style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', display: 'block', marginBottom: 'var(--spacing-xs)' }}>
+                  Contract End Date
+                </label>
+                <p style={{ fontSize: 'var(--font-size-base)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-text-primary)' }}>
+                  {client.contractEndDate ? formatDate(client.contractEndDate) : 'Not set'}
+                </p>
+              </div>
             </div>
-            <div>
-              <label style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', display: 'block', marginBottom: 'var(--spacing-xs)' }}>
-                Contract Start Date
-              </label>
-              <p style={{ fontSize: 'var(--font-size-base)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-text-primary)' }}>
-                {client.contractStartDate ? formatDate(client.contractStartDate) : 'Not set'}
-              </p>
-            </div>
-            <div>
-              <label style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', display: 'block', marginBottom: 'var(--spacing-xs)' }}>
-                Contract End Date
-              </label>
-              <p style={{ fontSize: 'var(--font-size-base)', fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-text-primary)' }}>
-                {client.contractEndDate ? formatDate(client.contractEndDate) : 'Not set'}
-              </p>
-            </div>
-          </div>
           </div>
         </div>
 
@@ -354,11 +354,11 @@ Generated on: ${new Date().toLocaleDateString()}
                 Renewal Reminder
               </h2>
               <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
-                {daysRemaining !== null && daysRemaining > 0 
+                {daysRemaining !== null && daysRemaining > 0
                   ? `Send renewal notification to ${client.name}. Subscription expires in ${daysRemaining} days.`
                   : daysRemaining === 0
-                  ? `Send renewal notification to ${client.name}. Subscription expires today.`
-                  : `Send renewal notification to ${client.name}. Subscription has expired ${Math.abs(daysRemaining)} days ago.`
+                    ? `Send renewal notification to ${client.name}. Subscription expires today.`
+                    : `Send renewal notification to ${client.name}. Subscription has expired ${Math.abs(daysRemaining)} days ago.`
                 }
               </p>
             </div>

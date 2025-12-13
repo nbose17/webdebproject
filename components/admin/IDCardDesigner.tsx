@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { 
-  Card, 
-  Button, 
-  Input, 
-  Select, 
-  Row, 
-  Col, 
+import {
+  Card,
+  Button,
+  Input,
+  Select,
+  Row,
+  Col,
   Typography,
   Divider,
   Space,
@@ -19,7 +19,7 @@ import {
   Slider,
   Form
 } from 'antd';
-import { 
+import {
   FaSave,
   FaEye,
   FaImage,
@@ -99,7 +99,7 @@ const SAMPLE_DATA = {
 };
 
 export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDesignerProps) {
-  const [cardTemplate, setCardTemplate] = useState<IDCardTemplate>(() => 
+  const [cardTemplate, setCardTemplate] = useState<IDCardTemplate>(() =>
     template || {
       id: '',
       name: '',
@@ -186,7 +186,7 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
   const updateElement = (elementId: string, updates: Partial<IDCardElement>) => {
     setCardTemplate(prev => ({
       ...prev,
-      elements: prev.elements.map(el => 
+      elements: prev.elements.map(el =>
         el.id === elementId ? { ...el, ...updates } : el
       )
     }));
@@ -197,7 +197,7 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
       ...prev,
       elements: prev.elements.filter(el => el.id !== elementId)
     }));
-    
+
     if (selectedElement === elementId) {
       setSelectedElement(null);
     }
@@ -207,13 +207,13 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
     setCardTemplate(prev => {
       const elements = [...prev.elements];
       const index = elements.findIndex(el => el.id === elementId);
-      
+
       if (direction === 'up' && index < elements.length - 1) {
         [elements[index], elements[index + 1]] = [elements[index + 1], elements[index]];
       } else if (direction === 'down' && index > 0) {
         [elements[index], elements[index - 1]] = [elements[index - 1], elements[index]];
       }
-      
+
       return { ...prev, elements };
     });
   };
@@ -237,7 +237,7 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
     if (element) {
       const newX = Math.max(0, Math.min(cardTemplate.width - element.width, element.x + deltaX));
       const newY = Math.max(0, Math.min(cardTemplate.height - element.height, element.y + deltaY));
-      
+
       updateElement(selectedElement, { x: newX, y: newY });
       setDragStart({ x: e.clientX, y: e.clientY });
     }
@@ -249,7 +249,7 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
 
   const renderElement = (element: IDCardElement) => {
     const scale = zoom / 100;
-    
+
     // Process content with sample data
     let processedContent = element.content;
     Object.entries(SAMPLE_DATA).forEach(([key, value]) => {
@@ -269,7 +269,6 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
       color: element.color || '#000000',
       backgroundColor: element.backgroundColor || 'transparent',
       borderRadius: `${(element.borderRadius || 0) * scale}px`,
-      border: element.borderWidth ? `${element.borderWidth * scale}px solid ${element.borderColor}` : 'none',
       transform: `rotate(${element.rotation || 0}deg)`,
       opacity: element.opacity || 1,
       cursor: 'move',
@@ -300,7 +299,7 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
             {processedContent || 'Text'}
           </div>
         );
-      
+
       case 'image':
       case 'logo':
         return (
@@ -311,15 +310,15 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
             onClick={handleElementClick}
           >
             {element.content ? (
-              <img 
-                src={element.content} 
+              <img
+                src={element.content}
                 alt="ID Card Element"
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               />
             ) : (
-              <div style={{ 
-                width: '100%', 
-                height: '100%', 
+              <div style={{
+                width: '100%',
+                height: '100%',
                 backgroundColor: '#f0f0f0',
                 border: '2px dashed #d9d9d9',
                 display: 'flex',
@@ -333,7 +332,7 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
             )}
           </div>
         );
-      
+
       case 'qr':
         return (
           <div
@@ -352,17 +351,17 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
               gap: '1px'
             }}>
               {Array.from({ length: 64 }, (_, i) => (
-                <div 
+                <div
                   key={i}
-                  style={{ 
-                    backgroundColor: Math.random() > 0.5 ? '#000' : '#fff' 
-                  }} 
+                  style={{
+                    backgroundColor: Math.random() > 0.5 ? '#000' : '#fff'
+                  }}
                 />
               ))}
             </div>
           </div>
         );
-      
+
       case 'barcode':
         return (
           <div
@@ -391,13 +390,13 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
             </div>
           </div>
         );
-      
+
       default:
         return null;
     }
   };
 
-  const selectedElementData = selectedElement 
+  const selectedElementData = selectedElement
     ? cardTemplate.elements.find(el => el.id === selectedElement)
     : null;
 
@@ -415,8 +414,8 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
       {/* Left Panel - Tools */}
       <div style={{ width: '300px', borderRight: '1px solid #f0f0f0', padding: '16px', overflow: 'auto' }}>
         <Title level={4}>Card Properties</Title>
-        
-        <Form layout="vertical" size="small">
+
+        <Form layout="vertical">
           <Form.Item label="Template Name">
             <Input
               value={cardTemplate.name}
@@ -424,7 +423,7 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
               placeholder="Enter template name"
             />
           </Form.Item>
-          
+
           <Form.Item label="Card Size">
             <Select
               value="standard"
@@ -442,7 +441,7 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
               ))}
             </Select>
           </Form.Item>
-          
+
           <Row gutter={8}>
             <Col span={12}>
               <Form.Item label="Width (mm)">
@@ -467,13 +466,13 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
               </Form.Item>
             </Col>
           </Row>
-          
+
           <Form.Item label="Background Color">
             <ColorPicker
               value={cardTemplate.backgroundColor}
-              onChange={(color) => setCardTemplate(prev => ({ 
-                ...prev, 
-                backgroundColor: typeof color === 'string' ? color : color.toHexString() 
+              onChange={(color) => setCardTemplate(prev => ({
+                ...prev,
+                backgroundColor: typeof color === 'string' ? color : color.toHexString()
               }))}
             />
           </Form.Item>
@@ -504,8 +503,8 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
           <>
             <Divider />
             <Title level={5}>Element Properties</Title>
-            
-            <Form layout="vertical" size="small">
+
+            <Form layout="vertical">
               <Form.Item label="Content">
                 {selectedElementData.type === 'text' ? (
                   <Input.TextArea
@@ -532,7 +531,7 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
                           return false;
                         }}
                       >
-                        <Button icon={<FaUpload />} size="small" />
+                        <Button icon={<FaUpload />} />
                       </Upload>
                     }
                   />
@@ -554,7 +553,7 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
                       min={0}
                       max={cardTemplate.width}
                       step={0.1}
-                      size="small"
+
                     />
                   </Form.Item>
                 </Col>
@@ -566,7 +565,7 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
                       min={0}
                       max={cardTemplate.height}
                       step={0.1}
-                      size="small"
+
                     />
                   </Form.Item>
                 </Col>
@@ -581,7 +580,7 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
                       min={1}
                       max={cardTemplate.width}
                       step={0.1}
-                      size="small"
+
                     />
                   </Form.Item>
                 </Col>
@@ -593,7 +592,7 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
                       min={1}
                       max={cardTemplate.height}
                       step={0.1}
-                      size="small"
+
                     />
                   </Form.Item>
                 </Col>
@@ -607,7 +606,7 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
                       onChange={(value) => updateElement(selectedElement!, { fontSize: value || 14 })}
                       min={6}
                       max={72}
-                      size="small"
+
                     />
                   </Form.Item>
 
@@ -615,7 +614,7 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
                     <Select
                       value={selectedElementData.fontWeight}
                       onChange={(value) => updateElement(selectedElement!, { fontWeight: value })}
-                      size="small"
+
                     >
                       <Option value="normal">Normal</Option>
                       <Option value="bold">Bold</Option>
@@ -628,27 +627,27 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
               <Form.Item label="Color">
                 <ColorPicker
                   value={selectedElementData.color}
-                  onChange={(color) => updateElement(selectedElement!, { 
-                    color: typeof color === 'string' ? color : color.toHexString() 
+                  onChange={(color) => updateElement(selectedElement!, {
+                    color: typeof color === 'string' ? color : color.toHexString()
                   })}
                 />
               </Form.Item>
 
               <Form.Item label="Layer">
                 <Space>
-                  <Button 
-                    icon={<FaMoveUp />} 
-                    size="small"
+                  <Button
+                    icon={<FaArrowUp />}
+
                     onClick={() => moveElementLayer(selectedElement!, 'up')}
                   />
-                  <Button 
-                    icon={<FaArrowDown />} 
-                    size="small"
+                  <Button
+                    icon={<FaArrowDown />}
+
                     onClick={() => moveElementLayer(selectedElement!, 'down')}
                   />
-                  <Button 
-                    icon={<FaTrash />} 
-                    size="small"
+                  <Button
+                    icon={<FaTrash />}
+
                     danger
                     onClick={() => deleteElement(selectedElement!)}
                   />
@@ -662,8 +661,8 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
       {/* Center Panel - Canvas */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {/* Toolbar */}
-        <div style={{ 
-          padding: '8px 16px', 
+        <div style={{
+          padding: '8px 16px',
           borderBottom: '1px solid #f0f0f0',
           display: 'flex',
           justifyContent: 'space-between',
@@ -681,13 +680,13 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
             />
             <Text style={{ marginLeft: '8px' }}>{zoom}%</Text>
           </div>
-          
+
           <Space>
             <Button icon={<FaEye />}>
               Preview
             </Button>
-            <Button 
-              type="primary" 
+            <Button
+              type="primary"
               icon={<FaSave />}
               onClick={handleSave}
               disabled={!cardTemplate.name.trim()}
@@ -701,8 +700,8 @@ export default function IDCardDesigner({ template, onSave, onCancel }: IDCardDes
         </div>
 
         {/* Canvas Area */}
-        <div style={{ 
-          flex: 1, 
+        <div style={{
+          flex: 1,
           padding: '20px',
           backgroundColor: '#f5f5f5',
           display: 'flex',

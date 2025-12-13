@@ -1,0 +1,458 @@
+'use client';
+
+import { useState, use } from 'react';
+import { useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import {
+  Card,
+  Table,
+  Button,
+  Tag,
+  Space,
+  Typography,
+  Row,
+  Col,
+  Statistic,
+  Avatar,
+  Tabs,
+  Alert,
+  Select,
+  Input,
+  Form
+} from 'antd';
+import {
+  FaArrowLeft,
+  FaUsers,
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaUserShield,
+  FaSearch,
+  FaEye,
+  FaBan,
+  FaCheck,
+  FaDumbbell
+} from 'react-icons/fa';
+import { mockGymUsers, mockAdminGyms } from '@/lib/constants';
+import { UserRole, GymUser, AdminGym } from '@/lib/types';
+import UserManagement from '@/components/admin/UserManagement';
+import AdminProtectedRoute from '@/components/shared/AdminProtectedRoute';
+
+const { Title, Text } = Typography;
+const { Search } = Input;
+const { Option } = Select;
+
+interface PageProps {
+  params: Promise<{ gymId: string }>;
+}
+
+export default function GymUsersPage({ params }: PageProps) {
+  const { gymId } = use(params);
+  const router = useRouter();
+  const routeParams = useParams();
+  const locale = routeParams.locale as string;
+
+  const gym = mockAdminGyms.find(g => g.id === gymId);
+  const allGymUsers = mockGymUsers.filter(user => user.gymId === gymId);
+
+  const [users, setUsers] = useState<GymUser[]>(allGymUsers);
+  const [filteredUsers, setFilteredUsers] = useState<GymUser[]>(allGymUsers);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState<UserRole | 'all'>('all');
+  const [branchFilter, setBranchFilter] = useState<string | 'all'>('all');
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [editingUser, setEditingUser] = useState<GymUser | null>(null);
+
+  if (!gym) {
+    return (
+      <div style={{ padding: '24px' }}>
+        <Alert
+          message="Gym Not Found"
+          description="The requested gym could not be found."
+          type="error"
+          showIcon
+        />
+      </div>
+    );
+  }
+
+  // Apply filters
+  const applyFilters = () => {
+    let filtered = users;
+
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(user =>
+        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (roleFilter !== 'all') {
+      filtered = filtered.filter(user => user.role === roleFilter);
+    }
+
+    if (branchFilter !== 'all') {
+      filtered = filtered.filter(user => user.branchId === branchFilter);
+    }
+
+    setFilteredUsers(filtered);
+  };
+
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    applyFilters();
+  };
+
+  const getRoleColor = (role: UserRole): string => {
+    switch (role) {
+      case UserRole.GYM_OWNER: return 'purple';
+      case UserRole.GYM_MANAGER: return 'blue';
+      case UserRole.GYM_TRAINER: return 'green';
+      case UserRole.GYM_RECEPTIONIST: return 'orange';
+      default: return 'default';
+    }
+  };
+
+  const getRoleLabel = (role: UserRole): string => {
+    return role.replace('gym_', '').replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  const getBranchName = (branchId: string | undefined): string => {
+    if (!branchId) return 'No Branch';
+    const branch = gym.branches?.find(b => b.id === branchId);
+    return branch?.name || 'Unknown Branch';
+  };
+
+  // Group users by role for different tabs
+  const usersByRole = {
+    owners: users.filter(u => u.role === UserRole.GYM_OWNER),
+    managers: users.filter(u => u.role === UserRole.GYM_MANAGER),
+    trainers: users.filter(u => u.role === UserRole.GYM_TRAINER),
+    staff: users.filter(u => u.role === UserRole.GYM_RECEPTIONIST),
+  };
+
+  const columns = [
+    {
+      title: 'User',
+      key: 'user',
+      render: (user: GymUser) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <Avatar size={40} style={{ backgroundColor: getRoleColor(user.role), fontSize: '14px' }}>
+            {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+          </Avatar>
+          <div>
+            <div style={{ fontWeight: '500', marginBottom: '2px' }}>{user.name}</div>
+            <div style={{ fontSize: '12px', color: '#8c8c8c' }}>{user.email}</div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Role',
+      dataIndex: 'role',
+      key: 'role',
+      render: (role: UserRole) => (
+        <Tag color={getRoleColor(role)}>
+          {getRoleLabel(role)}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Branch',
+      dataIndex: 'branchId',
+      key: 'branchId',
+      render: (branchId: string | undefined) => (
+        <Text style={{ fontSize: '13px' }}>
+          {getBranchName(branchId)}
+        </Text>
+      ),
+    },
+    {
+      title: 'Status',
+      key: 'status',
+      render: (user: GymUser) => (
+        <Tag color={user.isActive ? 'success' : 'default'}>
+          {user.isActive ? 'ACTIVE' : 'INACTIVE'}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Join Date',
+      dataIndex: 'joinDate',
+      key: 'joinDate',
+      render: (date: string) => new Date(date).toLocaleDateString(),
+    },
+    {
+      title: 'Actions',
+      key: 'actions',
+      render: (user: GymUser) => (
+        <Space>
+          <Button
+            type="text"
+            size="small"
+            icon={<FaEye />}
+          >
+            View
+          </Button>
+          <Button
+            type="text"
+            size="small"
+            icon={<FaEdit />}
+            onClick={() => {
+              setEditingUser(user);
+              setIsModalVisible(true);
+            }}
+          >
+            Edit
+          </Button>
+          <Button
+            type="text"
+            size="small"
+            icon={user.isActive ? <FaBan /> : <FaCheck />}
+            danger={user.isActive}
+          >
+            {user.isActive ? 'Deactivate' : 'Activate'}
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
+  // Calculate statistics
+  const totalUsers = users.length;
+  const activeUsers = users.filter(u => u.isActive).length;
+  const usersByBranch = (gym.branches || []).map(branch => ({
+    branch: branch.name,
+    count: users.filter(u => u.branchId === branch.id).length
+  }));
+
+  const tabItems = [
+    {
+      key: 'all',
+      label: `All Users (${totalUsers})`,
+      children: (
+        <Table
+          columns={columns}
+          dataSource={filteredUsers}
+          rowKey="id"
+          pagination={{ pageSize: 10 }}
+        />
+      ),
+    },
+    {
+      key: 'owners',
+      label: `Owners (${usersByRole.owners.length})`,
+      children: (
+        <Table
+          columns={columns}
+          dataSource={usersByRole.owners.filter(u =>
+            !searchTerm || u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            u.email.toLowerCase().includes(searchTerm.toLowerCase())
+          )}
+          rowKey="id"
+          pagination={false}
+        />
+      ),
+    },
+    {
+      key: 'managers',
+      label: `Managers (${usersByRole.managers.length})`,
+      children: (
+        <Table
+          columns={columns}
+          dataSource={usersByRole.managers.filter(u =>
+            !searchTerm || u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            u.email.toLowerCase().includes(searchTerm.toLowerCase())
+          )}
+          rowKey="id"
+          pagination={false}
+        />
+      ),
+    },
+    {
+      key: 'trainers',
+      label: `Trainers (${usersByRole.trainers.length})`,
+      children: (
+        <Table
+          columns={columns}
+          dataSource={usersByRole.trainers.filter(u =>
+            !searchTerm || u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            u.email.toLowerCase().includes(searchTerm.toLowerCase())
+          )}
+          rowKey="id"
+          pagination={{ pageSize: 8 }}
+        />
+      ),
+    },
+    {
+      key: 'staff',
+      label: `Staff (${usersByRole.staff.length})`,
+      children: (
+        <Table
+          columns={columns}
+          dataSource={usersByRole.staff.filter(u =>
+            !searchTerm || u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            u.email.toLowerCase().includes(searchTerm.toLowerCase())
+          )}
+          rowKey="id"
+          pagination={{ pageSize: 8 }}
+        />
+      ),
+    },
+  ];
+
+  return (
+    <AdminProtectedRoute requiredPermission={{ resource: 'users', action: 'read' }}>
+      <div>
+        <div className="dashboard-page-header">
+          <div>
+            <h1 className="dashboard-page-title">
+              <span className="dashboard-page-title-icon">
+                <FaUsers />
+              </span>
+              User Management - {gym.name}
+            </h1>
+            <p className="dashboard-page-subtitle">Manage all users and staff for this gym</p>
+          </div>
+        </div>
+
+        {/* Statistics */}
+        <Row gutter={[16, 16]} style={{ marginBottom: 'var(--spacing-2xl)' }}>
+          <Col xs={24} sm={8} md={6}>
+            <Card>
+              <Statistic
+                title="Total Users"
+                value={totalUsers}
+                prefix={<FaUsers style={{ color: '#4CAF50' }} />}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={8} md={6}>
+            <Card>
+              <Statistic
+                title="Active Users"
+                value={activeUsers}
+                prefix={<FaUsers style={{ color: '#52c41a' }} />}
+                suffix={`/ ${totalUsers}`}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={8} md={6}>
+            <Card>
+              <Statistic
+                title="Trainers"
+                value={usersByRole.trainers.length}
+                prefix={<FaDumbbell style={{ color: '#52c41a' }} />}
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={8} md={6}>
+            <Card>
+              <Statistic
+                title="Managers"
+                value={usersByRole.managers.length}
+                prefix={<FaUserShield style={{ color: '#4CAF50' }} />}
+              />
+            </Card>
+          </Col>
+        </Row>
+
+        {/* User Management */}
+        <Card>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '16px'
+          }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <Search
+                placeholder="Search users..."
+                onSearch={handleSearch}
+                onChange={(e) => handleSearch(e.target.value)}
+                style={{ width: 250 }}
+                enterButton={<FaSearch />}
+              />
+
+              <Select
+                style={{ width: 150 }}
+                placeholder="Filter by role"
+                value={roleFilter}
+                onChange={(value) => {
+                  setRoleFilter(value);
+                  applyFilters();
+                }}
+              >
+                <Option value="all">All Roles</Option>
+                <Option value={UserRole.GYM_OWNER}>Owner</Option>
+                <Option value={UserRole.GYM_MANAGER}>Manager</Option>
+                <Option value={UserRole.GYM_TRAINER}>Trainer</Option>
+                <Option value={UserRole.GYM_RECEPTIONIST}>Staff</Option>
+              </Select>
+
+              <Select
+                style={{ width: 150 }}
+                placeholder="Filter by branch"
+                value={branchFilter}
+                onChange={(value) => {
+                  setBranchFilter(value);
+                  applyFilters();
+                }}
+              >
+                <Option value="all">All Branches</Option>
+                {(gym.branches || []).map(branch => (
+                  <Option key={branch.id} value={branch.id}>
+                    {branch.name}
+                  </Option>
+                ))}
+              </Select>
+            </div>
+
+            <Button
+              type="primary"
+              icon={<FaPlus />}
+              onClick={() => {
+                setEditingUser(null);
+                setIsModalVisible(true);
+              }}
+            >
+              Add User
+            </Button>
+          </div>
+
+          <Tabs
+            defaultActiveKey="all"
+            items={tabItems}
+            size="large"
+          />
+        </Card>
+
+        {/* User Management Modal */}
+        <UserManagement
+          visible={isModalVisible}
+          onCancel={() => setIsModalVisible(false)}
+          onSave={(values) => {
+            if (editingUser) {
+              setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...values } : u));
+            } else {
+              const newUser: GymUser = {
+                id: `user-${Date.now()}`,
+                ...values,
+                gymId: gymId,
+                joinDate: new Date().toISOString().split('T')[0],
+                isActive: values.isActive ?? true,
+              };
+              setUsers([...users, newUser]);
+            }
+            setIsModalVisible(false);
+            applyFilters();
+          }}
+          editingUser={editingUser}
+          form={Form.useForm()[0]}
+          gyms={[gym]}
+        />
+      </div>
+    </AdminProtectedRoute>
+  );
+}
+
