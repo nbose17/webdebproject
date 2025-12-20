@@ -1,6 +1,3 @@
-'use client';
-
-import { use } from 'react';
 import Header from '@/components/public/Header';
 import Footer from '@/components/public/Footer';
 import HeroSection from '@/components/public/HeroSection';
@@ -15,8 +12,16 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default function GymPage({ params }: PageProps) {
-  const { id } = use(params);
+// Generate static params for all gym pages
+export async function generateStaticParams() {
+  return mockGyms.map((gym) => ({
+    id: gym.id,
+  }));
+}
+
+
+export default async function GymPage({ params }: PageProps) {
+  const { id } = await params;
 
   // Find the specific gym by ID
   const gym = mockGyms.find((g) => g.id === id);

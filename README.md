@@ -53,6 +53,40 @@ npm run build
 npm start
 ```
 
+## Deployment
+
+### Live Demo
+
+🚀 **[View Live Demo](https://nbose17.github.io/webdebproject/)**
+
+The application is automatically deployed to GitHub Pages on every push to the `main` branch.
+
+### GitHub Pages Setup
+
+The app is configured for static export and deployed via GitHub Actions:
+
+1. **Automatic Deployment**: Push to `main` branch triggers deployment
+2. **Build Process**: GitHub Actions builds the static site
+3. **Deployment**: Automatically published to GitHub Pages
+
+### Manual Deployment
+
+If you need to deploy manually:
+
+```bash
+# Build the static export
+npm run export
+
+# The output will be in the 'out' directory
+```
+
+### Deployment Configuration
+
+- **Base Path**: `/webdebproject`
+- **Output**: Static HTML/CSS/JS files
+- **Image Optimization**: Disabled (required for static export)
+- **Deployment URL**: `https://nbose17.github.io/webdebproject/`
+
 ## Project Structure
 
 ```
