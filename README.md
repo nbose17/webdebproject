@@ -57,7 +57,7 @@ npm start
 
 ### Live Demo
 
-🚀 **[View Live Demo](https://nbose17.github.io/webdebproject/)**
+🚀 **[View Live Demo](https://nbose17.github.io/webdevproject/)**
 
 The application is automatically deployed to GitHub Pages on every push to the `main` branch.
 
@@ -82,10 +82,10 @@ npm run export
 
 ### Deployment Configuration
 
-- **Base Path**: `/webdebproject`
+- **Base Path**: `/webdevproject`
 - **Output**: Static HTML/CSS/JS files
 - **Image Optimization**: Disabled (required for static export)
-- **Deployment URL**: `https://nbose17.github.io/webdebproject/`
+- **Deployment URL**: `https://nbose17.github.io/webdevproject/`
 
 ## Project Structure
 

@@ -3,6 +3,7 @@ import Footer from '@/components/public/Footer';
 import HeroSection from '@/components/public/HeroSection';
 import ClassCard from '@/components/public/ClassCard';
 import PlanCard from '@/components/public/PlanCard';
+import PlanList from '@/components/public/PlanList';
 import TrainerCard from '@/components/public/TrainerCard';
 import NewsletterSection from '@/components/public/NewsletterSection';
 import Carousel from '@/components/shared/Carousel';
@@ -55,7 +56,7 @@ export default async function GymPage({ params }: PageProps) {
   return (
     <div className="public-page">
       <Header />
-      <HeroSection />
+      <HeroSection image={gym.image} />
       <main className="public-main">
         <div className="container">
           {/* Feature Section */}
@@ -90,11 +91,7 @@ export default async function GymPage({ params }: PageProps) {
             <p className="gym-detail-sub-heading">
               {planListDescription?.content || 'Plan List Sub Heading Plan List Sub Heading Plan List Sub Heading Plan List Sub Heading'}
             </p>
-            <Carousel itemsPerView={3}>
-              {mockPlans.map((plan) => (
-                <PlanCard key={plan.id} plan={plan} />
-              ))}
-            </Carousel>
+            <PlanList plans={mockPlans} />
           </section>
 
           {/* Trainers Section */}

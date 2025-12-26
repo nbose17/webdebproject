@@ -5,11 +5,16 @@ import { formatCurrency } from '@/lib/utils';
 
 interface PlanCardProps {
   plan: Plan;
+  onClick?: () => void;
 }
 
-export default function PlanCard({ plan }: PlanCardProps) {
+export default function PlanCard({ plan, onClick }: PlanCardProps) {
   return (
-    <div className="plan-card">
+    <div
+      className="plan-card"
+      onClick={onClick}
+      style={{ cursor: onClick ? 'pointer' : 'default' }}
+    >
       <h3 className="plan-card-title">{plan.name}</h3>
       <div className="plan-card-price">
         {formatCurrency(plan.price)}

@@ -23,10 +23,10 @@ export function generateId(): string {
 
 /**
  * Get the base path from Next.js configuration
- * Returns '/webdebproject' in production, empty string in development
+ * Returns '/webdevproject' in production, empty string in development
  */
 export function getBasePath(): string {
-  return process.env.NODE_ENV === 'production' ? '/webdebproject' : '';
+  return '/webdevproject';
 }
 
 /**

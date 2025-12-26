@@ -1,8 +1,13 @@
 'use client';
 
 import Button from '@/components/shared/Button';
+import { getAssetPath } from '@/lib/utils';
 
-export default function HeroSection() {
+interface HeroSectionProps {
+  image?: string;
+}
+
+export default function HeroSection({ image }: HeroSectionProps) {
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -10,8 +15,12 @@ export default function HeroSection() {
     }
   };
 
+  const heroStyle = image ? {
+    backgroundImage: `url('${getAssetPath(image)}')`
+  } : undefined;
+
   return (
-    <section className="hero-section">
+    <section className="hero-section" style={heroStyle}>
       <div className="hero-section-overlay" />
       <div className="hero-section-content">
         <div className="hero-section-text-box">

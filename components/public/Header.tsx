@@ -35,7 +35,9 @@ export default function Header() {
     <header className="public-header">
       <div className="public-header-content">
         <div className="public-header-branding-container">
-          <p className="public-header-branding">FitConnect Ads</p>
+          <Link href="/" className="public-header-branding-link">
+            <p className="public-header-branding">FitConnect Ads</p>
+          </Link>
         </div>
         <div className="public-header-search-container">
           <Search
