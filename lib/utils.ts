@@ -23,10 +23,10 @@ export function generateId(): string {
 
 /**
  * Get the base path from Next.js configuration
- * Returns '/webdevproject' in production, empty string in development
+ * Returns empty string for Vercel deployment (root URL)
  */
 export function getBasePath(): string {
-  return '/webdevproject';
+  return '';
 }
 
 /**

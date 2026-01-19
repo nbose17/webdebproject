@@ -55,37 +55,29 @@ npm start
 
 ## Deployment
 
-### Live Demo
+### Vercel Deployment
 
-🚀 **[View Live Demo](https://nbose17.github.io/webdevproject/)**
+The application is deployed on Vercel. To deploy your own instance:
 
-The application is automatically deployed to GitHub Pages on every push to the `main` branch.
+1. **Connect to Vercel**: Import this repository in your [Vercel Dashboard](https://vercel.com/dashboard)
+2. **Configure Project**: Vercel will auto-detect Next.js settings
+3. **Deploy**: Click deploy - Vercel handles the rest
 
-### GitHub Pages Setup
-
-The app is configured for static export and deployed via GitHub Actions:
-
-1. **Automatic Deployment**: Push to `main` branch triggers deployment
-2. **Build Process**: GitHub Actions builds the static site
-3. **Deployment**: Automatically published to GitHub Pages
-
-### Manual Deployment
-
-If you need to deploy manually:
+### Local Production Build
 
 ```bash
-# Build the static export
-npm run export
+# Build for production
+npm run build
 
-# The output will be in the 'out' directory
+# Start production server
+npm start
 ```
 
 ### Deployment Configuration
 
-- **Base Path**: `/webdevproject`
-- **Output**: Static HTML/CSS/JS files
-- **Image Optimization**: Disabled (required for static export)
-- **Deployment URL**: `https://nbose17.github.io/webdevproject/`
+- **Platform**: Vercel
+- **Framework**: Next.js (auto-detected)
+- **Root URL**: Deployed at root path (`/`)
 
 ## Project Structure
 
